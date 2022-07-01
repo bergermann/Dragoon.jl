@@ -1,0 +1,13 @@
+name = "Dragoon"
+uuid = "2528b1d8-4502-48e3-b632-a5c1e1215533"
+authors = ["voidarchon <dominik.bergermann@rwth-aachen.de> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1.0.5"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
