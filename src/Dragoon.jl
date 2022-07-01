@@ -20,6 +20,7 @@ include("linesearch/searches.jl")
 include("linesearch/unstuckinators.jl")
 
 #Nelder-Mead options
+include("neldermead/functions.jl")
 
 
 end

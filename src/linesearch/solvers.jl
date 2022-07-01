@@ -1,3 +1,5 @@
+export solverSteepestDescent, solverNewton, solverBFGS
+
 #solvers to determine directions
 
 function solverSteepestDescent(p,g,h,trace,i)

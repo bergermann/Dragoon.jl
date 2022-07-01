@@ -1,3 +1,5 @@
+export unstuckDont, unstuckRandom, unstuckCoord
+
 #tries to unstuck system if termination is unsatisfactory
 
 function unstuckDont(booster,hist,freqs,objFunction; showtrace=false)

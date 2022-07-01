@@ -1,3 +1,5 @@
+export searchStandard, searchExtSteps, searchExtDist
+
 #handles the step and stopping
 
 function searchStandard(p,α,booster,hist,freqs,objFunction,ϵls,kmax;

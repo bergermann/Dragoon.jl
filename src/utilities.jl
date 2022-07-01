@@ -1,12 +1,8 @@
+export init, boost1d, findpeak, genFreqs, pos2dist, dist2pos, pNorm,
+        copy, getBoost1d
+
 #convenient convenience functions for convenience
 
-using Statistics
-using Distributions
-using Random
-
-Random.seed!(366821)
-
-include("Analytical1D.jl")
 
 init = [1.00334, 6.94754, 7.1766, 7.22788, 7.19717,
         7.23776, 7.07746, 7.57173, 7.08019, 7.24657,
@@ -27,11 +23,11 @@ function findpeak(f0,n; eps=24.,thickness=1e-3,gran=1000,dev=0.1)
     return D[findmax(B)[2]]
 end
 
-function generateFrequencies(fcenter,fwidth; length=100)
+function genFreqs(fcenter,fwidth; length=100)
     return Array(range(fcenter-fwidth/2; stop=fcenter+fwidth/2,length=length))
 end
 
-function generateFrequencies(bounds; length=100)
+function genFreqs(bounds; length=100)
     return Array(range(bounds[1]; stop=bounds[2],length=length))
 end
 
@@ -50,13 +46,6 @@ function pNorm(x; p=2)
     return sum(@. abs(x)^p)^(1/p)
 end
 
-function travelTime(pos1,pos2; speed=0.01)
-    return maximum(abs.(pos1-pos2))/speed
-end
-
-function totalTravelTime(pos1,pos2; speed=0.01)
-    return sum(abs.(pos1-pos2))/speed
-end
 
 Base.copy(x::T) where T = T([getfield(x, k) for k ∈ fieldnames(T)]...)
 

@@ -2,15 +2,6 @@ export linesearch, nelderMead
 
 import Dates: now, UTC
 
-include("functions.jl")
-include("utilities.jl")
-include("objective.jl")
-include("solvers.jl")
-include("derivatives.jl")
-include("steps.jl")
-include("searches.jl")
-include("unstuckinators.jl")
-
 function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     α::Float64,
                     objFunction::Tuple{Function,Vector},
@@ -25,7 +16,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
     t = now(UTC)
 
-    trace = Vector{Trace}(undef,maxiter+1)
+    trace = Vector{LSTrace}(undef,maxiter+1)
 
     p = zeros(booster.ndisk)
     g = zeros(booster.ndisk)
@@ -236,36 +227,4 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     printTermination(booster,hist,i,maxiter)
 
     return trace[1:Int(i/traceevery)+1]
-end
-
-function initSimplexCoord(x0::Array{Float64},x::Matrix{Float64},d::Float64)
-    x[:,:] = repeat(x0,1,length(x0)+1)
-
-    for i in 1:length(x0)
-        x[i,i+1] += d
-    end
-end
-
-function initSimplexAffine(x0::Array{Float64},p::Matrix{Float64},a::Float64,
-                                                                    b::Float64)
-    x[:,:]
-end
-
-function getSimplexObj(x::Matrix{Float64},
-                        indices::Vector{Int},
-                        booster::Booster,
-                        hist::Array{State},
-                        freqs::Array{Float64},
-                        objFunction::Tuple{Function,Vector};
-                        reset=false)
-    reset && (xc = copy(booster.pos))
-
-    for i in indices
-        moveCommand(booster,x[:,i]; additive=false)
-        updateHist!(booster,hist,freqs,objFunction)
-    end
-
-    reset && moveCommand(booster,xc; additive=false)
-
-    return (a->a.objvalue).(hist[1:length(indices)])
 end

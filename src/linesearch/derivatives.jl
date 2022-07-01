@@ -1,3 +1,5 @@
+export firstDerivative, secondDerivative
+
 #calculates all necessary derivates for solver
 
 function firstDerivative(g,h,booster,hist,freqs,objFunction,Δx,mode)
