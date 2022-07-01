@@ -1,4 +1,4 @@
-export Booster, initHist
+export Booster, State, initHist
 
 #backbone functions
 
