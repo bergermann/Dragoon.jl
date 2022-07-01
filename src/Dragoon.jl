@@ -9,6 +9,8 @@ using BoostFractor
 #General optimizers
 include("optimizers.jl")
 include("objective.jl")
+include("functions.jl")
+
 include("utilities.jl")
 
 #Linesearch options
@@ -21,6 +23,7 @@ include("linesearch/unstuckinators.jl")
 
 #Nelder-Mead options
 include("neldermead/functions.jl")
-
+include("neldermead/simplexinit.jl")
+include("neldermead/simplexobj.jl")
 
 end
