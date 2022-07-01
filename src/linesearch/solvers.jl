@@ -1,5 +1,7 @@
 export solverSteepestDescent, solverNewton, solverBFGS
 
+import LinearAlgebra: cholesky
+
 #solvers to determine directions
 
 function solverSteepestDescent(p,g,h,trace,i)

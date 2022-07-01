@@ -1,5 +1,6 @@
-#backbone functions of the optimisers
 export analyse
+
+#backbone functions of the optimisers
 
 import Dates: Second, canonicalize
 
