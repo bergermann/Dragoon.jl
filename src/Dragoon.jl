@@ -11,6 +11,7 @@ include("functions.jl")
 include("optimizers.jl")
 include("objective.jl")
 
+include("Analytical1D.jl")
 include("utilities.jl")
 
 #Linesearch options
