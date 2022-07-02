@@ -74,7 +74,8 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     booster.codetimestamp = canonicalize(now(UTC)-t)
     printTermination(booster,hist,i,maxiter)
 
-    trace[i+1] = LSTrace(booster.pos,hist[1].objvalue,g,h)
+    trace[i+1] = LSTrace(booster.pos,hist[1].objvalue,g,h,
+                                booster.timestamp,booster.summedtraveltime)
 
     return trace[1:i+1]
 end
