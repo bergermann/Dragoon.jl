@@ -9,10 +9,10 @@
 To install package run
 ```julia
 julia> ]add https://github.com/bergermann/Dragoon.jl.git
-julia> ]add https://github.com/mppmu/BoostFractor.jl.git
 ```
-If you intend to use the internal analyse function, also do
+and add dependencies
 ```julia
+julia> ]add https://github.com/mppmu/BoostFractor.jl.git
 julia> ]add Plots
 ```
 
