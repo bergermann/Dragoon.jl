@@ -33,7 +33,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
         derivatives[1](g,h,booster,hist,freqs,objFunction,derivatives[2]...)
 
-        trace[i] = Trace(booster.pos,hist[1].objvalue,copy(g),copy(h),
+        trace[i] = LSTrace(booster.pos,hist[1].objvalue,copy(g),copy(h),
                                     booster.timestamp,booster.summedtraveltime)
 
         solver[1](p,g,h,trace,i,solver[2]...)
@@ -74,7 +74,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     booster.codetimestamp = canonicalize(now(UTC)-t)
     printTermination(booster,hist,i,maxiter)
 
-    trace[i+1] = Trace(booster.pos,hist[1].objvalue,g,h)
+    trace[i+1] = LSTrace(booster.pos,hist[1].objvalue,g,h)
 
     return trace[1:i+1]
 end
