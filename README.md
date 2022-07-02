@@ -1,1 +1,19 @@
+# <img src="docs/src/img/Dragoon.webp" alt="" width=300> <!--Dragoon.jl-->
+
 # Dragoon
+
+[![Build Status](https://github.com/bergermann/Dragoon.jl/workflows/build/badge.svg?branch=master)](undefined)
+[![codecov](https://codecov.io/gh/bergermann/Dragoon.jl/branch/master/graph/badge.svg?token=YF747EQJWX)](undefined)
+
+## Installation
+To install package run
+```julia
+julia> ]add https://github.com/bergermann/Dragoon.jl.git
+```
+If you intend on using the internal analyse function, also do
+```julia
+julia> ]add Plots
+```
+
+## Usage
+Look at [examples](./examples) for comprehensive guides.
