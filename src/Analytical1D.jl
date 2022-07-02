@@ -1,3 +1,5 @@
+export disk_system
+
 function transform_surface(freq::AbstractArray, gamma::AbstractArray;
     axion_out::AbstractArray = [],
     eps_i::Union{AbstractFloat, Complex} = 1.,
@@ -264,7 +266,7 @@ function disk_system(freq::AbstractArray;
 
     return gamma, axion_out
 
-	
+
 end
 
 
