@@ -1,4 +1,4 @@
-export disk_system
+###		1-dimensional boostfactor calculation, matrix formalism
 
 function transform_surface(freq::AbstractArray, gamma::AbstractArray;
     axion_out::AbstractArray = [],

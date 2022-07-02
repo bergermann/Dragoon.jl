@@ -1,6 +1,6 @@
-export unstuckDont, unstuckRandom, unstuckCoord
+###     tries to unstuck system if termination is unsatisfactory
 
-#tries to unstuck system if termination is unsatisfactory
+export unstuckDont, unstuckRandom, unstuckCoord
 
 function unstuckDont(booster,hist,freqs,objFunction; showtrace=false)
     showtrace && println("No unstucking tried. Terminating.")

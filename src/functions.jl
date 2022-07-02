@@ -1,6 +1,6 @@
-export Booster, initHist
+###     backbone functions for all optimizers
 
-#backbone functions
+export Booster, initHist
 
 ###     physical state of the booster
 

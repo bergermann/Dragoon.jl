@@ -1,6 +1,6 @@
-export firstDerivative, secondDerivative
+###     calculates all necessary derivates for solver
 
-#calculates all necessary derivates for solver
+export firstDerivative, secondDerivative
 
 function firstDerivative(g,h,booster,hist,freqs,objFunction,Δx,mode)
     updateHist!(booster,hist,freqs,objFunction)

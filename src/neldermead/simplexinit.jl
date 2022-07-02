@@ -1,6 +1,6 @@
-export initSimplexCoord, initSimplexAffine
+###     constructors of the initial simplex
 
-#constructors of the initial simplex
+export initSimplexCoord, initSimplexAffine
 
 function initSimplexCoord(x0::Array{Float64},x::Matrix{Float64},d::Float64)
     x[:,:] = repeat(x0,1,length(x0)+1)

@@ -1,3 +1,5 @@
+###     functions to get objective values for every vertex
+
 export getSimplexObj
 
 function getSimplexObj(x::Matrix{Float64},

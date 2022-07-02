@@ -1,6 +1,6 @@
-export stepNorm
+###     determines step length and/or normalization of step vector
 
-#determines step length and/or normalization of step vector
+export stepNorm
 
 function stepNorm(p,α,booster,hist,freqs,objFunction,mode; showtrace=false)
     #static, normalize p

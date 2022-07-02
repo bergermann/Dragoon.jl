@@ -1,6 +1,6 @@
-export searchStandard, searchExtSteps, searchExtDist
+###     handles the step and stopping
 
-#handles the step and stopping
+export searchStandard, searchExtSteps, searchExtDist
 
 function searchStandard(p,α,booster,hist,freqs,objFunction,ϵls,kmax;
                                                                 showtrace=false)

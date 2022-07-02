@@ -1,4 +1,4 @@
-#convenient convenience functions for convenience
+###     convenient convenience functions for convenience
 
 export init, boost1d, findpeak, genFreqs, pos2dist, dist2pos, pNorm,
         copy, getBoost1d
