@@ -3,7 +3,7 @@
 export analyse
 
 import Dates: Second, canonicalize
-import Plots: plot, plot!, scatter, vlines, title!, xlabel!, ylabel!,
+import Plots: plot, plot!, scatter, vline!, title!, xlabel!, ylabel!,
         annotate!, display
 
 
