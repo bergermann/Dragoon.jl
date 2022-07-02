@@ -7,9 +7,9 @@ module Dragoon
 using BoostFractor
 
 #General optimizers
+include("functions.jl")
 include("optimizers.jl")
 include("objective.jl")
-include("functions.jl")
 
 include("utilities.jl")
 
