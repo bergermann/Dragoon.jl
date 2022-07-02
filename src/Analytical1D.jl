@@ -1,4 +1,3 @@
-export disk_system
 
 function transform_surface(freq::AbstractArray, gamma::AbstractArray;
     axion_out::AbstractArray = [],
