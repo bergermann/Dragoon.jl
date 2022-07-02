@@ -1,8 +1,10 @@
+###     information tracing and output linesearch
+
 export analyse
 
-#backbone functions of the optimisers
-
 import Dates: Second, canonicalize
+import Plots: plot, plot!, scatter, vlines, title!, xlabel!, ylabel!,
+        annotate!, display
 
 
 ###     information tracing

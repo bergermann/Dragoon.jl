@@ -1,6 +1,11 @@
+###     information tracing and output for nelder mead
+
 export analyse
 
-###     information tracing
+import Dates: Second, canonicalize
+import Plots: plot, plot!, scatter, vlines, title!, xlabel!, ylabel!,
+        annotate!, display
+
 
 mutable struct NMTrace
     x::Matrix{Float64}
