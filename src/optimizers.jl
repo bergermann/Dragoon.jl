@@ -2,7 +2,7 @@ export linesearch, nelderMead
 
 import Dates: now, UTC
 
-function linesearch(booster::Booster,hist::Vector,freqs::Array{Float64},
+function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     α::Float64,
                     objFunction::Tuple{Function,Vector},
                     solver::Tuple{Function,Vector},
