@@ -1,4 +1,4 @@
-# <img src="docs/src/img/Dragoon.webp" alt="" width=300> <!--Dragoon.jl-->
+# <img src="docs/src/img/Dragoon.png" alt="" width=300> <!--Dragoon.jl-->
 
 # Dragoon
 
