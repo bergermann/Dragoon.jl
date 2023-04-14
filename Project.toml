@@ -1,7 +1,6 @@
 name = "Dragoon"
 uuid = "2528b1d8-4502-48e3-b632-a5c1e1215533"
 authors = ["voidarchon <dominik.bergermann@rwth-aachen.de> and contributors"]
-version = "0.1.0"
 
 [deps]
 BoostFractor = "222d2961-0b53-58be-99ce-9613a82efb32"
