@@ -40,7 +40,11 @@ mutable struct State
     objvalue::Float64
     timestamp::Float64
 
-    function State(booster::Booster)
+    function State(booster)
         new(booster.pos,0.0,0.0)
+    end
+
+    function State(booster,objvalue,timestamp)
+        new(booster.pos,objvalue,timestamp)
     end
 end

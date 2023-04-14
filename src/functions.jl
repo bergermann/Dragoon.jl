@@ -6,7 +6,7 @@ function getState(booster::Booster,
                     freqs::Array{Float64},
                     objFunction::Tuple{Function,Vector})
 
-    return State(booster.pos,objFunction[1](booster,freqs,objFunction[2]...),
+    return State(booster,objFunction[1](booster,freqs,objFunction[2]...),
                                                             booster.timestamp)
 end
 
