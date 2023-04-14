@@ -1,7 +1,11 @@
 
 ###     physical state of the booster
 
+export Booster, DevicesType, AnalyticalBooster, PhysicalBooster, State
+
 abstract type Booster end
+
+abstract type DevicesType end
 
 mutable struct AnalyticalBooster <: Booster
     pos::Array{<:Real}
@@ -18,8 +22,6 @@ mutable struct AnalyticalBooster <: Booster
         new(dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,vmotor,maxlength,0.,0.,0.)
     end
 end
-
-abstract type DevicesType end
 
 mutable struct PhysicalBooster <: Booster
     devices::DevicesType
