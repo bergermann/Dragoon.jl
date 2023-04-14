@@ -22,7 +22,7 @@ end
 abstract type DevicesType end
 
 mutable struct PhysicalBooster <: Booster
-    devices<:DevicesType
+    devices::DevicesType
     pos::Array{<:Real}
     ndisk::Int
     thickness::Float64
