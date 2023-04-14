@@ -2,42 +2,6 @@
 
 export Booster, initHist
 
-###     physical state of the booster
-
-abstract type Booster end
-
-mutable struct AnalyticalBooster <: Booster
-    pos::Array{Float64}
-    ndisk::UInt8
-    thickness::Float64
-    epsilon::Float64
-    vmotor::Float64
-    maxlength::Float64
-    timestamp::Float64
-    summedtraveltime::Float64
-    codetimestamp
-end
-
-mutable struct PhysicalBooster <: Booster
-    devices::Devices
-    pos::Array{Float64}
-    ndisk::UInt8
-    thickness::Float64
-    epsilon::Float64
-    maxlength::Float64
-    summedtraveltime::Float64
-end
-
-Booster() = Booster(dist2pos(init),20,1e-3,24.,0.1e-3,2.,0.,0.,0.)
-
-mutable struct State
-    pos::Array{Float64}
-    objvalue::Float64
-    timestamp::Float64
-end
-
-State(booster::Booster) = State(zeros(Float64,booster.ndisk),0.0,0.0)
-
 function getState(booster::Booster,
                     freqs::Array{Float64},
                     objFunction::Tuple{Function,Vector})
