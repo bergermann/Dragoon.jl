@@ -7,9 +7,9 @@ mutable struct AnalyticalBooster <: Booster
     pos::Array{<:Real}
     ndisk::Int
     thickness::Float64
-    epsilon<:Real
-    vmotor<:Real
-    maxlength<:Real
+    epsilon::Real
+    vmotor::Real
+    maxlength::Real
     timestamp::Float64
     summedtraveltime::Float64
     codetimestamp
@@ -26,8 +26,8 @@ mutable struct PhysicalBooster <: Booster
     pos::Array{<:Real}
     ndisk::Int
     thickness::Float64
-    epsilon<:Real
-    maxlength<:Real
+    epsilon::Real
+    maxlength::Real
     summedtraveltime::Float64
 
     function PhysicalBooster(initdist; ndisk=20,τ=1e-3,ϵ=24,maxlength=2)
