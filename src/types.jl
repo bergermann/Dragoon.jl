@@ -6,6 +6,7 @@ export Booster, DevicesType, AnalyticalBooster, PhysicalBooster, State
 abstract type Booster end
 
 abstract type DevicesType end
+abstract type BoundariesType end
 
 mutable struct AnalyticalBooster <: Booster
     pos::Array{<:Real}
@@ -26,6 +27,7 @@ end
 mutable struct PhysicalBooster <: Booster
     devices::DevicesType
     pos::Array{<:Real}
+    # bounds::Array{BoundariesType}
     ndisk::Int
     thickness::Float64
     epsilon::Real
