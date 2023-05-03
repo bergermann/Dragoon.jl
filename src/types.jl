@@ -34,8 +34,8 @@ mutable struct PhysicalBooster <: Booster
     maxlength::Real
     summedtraveltime::Float64
 
-    function PhysicalBooster(initdist; ndisk=20,τ=1e-3,ϵ=24,maxlength=2)
-        new(dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,maxlength,0.)
+    function PhysicalBooster(devices,initdist; ndisk=20,τ=1e-3,ϵ=24,maxlength=2)
+        new(devices,dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,maxlength,0.)
     end
 end
 
