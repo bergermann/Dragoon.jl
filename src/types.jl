@@ -1,7 +1,7 @@
 
 ###     physical state of the booster
 
-export Booster, DevicesType, AnalyticalBooster, PhysicalBooster, State
+export Booster, DevicesType, BoundariesType, AnalyticalBooster, PhysicalBooster, State
 
 abstract type Booster end
 
