@@ -29,10 +29,10 @@ mutable struct PhysicalBooster <: Booster
     pos::Array{<:Real}
     # bounds::Array{BoundariesType}
     ndisk::Int
-    thickness::Float64
+    thickness::Real
     epsilon::Real
     maxlength::Real
-    summedtraveltime::Float64
+    summedtraveltime::Real
 
     function PhysicalBooster(devices,initdist; ndisk=20,τ=1e-3,ϵ=24,maxlength=2)
         new(devices,dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,maxlength,0.)
