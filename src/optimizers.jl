@@ -4,7 +4,7 @@ export linesearch, nelderMead
 
 import Dates: now, UTC
 
-function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
+function linesearch(booster::AnalyticalBooster,hist::Vector{State},freqs::Array{Float64},
                     α::Float64,
                     objFunction::Tuple{Function,Vector},
                     solver::Tuple{Function,Vector},
@@ -80,7 +80,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     return trace[1:i+1]
 end
 
-function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
+function nelderMead(booster::AnalyticalBooster,hist::Vector{State},freqs::Array{Float64},
                     α::Float64,β::Float64,γ::Float64,δ::Float64,
                     objFunction::Tuple{Function,Vector},
                     initSimplex::Tuple{Function,Vector},
