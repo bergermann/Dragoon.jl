@@ -32,14 +32,15 @@ mutable struct PhysicalBooster <: Booster
     thickness::Real
     epsilon::Real
     maxlength::Real
+    timestamp::Real
     summedtraveltime::Real
 
     function PhysicalBooster(devices,initdist; ndisk=20,τ=1e-3,ϵ=24,maxlength=2)
-        new(devices,dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,maxlength,0.)
+        new(devices,dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,maxlength,0.,0.)
     end
 
-    function PhysicalBooster(devices,pos,ndisk,thickness,epsilon,maxlength,summedtraveltime)
-        new(devices,pos,ndisk,thickness,epsilon,maxlength,summedtraveltime)
+    function PhysicalBooster(devices,pos,ndisk,thickness,epsilon,maxlength,timestamp,summedtraveltime)
+        new(devices,pos,ndisk,thickness,epsilon,maxlength,timestamp,summedtraveltime)
     end
 end
 
