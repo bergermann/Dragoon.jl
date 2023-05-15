@@ -41,7 +41,7 @@ end
 
 ###     control functions for the booster
 
-function move(booster::Booster,newpos::Vector{Tuple{Int64,Float64}};
+function move(booster::AnalyticalBooster,newpos::Vector{Tuple{Int64,Float64}};
         Δt=0,returntrace=false,tracestep=1e-3,additive=true)
     T = zeros(length(newpos))
 
@@ -65,7 +65,7 @@ function move(booster::Booster,newpos::Vector{Tuple{Int64,Float64}};
     end
 end
 
-function move(booster::Booster,newpos::Array{Float64};
+function move(booster::AnalyticalBooster,newpos::Array{Float64};
         Δt=0,returntrace=false,tracestep=1e-3,additive=false)
     if additive
         T1 = maximum(abs.(newpos))/booster.vmotor
