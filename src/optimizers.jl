@@ -274,7 +274,7 @@ function nelderMead(booster::PhysicalBooster,hist::Vector{State},freqs::Array{Fl
         #centroid
         x_ = sum(x[:,1:end-1]; dims=2)/booster.ndisk
         if tracecentroid
-            move(booster,x_; additive=false)
+            commandMove(booster,x_; additive=false)
             updateHist!(booster,hist,freqs,objFunction)
 
             trace[i].x_ = x_
@@ -283,7 +283,7 @@ function nelderMead(booster::PhysicalBooster,hist::Vector{State},freqs::Array{Fl
 
         #reflection point, reflection
         xr = x_+α*(x_-x[:,end])
-        move(booster,xr; additive=false)
+        commandMove(booster,xr; additive=false)
         updateHist!(booster,hist,freqs,objFunction)
         fr = hist[1].objvalue
 
@@ -293,7 +293,7 @@ function nelderMead(booster::PhysicalBooster,hist::Vector{State},freqs::Array{Fl
         elseif fr < f[1]    #expansion
             xe = x_+β*(xr-x_)
 
-            move(booster,xe; additive=false)
+            commandMove(booster,xe; additive=false)
             updateHist!(booster,hist,freqs,objFunction)
 
             fe = hist[1].objvalue
@@ -309,7 +309,7 @@ function nelderMead(booster::PhysicalBooster,hist::Vector{State},freqs::Array{Fl
             if f[end-1] <= fr < f[end] #outside contraction
                 xoc = x_+γ*(xr-x_)
 
-                move(booster,xoc; additive=false)
+                commandMove(booster,xoc; additive=false)
                 updateHist!(booster,hist,freqs,objFunction)
 
                 foc = hist[1].objvalue
@@ -328,7 +328,7 @@ function nelderMead(booster::PhysicalBooster,hist::Vector{State},freqs::Array{Fl
             else #inside contraction
                 xic = x_-γ*(xr-x_)
 
-                move(booster,xic; additive=false)
+                commandMove(booster,xic; additive=false)
                 updateHist!(booster,hist,freqs,objFunction)
 
                 fic = hist[1].objvalue
@@ -362,7 +362,7 @@ function nelderMead(booster::PhysicalBooster,hist::Vector{State},freqs::Array{Fl
 
     x_ = sum(x[:,1:end-1]; dims=2)/booster.ndisk
     if tracecentroid
-        move(booster,x_; additive=false)
+        commandMove(booster,x_; additive=false)
         updateHist!(booster,hist,freqs,objFunction)
 
         trace[Int(i/traceevery)+1].x_ = x_
@@ -370,7 +370,7 @@ function nelderMead(booster::PhysicalBooster,hist::Vector{State},freqs::Array{Fl
     end
 
     #move to optimal point
-    move(booster,x[:,argmin(f)]; additive=false)
+    commandMove(booster,x[:,argmin(f)]; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
     booster.codetimestamp = canonicalize(now(UTC)-t)
