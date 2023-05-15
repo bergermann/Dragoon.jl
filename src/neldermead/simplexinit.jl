@@ -1,6 +1,6 @@
 ###     constructors of the initial simplex
 
-export initSimplexCoord, initSimplexAffine
+export initSimplexCoord, initSimplexCoord!, initSimplexAffine
 
 
 
