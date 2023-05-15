@@ -12,11 +12,11 @@ function getSimplexObj(x::Matrix{Float64},
     reset && (xc = copy(booster.pos))
 
     for i in axes(x,2)
-        moveCommand(booster,x[:,i]; additive=false)
+        move(booster,x[:,i]; additive=false)
         updateHist!(booster,hist,freqs,objFunction; force=true)
     end
 
-    reset && moveCommand(booster,xc; additive=false)
+    reset && move(booster,xc; additive=false)
 
     return (a->a.objvalue).(hist[axes(x,2)])
 end
@@ -32,11 +32,11 @@ function getSimplexObj(x::Matrix{Float64},
     reset && (xc = copy(booster.pos))
 
     for i in indices
-        moveCommand(booster,x[:,i]; additive=false)
+        move(booster,x[:,i]; additive=false)
         updateHist!(booster,hist,freqs,objFunction; force=true)
     end
 
-    reset && moveCommand(booster,xc; additive=false)
+    reset && move(booster,xc; additive=false)
 
     return (a->a.objvalue).(hist[1:length(indices)])
 end
