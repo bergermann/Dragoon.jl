@@ -8,7 +8,8 @@ init = [1.00334, 6.94754, 7.1766, 7.22788, 7.19717,
         7.21708, 7.18317, 7.13025, 7.2198, 7.45585,
         7.39873, 7.15403, 7.14252, 6.83105, 7.42282]*1e-3
 
-boost1d(spacs,f; eps=24.,thickness=1e-3) = abs2.(disk_system(f;
+boost1d(spacs::Vector{Float64},f::Vector{Float64};eps::Real=24.,thickness::Real=1e-3) = 
+    abs2.(disk_system(f;
         spacings=[spacs;0],disk_thickness=thickness,disk_epsilon=eps,
         num_disk=length(spacs))[2])
 
