@@ -374,7 +374,7 @@ function nelderMead(booster::PhysicalBooster,hist::Vector{State},freqs::Array{Fl
     updateHist!(booster,hist,freqs,objFunction)
 
     # booster.codetimestamp = canonicalize(now(UTC)-t)
-    printTermination(booster,hist,i,maxiter)
+    # printTermination(booster,hist,i,maxiter)
 
     return trace[1:Int(i/traceevery)+1]
 end
