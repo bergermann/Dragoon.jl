@@ -272,7 +272,7 @@ function nelderMead(booster::PhysicalBooster,hist::Vector{State},freqs::Array{Fl
         end
 
         #centroid
-        x_ = reshape(sum(x[:,1:end-1]; dims=2),:))/booster.ndisk
+        x_ = reshape(sum(x[:,1:end-1]; dims=2),:)/booster.ndisk
         if tracecentroid
             move(booster,x_; additive=false)
             updateHist!(booster,hist,freqs,objFunction)
