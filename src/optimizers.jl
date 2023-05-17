@@ -119,7 +119,7 @@ function nelderMead(booster::AnalyticalBooster,hist::Vector{State},freqs::Array{
         end
 
         #centroid
-        x_ = sum(x[:,1:end-1]; dims=2)/booster.ndisk
+        x_ = reshape(sum(x[:,1:end-1]; dims=2),:)/booster.ndisk
         if tracecentroid
             move(booster,x_; additive=false)
             updateHist!(booster,hist,freqs,objFunction)
@@ -213,7 +213,7 @@ function nelderMead(booster::AnalyticalBooster,hist::Vector{State},freqs::Array{
     trace[Int(i/traceevery)+1] = NMTrace(x,f,zeros(booster.ndisk),0.,booster.timestamp,
                                                 booster.summedtraveltime)
 
-    x_ = sum(x[:,1:end-1]; dims=2)/booster.ndisk
+    x_ = reshape(sum(x[:,1:end-1]; dims=2),:)/booster.ndisk
     if tracecentroid
         move(booster,x_; additive=false)
         updateHist!(booster,hist,freqs,objFunction)
