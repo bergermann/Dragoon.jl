@@ -1,6 +1,6 @@
 ###     backbone functions for all optimizers
 
-export initHist
+export getState, initHist, updateHist!
 
 function getState(booster::Booster,
                     freqs::Array{Float64},
