@@ -4,30 +4,31 @@ export getState, initHist, updateHist!
 
 function getState(booster::Booster,
                     freqs::Array{Float64},
-                    objFunction::Tuple{Function,Vector})
+                    objFunction::Callback)
 
-    return State(booster,objFunction[1](booster,freqs,objFunction[2]...),
-                                                            booster.timestamp)
+    return State(booster,objFunction.func(booster,freqs,objFunction.args))
 end
 
 function initHist(booster::Booster,
                     length::Int64,
                     freqs::Array{Float64},
-                    objFunction::Tuple{Function,Vector})
+                    objFunction::Callback)
 
-    hist = fill(State(booster),length)
+    s0 = State(booster)
+    hist = fill(s0,length)
     updateHist!(booster,hist,freqs,objFunction; showtrace=true,force=true)
 
     return hist
 end
 
 function updateHist!(booster::Booster,
-                        hist,freqs::Array{Float64},
-                        objFunction::Tuple{Function,Vector};
+                        hist::Vector{State},
+                        freqs::Array{Float64},
+                        objFunction::Callback;
                         showtrace=false,force=false)
 
-    if hist[1].timestamp != booster.timestamp || force
-        hist[2:end] = hist[1:end-1]
+    if hist[1].pos != booster.pos || force
+        shiftdown!(hist)
         hist[1] = getState(booster,freqs,objFunction)
     end
 
@@ -36,8 +37,6 @@ function updateHist!(booster::Booster,
                     ", Timestamp: ",hist[1].timestamp)
     end
 end
-
-
 
 ###     control functions for the booster
 
@@ -57,7 +56,7 @@ function move(booster::AnalyticalBooster,newpos::Vector{Tuple{Int64,Float64}};
         end
     end
 
-    booster.timestamp += Δt + maximum(T)
+    booster.timestamp += (Δt + maximum(T)) *ₜ Second
     booster.summedtraveltime += sum(T)
 
     if returntrace
@@ -87,7 +86,7 @@ function move(booster::AnalyticalBooster,newpos::Array{Float64};
         booster.pos = copy(newpos)
     end
 
-    booster.timestamp += Δt + T1
+    booster.timestamp += (Δt + T1) *ₜ Second
     booster.summedtraveltime += T2
 
     if returntrace

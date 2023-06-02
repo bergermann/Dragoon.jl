@@ -6,7 +6,8 @@ function getSimplexObj(x::Matrix{Float64},
                         booster::Booster,
                         hist::Array{State},
                         freqs::Array{Float64},
-                        objFunction::Tuple{Function,Vector};
+                        objFunction::Callback,
+                        args::Tuple{};
                         reset=false)
     
     reset && (xc = copy(booster.pos))
@@ -26,7 +27,8 @@ function getSimplexObj(x::Matrix{Float64},
                         booster::Booster,
                         hist::Array{State},
                         freqs::Array{Float64},
-                        objFunction::Tuple{Function,Vector};
+                        objFunction::Callback,
+                        args::Tuple{};
                         reset=false)
     
     reset && (xc = copy(booster.pos))
@@ -40,3 +42,5 @@ function getSimplexObj(x::Matrix{Float64},
 
     return (a->a.objvalue).(hist[1:length(indices)])
 end
+
+const DefaultSimplexSampler = Callback(getSimplexObj)

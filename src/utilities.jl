@@ -53,3 +53,12 @@ function getBoost1d(booster::Booster,freqs::Array{Float64})
     return boost1d(pos2dist(booster.pos; thickness=booster.thickness),freqs;
         eps=booster.epsilon,thickness=booster.thickness)
 end
+
+
+
+
+function shiftdown!(x::Vector)
+    @inbounds for i in length(x)-1:-1:1
+        x[i+1] = x[i]
+    end
+end

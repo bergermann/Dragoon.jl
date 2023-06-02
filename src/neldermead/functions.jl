@@ -2,7 +2,6 @@
 
 export analyse
 
-import Dates: Second, canonicalize
 import Plots: plot, plot!, scatter, vline!, title!, xlabel!, ylabel!,
         annotate!, display
 
@@ -12,15 +11,20 @@ mutable struct NMTrace
     obj::Vector{Float64}
     x_::Vector{Float64}
     obj_::Float64
-    t::Float64
+    t::DateTime
     T::Float64
 end
 
 function printNMIter(booster::Booster,f::Vector{Float64},i::Int)
-    println("Iter: ",i,", timestamp: ",
-                            canonicalize(Second(round(Int,booster.timestamp))))
-    println("Iter finished. Objective value: ",
-                                        round(minimum(f); digits=3),"\n")
+    if hasfield(booster,:startingtime)
+        println("Iter: ",i,", timestamp: ",canonicalize(
+            floor(booster.timestamp-booster.startingtime,Second)))
+    else
+        println("Iter: ",i,", timestamp: ",canonicalize(
+            floor(booster.timestamp,Second)))
+    end
+
+    println("Iter finished. Objective value: ",round(minimum(f); digits=3),"\n")
 end
 
 function analyse(hist,trace::Vector{NMTrace},freqsplot;
@@ -29,6 +33,7 @@ function analyse(hist,trace::Vector{NMTrace},freqsplot;
                         div=5,
                         scale=1e9,
                         ylim=[-0.05e4,3e4])
+    
     tracex = hcat((x->x.x[:,1]).(trace)...)
     tracex_ = hcat((x->x.x_).(trace)...)
     traced = hcat((x->pos2dist(x.x[:,1])).(trace)...)
@@ -59,7 +64,7 @@ function analyse(hist,trace::Vector{NMTrace},freqsplot;
         plot!(freqsplot/scale,boost1d(pos2dist(tracex[:,l]),freqsplot);
                 ylim=ylim,label="final",lc="red",lw=2)
 
-        if freqs != nothing
+        if freqs !== nothing
             vline!([minimum(freqs),maximum(freqs)]/scale,c="black",linestyle=:dash,
                     label="")
         end

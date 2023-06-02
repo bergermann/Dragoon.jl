@@ -3,6 +3,8 @@
 
 export Booster, DevicesType, BoundariesType, AnalyticalBooster, PhysicalBooster, State
 
+unow() = now(UTC)
+
 abstract type Booster end
 
 abstract type DevicesType end
@@ -15,12 +17,12 @@ mutable struct AnalyticalBooster <: Booster
     epsilon::Real
     vmotor::Real
     maxlength::Real
-    timestamp::Float64
-    summedtraveltime::Float64
-    codetimestamp
+    timestamp::DateTime
+    codetimestamp::DateTime
+    summedtraveltime::Nanosecond
 
     function AnalyticalBooster(initdist; ndisk=20,τ=1e-3,ϵ=24,vmotor=0.1e-3,maxlength=2)
-        new(dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,vmotor,maxlength,0.,0.,0.)
+        new(dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,vmotor,maxlength,unow(),unow(),0.)
     end
 end
 
@@ -32,28 +34,58 @@ mutable struct PhysicalBooster <: Booster
     thickness::Real
     epsilon::Real
     maxlength::Real
-    timestamp::Real
-    summedtraveltime::Real
+    timestamp::DateTime
+    startingtime::DateTime
+    summedtraveltime::Float64
 
     function PhysicalBooster(devices,initdist; ndisk=20,τ=1e-3,ϵ=24,maxlength=2)
-        new(devices,dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,maxlength,0.,0.)
+        new(devices,dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,maxlength,
+            unow(),unow(),0.)
     end
 
-    function PhysicalBooster(devices,pos,ndisk,thickness,epsilon,maxlength,timestamp,summedtraveltime)
-        new(devices,pos,ndisk,thickness,epsilon,maxlength,timestamp,summedtraveltime)
+    function PhysicalBooster(
+            devices,pos,ndisk,thickness,epsilon,maxlength,timestamp,
+            startingtime,summedtraveltime)
+
+        new(devices,pos,ndisk,thickness,epsilon,maxlength,timestamp,
+            startingtime,summedtraveltime)
     end
 end
+
 
 mutable struct State
     pos::Array{Float64}
     objvalue::Float64
-    timestamp::Float64
+    timestamp::DateTime
 
     function State(booster)
-        new(booster.pos,0.0,0.0)
+        new(zeros(Float64,length(booster.pos)),0.0,DateTime(0))
+    end
+
+    function State(booster::AnalyticalBooster,objvalue)
+        new(booster.pos,objvalue,booster.timestamp)        
+    end
+
+    function State(booster::PhysicalBooster,objvalue)
+        new(booster.pos,objvalue,unow())    # fix???     
     end
 
     function State(booster,objvalue,timestamp)
         new(booster.pos,objvalue,timestamp)
     end
 end
+
+mutable struct Callback
+    func::Function
+    args::Tuple
+
+    function Callback(func,args)
+        new(func,args)
+    end
+
+    function Callback(func)
+        new(func,())
+    end
+end
+
+const F = Callback

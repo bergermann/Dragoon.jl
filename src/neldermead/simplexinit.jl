@@ -4,7 +4,7 @@ export initSimplexCoord, initSimplexCoord!, initSimplexAffine
 
 
 
-function initSimplexCoord(x0::Array{Float64},d::Real)
+function initSimplexCoord(x0::Array{Float64},d::Real,args::Tuple{})
     x = repeat(x0,1,length(x0)+1)
 
     for i in 1:length(x0)
@@ -14,7 +14,8 @@ function initSimplexCoord(x0::Array{Float64},d::Real)
     return x
 end
 
-function initSimplexCoord!(x0::Array{Float64},x::Matrix{Float64},d::Float64)
+function initSimplexCoord!(x0::Array{Float64},x::Matrix{Float64},d::Float64,
+                                                                args::Tuple{})
     x[:,:] = repeat(x0,1,length(x0)+1)
 
     for i in 1:length(x0)
@@ -22,7 +23,10 @@ function initSimplexCoord!(x0::Array{Float64},x::Matrix{Float64},d::Float64)
     end
 end
 
+const InitSimplexCoord = Callback(initSimplexCoord)
+const InitSimplexCoord! = Callback(initSimplexCoord!)
+
 function initSimplexAffine(x0::Array{Float64},p::Matrix{Float64},a::Float64,
-                                                                    b::Float64)
+                                                    b::Float64,args::Tuple{})
     x[:,:]
 end

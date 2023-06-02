@@ -2,11 +2,13 @@
 
 export stepNorm
 
-function stepNorm(p,α,booster,hist,freqs,objFunction,mode; showtrace=false)
+
+# args = (mode,)
+function stepNorm(p,α,booster,hist,freqs,objFunction,args; showtrace=false)
     #static, normalize p
-    if mode == "unit"
+    if args[1] == "unit"
         p[:] = p/pNorm(p)
-    elseif mode == "max"
+    elseif args[1] == "max"
         p[:] = p/maximum(abs.(p))
     end
 end

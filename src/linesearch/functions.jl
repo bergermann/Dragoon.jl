@@ -2,7 +2,6 @@
 
 export analyse
 
-import Dates: Second, canonicalize
 import Plots: plot, plot!, scatter, vline!, title!, xlabel!, ylabel!,
         annotate!, display
 
@@ -14,7 +13,7 @@ mutable struct LSTrace
     obj::Float64
     g::Vector{Float64}
     h::Matrix{Float64}
-    t::Float64
+    t::DateTime
     T::Float64
 end
 
@@ -27,9 +26,17 @@ LSTrace() = LSTrace([0],0,[0],zeros(1,1),0.,0.)
 ###     output
 
 function printIter(booster::Booster,hist,i::Int,k::Int)
-    println("Iter: ",i,", timestamp: ",round(booster.timestamp,digits=3))
+    if hasfield(booster,:startingtime)
+        println("Iter: ",i,", timestamp: ",canonicalize(
+            floor(booster.timestamp-booster.startingtime,Second)))
+    else
+        println("Iter: ",i,", timestamp: ",canonicalize(
+            floor(booster.timestamp,Second)))
+    end
+    
     println("Iter finished. Steps: ",k,", Objective value: ",
             round(hist[1].objvalue; digits=3),"\n")
+            
     k == 0 && println("Stuck. Trying to unstuck.\n")
 end
 
@@ -58,7 +65,7 @@ function analyse(hist,trace::Vector{LSTrace},freqsplot;
         plot!(freqsplot/scale,boost1d(pos2dist(tracex[:,l]),freqsplot);
                 ylim=ylim,label="final",lc="red",lw=2)
 
-        if freqs != nothing
+        if freqs !== nothing
             vline!([minimum(freqs),maximum(freqs)]/scale,c="black",linestyle=:dash,
                     label="")
         end
