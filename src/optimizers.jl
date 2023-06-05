@@ -21,6 +21,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         booster.startingtime = unow()
     elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
+        resettimer && booster.timestamp = DateTime(0)
     end
 
     trace = Vector{LSTrace}(undef,maxiter+1)
@@ -77,8 +78,9 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     end
 
 
-    if hasproperty(booster,:codetimestamp) && resettimer
-        booster.codetimestamp = unow()-t0 + booster.codetimestamp*!resettimer
+    if hasproperty(booster,:codetimestamp)
+        resettimer && booster.codetimestamp = DateTime(0)
+        booster.codetimestamp += unow()-t0
     end
 
     printTermination(booster,hist,i,maxiter)
@@ -103,10 +105,13 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     traceevery::Int=1,
                     resettimer::Bool=true)
 
+    
+
     if hasproperty(booster,:startingtime) && resettimer
         booster.startingtime = unow()
     elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
+        resettimer && booster.timestamp = DateTime(0)
     end
 
     trace = Vector{NMTrace}(undef,floor(Int,maxiter/traceevery)+1)
@@ -241,8 +246,9 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     move(booster,x[:,argmin(f)]; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
-    if hasproperty(booster,:codetimestamp) && resettimer
-        booster.codetimestamp = unow()-t0 + booster.codetimestamp*!resettimer
+    if hasproperty(booster,:codetimestamp)
+        resettimer && booster.codetimestamp = DateTime(0)
+        booster.codetimestamp += unow()-t0
     end
 
     printTermination(booster,hist,i,maxiter)
