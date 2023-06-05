@@ -1,7 +1,7 @@
 
 ###     physical state of the booster
 
-export Booster, DevicesType, BoundariesType, AnalyticalBooster, PhysicalBooster, State
+export Booster, DevicesType, BoundariesType, AnalyticalBooster, PhysicalBooster, State, Callback, F
 
 unow() = now(UTC)
 
@@ -14,7 +14,7 @@ mutable struct AnalyticalBooster <: Booster
     pos::Array{<:Real}
     ndisk::Int
     thickness::Real
-    epsilon::Number
+    epsilon::Float64
     vmotor::Real
     maxlength::Real
     timestamp::DateTime
