@@ -38,6 +38,8 @@ function updateHist!(booster::Booster,
     end
 end
 
+
+
 ###     control functions for the booster
 
 function move(booster::AnalyticalBooster,newpos::Vector{Tuple{Int64,Float64}};
