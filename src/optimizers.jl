@@ -45,6 +45,8 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         trace[i] = LSTrace(booster.pos,hist[1].objvalue,copy(g),copy(h),
                                     booster.timestamp,booster.summedtraveltime)
 
+        display(g); display(h)
+
         solver.func(p,g,h,trace,i,solver.args)
 
         showtrace && println("Gradient norm: ",round(pNorm(g),sigdigits=3))
@@ -259,7 +261,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         if resettimer
             booster.codetimestamp = DateTime(0)
         end
-        
+
         booster.codetimestamp += unow()-t0
     end
 
