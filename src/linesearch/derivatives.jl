@@ -6,14 +6,14 @@ export Derivator1, Derivator2
 # args = (Δx,mode)
 function firstDerivative(g,h,booster,hist,freqs,objFunction,args)
 
-    updateHist!(booster,hist,freqs,objFunction)
+    updateHist!(booster,hist,freqs,objFunction; force=true)
     move(booster,[(1,args[1])])
 
     if args[2] == "double"
         for i in 1:booster.ndisk
-            updateHist!(booster,hist,freqs,objFunction)
+            updateHist!(booster,hist,freqs,objFunction; force=true)
             move(booster,[(i,-2args[1])])
-            updateHist!(booster,hist,freqs,objFunction)
+            updateHist!(booster,hist,freqs,objFunction; force=true)
 
             g[i] = (hist[2].objvalue-hist[1].objvalue)/2args[1]
 
@@ -25,7 +25,7 @@ function firstDerivative(g,h,booster,hist,freqs,objFunction,args)
         end
     else
         for i in 1:booster.ndisk
-            updateHist!(booster,hist,freqs,objFunction)
+            updateHist!(booster,hist,freqs,objFunction; force=true)
 
             g[i] = (hist[1].objvalue-hist[i+1].objvalue)
 
