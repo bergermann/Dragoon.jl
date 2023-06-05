@@ -16,7 +16,7 @@ mutable struct NMTrace
 end
 
 function printNMIter(booster::Booster,f::Vector{Float64},i::Int)
-    if hasfield(booster,:startingtime)
+    if hasproperty(booster,:startingtime)
         println("Iter: ",i,", timestamp: ",canonicalize(
             floor(booster.timestamp-booster.startingtime,Second)))
     else
