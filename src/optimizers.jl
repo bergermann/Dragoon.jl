@@ -17,9 +17,9 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     unstuckisiter::Bool=true,
                     resettimer::Bool=true)
 
-    if hasfield(booster,:startingtime) && resettimer
+    if hasproperty(booster,:startingtime) && resettimer
         booster.startingtime = unow()
-    elseif hasfield(booster,:codetimestamp)
+    elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
     end
 
@@ -77,7 +77,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     end
 
 
-    if hasfield(booster,:codetimestamp) && resettimer
+    if hasproperty(booster,:codetimestamp) && resettimer
         booster.codetimestamp = unow()-t0 + booster.codetimestamp*!resettimer
     end
 
@@ -103,9 +103,9 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     traceevery::Int=1,
                     resettimer::Bool=true)
 
-    if hasfield(booster,:startingtime) && resettimer
+    if hasproperty(booster,:startingtime) && resettimer
         booster.startingtime = unow()
-    elseif hasfield(booster,:codetimestamp)
+    elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
     end
 
@@ -241,7 +241,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     move(booster,x[:,argmin(f)]; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
-    if hasfield(booster,:codetimestamp) && resettimer
+    if hasproperty(booster,:codetimestamp) && resettimer
         booster.codetimestamp = unow()-t0 + booster.codetimestamp*!resettimer
     end
 
@@ -408,9 +408,9 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
                         traceevery::Int=1,
                         resettimer::Bool=true)
     
-    if hasfield(booster,:startingtime) && resettimer
+    if hasproperty(booster,:startingtime) && resettimer
         booster.startingtime = unow()
-    elseif hasfield(booster,:codetimestamp)
+    elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
     end
 
@@ -421,7 +421,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
     move(booster,x[:,argmin(f)]; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
-    if hasfield(booster,:codetimestamp) && resettimer
+    if hasproperty(booster,:codetimestamp) && resettimer
         booster.codetimestamp = unow()-t0 + booster.codetimestamp*!resettimer
     end
 
