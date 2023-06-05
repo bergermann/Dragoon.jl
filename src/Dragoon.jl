@@ -7,7 +7,7 @@ module Dragoon
 using BoostFractor
 
 import Dates: DateTime, now, UTC, canonicalize, Second, Nanosecond
-# import DateFormats: /ₜ, *ₜ
+import DateFormats: /ₜ, *ₜ
 
 #General optimizers
 include("types.jl")
