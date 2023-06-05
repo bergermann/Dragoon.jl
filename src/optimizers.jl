@@ -111,10 +111,10 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
     trace = Vector{NMTrace}(undef,floor(Int,maxiter/traceevery)+1)
 
-    x = zeros(booster.ndisk,booster.ndisk+1)
+    # x = zeros(booster.ndisk,booster.ndisk+1)
     f = zeros(booster.ndisk+1)
 
-    initSimplex.func(booster.pos,x,initSimplex.args)
+    x = initSimplex.func(booster.pos,initSimplex.args)
     f = simplexObj.func(x,Vector(1:booster.ndisk+1),booster,hist,freqs,
                                             objFunction,simplexObj.args)
 
