@@ -13,8 +13,8 @@ abstract type BoundariesType end
 mutable struct AnalyticalBooster <: Booster
     pos::Array{<:Real}
     ndisk::Int
-    thickness::Float64
-    epsilon::Real
+    thickness::Real
+    epsilon::Number
     vmotor::Real
     maxlength::Real
     timestamp::DateTime
