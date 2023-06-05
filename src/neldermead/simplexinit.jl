@@ -1,7 +1,7 @@
 ###     constructors of the initial simplex
 
 export initSimplexCoord, initSimplexCoord!, initSimplexAffine
-
+export InitSimplexCoord, InitSimplexCoord!
 
 
 function initSimplexCoord(x0::Array{Float64},d::Real,args::Tuple{})

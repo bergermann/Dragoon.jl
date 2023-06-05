@@ -1,6 +1,7 @@
 ###     handles the step and stopping
 
 export searchStandard, searchExtSteps, searchExtDist
+export SearchStandard, SearchExtendedSteps, SearchExtendedDist, SearchTrueNewton
 
 # args = (ϵls,kmax)
 function searchStandard(p,α,booster,hist,freqs,objFunction,args; showtrace=false)

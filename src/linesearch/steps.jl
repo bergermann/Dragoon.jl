@@ -1,7 +1,7 @@
 ###     determines step length and/or normalization of step vector
 
 export stepNorm
-
+export StepNorm
 
 # args = (mode,)
 function stepNorm(p,α,booster,hist,freqs,objFunction,args; showtrace=false)
@@ -12,3 +12,5 @@ function stepNorm(p,α,booster,hist,freqs,objFunction,args; showtrace=false)
         p[:] = p/maximum(abs.(p))
     end
 end
+
+const StepNorm(mode) = Callback(stepNorm,(mode,))

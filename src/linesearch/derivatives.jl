@@ -1,7 +1,7 @@
 ###     calculates all necessary derivates for solver
 
 export firstDerivative, secondDerivative
-
+export Derivator1, Derivator2
 
 # args = (Δx,mode)
 function firstDerivative(g,h,booster,hist,freqs,objFunction,args)

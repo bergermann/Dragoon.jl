@@ -1,6 +1,7 @@
 ###     functions to get objective values for every vertex
 
 export getSimplexObj
+export DefaultSimplexSampler
 
 function getSimplexObj(x::Matrix{Float64},
                         booster::Booster,
