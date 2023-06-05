@@ -31,7 +31,7 @@ function printIter(booster::Booster,hist,i::Int,k::Int)
             floor(booster.timestamp-booster.startingtime,Second)))
     else
         println("Iter: ",i,", timestamp: ",canonicalize(
-            floor(booster.timestamp,Second)))
+            floor(booster.timestamp-DateTime(0),Second)))
     end
     
     println("Iter finished. Steps: ",k,", Objective value: ",
