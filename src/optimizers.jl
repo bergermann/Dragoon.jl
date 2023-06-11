@@ -17,10 +17,14 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     unstuckisiter::Bool=true,
                     resettimer::Bool=true)
 
-    if hasfield(booster,:startingtime) && resettimer
+    if hasproperty(booster,:startingtime) && resettimer
         booster.startingtime = unow()
-    elseif hasfield(booster,:codetimestamp)
+    elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
+
+        if resettimer
+            booster.timestamp = DateTime(0)
+        end
     end
 
     trace = Vector{LSTrace}(undef,maxiter+1)
@@ -40,6 +44,8 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
         trace[i] = LSTrace(booster.pos,hist[1].objvalue,copy(g),copy(h),
                                     booster.timestamp,booster.summedtraveltime)
+
+        display(g); display(h)
 
         solver.func(p,g,h,trace,i,solver.args)
 
@@ -77,8 +83,12 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     end
 
 
-    if hasfield(booster,:codetimestamp) && resettimer
-        booster.codetimestamp = unow()-t0 + booster.codetimestamp*!resettimer
+    if hasproperty(booster,:codetimestamp)
+        if resettimer
+            booster.codetimestamp = DateTime(0)
+        end
+
+        booster.codetimestamp += unow()-t0
     end
 
     printTermination(booster,hist,i,maxiter)
@@ -107,18 +117,24 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     traceevery::Int=1,
                     resettimer::Bool=true)
 
-    if hasfield(booster,:startingtime) && resettimer
+    
+
+    if hasproperty(booster,:startingtime) && resettimer
         booster.startingtime = unow()
-    elseif hasfield(booster,:codetimestamp)
+    elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
+
+        if resettimer
+            booster.timestamp = DateTime(0)
+        end
     end
 
     trace = Vector{NMTrace}(undef,floor(Int,maxiter/traceevery)+1)
 
-    x = zeros(booster.ndisk,booster.ndisk+1)
+    # x = zeros(booster.ndisk,booster.ndisk+1)
     f = zeros(booster.ndisk+1)
 
-    initSimplex.func(booster.pos,x,initSimplex.args)
+    x = initSimplex.func(booster.pos,initSimplex.args)
     f = simplexObj.func(x,Vector(1:booster.ndisk+1),booster,hist,freqs,
                                             objFunction,simplexObj.args)
 
@@ -245,8 +261,12 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     move(booster,x[:,argmin(f)]; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
-    if hasfield(booster,:codetimestamp) && resettimer
-        booster.codetimestamp = unow()-t0 + booster.codetimestamp*!resettimer
+    if hasproperty(booster,:codetimestamp)
+        if resettimer
+            booster.codetimestamp = DateTime(0)
+        end
+
+        booster.codetimestamp += unow()-t0
     end
 
     printTermination(booster,hist,i,maxiter)
@@ -413,9 +433,9 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
                         traceevery::Int=1,
                         resettimer::Bool=true)
     
-    if hasfield(booster,:startingtime) && resettimer
+    if hasproperty(booster,:startingtime) && resettimer
         booster.startingtime = unow()
-    elseif hasfield(booster,:codetimestamp)
+    elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
     end
 
@@ -456,7 +476,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
     move(booster,xsol; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
-    if hasfield(booster,:codetimestamp) && resettimer
+    if hasproperty(booster,:codetimestamp) && resettimer
         booster.codetimestamp = unow()-t0 + booster.codetimestamp*!resettimer
     end
 

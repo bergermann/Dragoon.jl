@@ -14,6 +14,7 @@ include("types.jl")
 include("functions.jl")
 include("optimizers.jl")
 include("objective.jl")
+include("unstuckinators.jl")
 
 include("Analytical1D.jl")
 include("utilities.jl")
@@ -24,7 +25,6 @@ include("linesearch/solvers.jl")
 include("linesearch/derivatives.jl")
 include("linesearch/steps.jl")
 include("linesearch/searches.jl")
-include("linesearch/unstuckinators.jl")
 
 # Nelder-Mead options
 include("neldermead/functions.jl")

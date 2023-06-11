@@ -38,6 +38,8 @@ function updateHist!(booster::Booster,
     end
 end
 
+
+
 ###     control functions for the booster
 
 function move(booster::AnalyticalBooster,newpos::Vector{Tuple{Int64,Float64}};
@@ -111,11 +113,17 @@ end
 ###     information output functions
 
 function printTimes(booster::Booster)
-    println("Elapsed movement time:  ",
-                canonicalize(Second(round(Int,booster.timestamp))))
-    println("Summed movement time:   ",
-                canonicalize(Second(round(Int,booster.summedtraveltime))))
-    println("Elapsed computing time: ",canonicalize(booster.codetimestamp))
+    if hasproperty(booster,:startingtime)
+        println("Elapsed movement time:  ",canonicalize(round(booster.timestamp-booster.startime,Second)))
+    else
+        println("Elapsed movement time:  ",canonicalize(round(booster.timestamp-DateTime(0),Second)))
+    end
+
+    println("Summed movement time:   ",canonicalize(round(booster.summedtraveltime*ₜSecond,Second)))
+
+    if hasproperty(booster,:codetimestamp)
+        println("Elapsed computing time: ",canonicalize(booster.codetimestamp-DateTime(0)))
+    end
 end
 
 function printTermination(booster::Booster,hist,i::Int,maxiter::Int)

@@ -16,12 +16,12 @@ mutable struct NMTrace
 end
 
 function printNMIter(booster::Booster,f::Vector{Float64},i::Int)
-    if hasfield(booster,:startingtime)
+    if hasproperty(booster,:startingtime)
         println("Iter: ",i,", timestamp: ",canonicalize(
-            floor(booster.timestamp-booster.startingtime,Second)))
+            round(booster.timestamp-booster.startingtime,Second)))
     else
         println("Iter: ",i,", timestamp: ",canonicalize(
-            floor(booster.timestamp,Second)))
+            round(booster.timestamp-DateTime(0),Second)))
     end
 
     println("Iter finished. Objective value: ",round(minimum(f); digits=3),"\n")

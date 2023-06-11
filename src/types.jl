@@ -1,7 +1,7 @@
 
 ###     physical state of the booster
 
-export Booster, DevicesType, BoundariesType, AnalyticalBooster, PhysicalBooster, State
+export Booster, DevicesType, BoundariesType, AnalyticalBooster, PhysicalBooster, State, Callback, F
 
 unow() = now(UTC)
 
@@ -13,16 +13,20 @@ abstract type BoundariesType end
 mutable struct AnalyticalBooster <: Booster
     pos::Array{<:Real}
     ndisk::Int
-    thickness::Float64
-    epsilon::Real
+    thickness::Real
+    epsilon::Float64
     vmotor::Real
     maxlength::Real
     timestamp::DateTime
     codetimestamp::DateTime
-    summedtraveltime::Nanosecond
+    summedtraveltime::Float64
 
     function AnalyticalBooster(initdist; ndisk=20,τ=1e-3,ϵ=24,vmotor=0.1e-3,maxlength=2)
         new(dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,vmotor,maxlength,unow(),unow(),0.)
+    end
+
+    function AnalyticalBooster(pos,ndisk,thickness,epsilon,vmotor,maxlength,timestamp,codetimestamp,summedtraveltime)
+        new(pos,ndisk,thickness,epsilon,vmotor,maxlength,timestamp,codetimestamp,summedtraveltime)
     end
 end
 

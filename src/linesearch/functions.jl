@@ -26,12 +26,12 @@ LSTrace() = LSTrace([0],0,[0],zeros(1,1),0.,0.)
 ###     output
 
 function printIter(booster::Booster,hist,i::Int,k::Int)
-    if hasfield(booster,:startingtime)
+    if hasproperty(booster,:startingtime)
         println("Iter: ",i,", timestamp: ",canonicalize(
             floor(booster.timestamp-booster.startingtime,Second)))
     else
         println("Iter: ",i,", timestamp: ",canonicalize(
-            floor(booster.timestamp,Second)))
+            floor(booster.timestamp-DateTime(0),Second)))
     end
     
     println("Iter finished. Steps: ",k,", Objective value: ",
