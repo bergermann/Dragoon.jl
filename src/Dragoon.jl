@@ -9,7 +9,7 @@ using BoostFractor
 import Dates: DateTime, now, UTC, canonicalize, Second, Nanosecond
 import DateFormats: /ₜ, *ₜ
 
-#General optimizers
+# General optimizers
 include("types.jl")
 include("functions.jl")
 include("optimizers.jl")
@@ -18,7 +18,7 @@ include("objective.jl")
 include("Analytical1D.jl")
 include("utilities.jl")
 
-#Linesearch options
+# Linesearch options
 include("linesearch/functions.jl")
 include("linesearch/solvers.jl")
 include("linesearch/derivatives.jl")
@@ -26,9 +26,12 @@ include("linesearch/steps.jl")
 include("linesearch/searches.jl")
 include("linesearch/unstuckinators.jl")
 
-#Nelder-Mead options
+# Nelder-Mead options
 include("neldermead/functions.jl")
 include("neldermead/simplexinit.jl")
 include("neldermead/simplexobj.jl")
+
+# Simulated Annealing options
+include("annealing/functions.jl")
 
 end

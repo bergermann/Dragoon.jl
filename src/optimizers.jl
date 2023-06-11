@@ -89,6 +89,10 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     return trace[1:i+1]
 end
 
+
+
+
+
 function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     α::Float64,β::Float64,γ::Float64,δ::Float64,
                     objFunction::Callback,
@@ -399,6 +403,7 @@ end
 
 
 function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Float64},
+                        τ::Array{Float64},rmax::Float64,
                         objFunction::Callback,
                         unstuckinator::Callback;
                         maxiter::Integer=Int(1e2),
@@ -414,11 +419,41 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         t0 = unow()
     end
 
+    trace = Vector{SATrace}(undef,maxiter+1)
+    
+    updateHist!(booster,hist,freqs,objFunction)
+
+    xsol = copy(booster.pos)
+    objsol = hist[1].objvalue
+    
+    x = copy(booster.pos)
+    objx = hist[1].objvalue
+
+
+    for i in eachindex(τ)
+        move(booster,x+findNeighbour(booster,rmax); additive=false)
+        updateHist!(booster,hist,freqs,objFunction)
+
+        if hist[1].objvalue <= objx || rand() <= thermal(objx,hist[1].objvalue,τ[i])
+            x = copy(booster.pos)
+            objsol = hist[1].objvalue
+        end
+
+        if hist[1].objvalue <= objsol
+            xsol = copy(booster.pos)
+        end
+
+        trace[i] = SATrace(x,obj,τ,iter,t,T)
+    end
+
+
+
+
+
+
 
     
-
-    
-    move(booster,x[:,argmin(f)]; additive=false)
+    move(booster,xsol; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
     if hasfield(booster,:codetimestamp) && resettimer
