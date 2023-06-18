@@ -44,8 +44,6 @@ const Derivator1(Δx,mode) = Callback(firstDerivative,(Δx,mode))
 function secondDerivative(g,h,booster,hist,freqs,objFunction,args)
     updateHist!(booster,hist,freqs,objFunction)
 
-    println([(1,args[1])])
-
     move(booster,[(1,args[1])])
     
     if args[3] == "double"

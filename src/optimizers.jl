@@ -47,7 +47,11 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
         display(g); display(h)
 
-        solver.func(p,g,h,trace,i,solver.args)
+        try
+            solver.func(p,g,h,trace,i,solver.args)
+        catch e
+            println(e); return g, h
+        end
 
         showtrace && println("Gradient norm: ",round(pNorm(g),sigdigits=3))
 
