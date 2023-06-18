@@ -44,6 +44,7 @@ end
 
 function move(booster::AnalyticalBooster,newpos::Vector{Tuple{Int64,Float64}};
         Δt=0,returntrace=false,tracestep=1e-3,additive=true)
+    
     T = zeros(length(newpos))
 
     if additive

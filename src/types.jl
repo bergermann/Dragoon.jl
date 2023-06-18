@@ -67,15 +67,15 @@ mutable struct State
     end
 
     function State(booster::AnalyticalBooster,objvalue)
-        new(booster.pos,objvalue,booster.timestamp)        
+        new(copy(booster.pos),objvalue,booster.timestamp)        
     end
 
     function State(booster::PhysicalBooster,objvalue)
-        new(booster.pos,objvalue,unow())    # fix???     
+        new(copy(booster.pos),objvalue,unow())    # fix???     
     end
 
     function State(booster,objvalue,timestamp)
-        new(booster.pos,objvalue,timestamp)
+        new(copy(booster.pos),objvalue,timestamp)
     end
 end
 

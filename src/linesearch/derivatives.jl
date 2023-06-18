@@ -43,14 +43,18 @@ const Derivator1(Δx,mode) = Callback(firstDerivative,(Δx,mode))
 # args = (Δx1,Δx2,mode)
 function secondDerivative(g,h,booster,hist,freqs,objFunction,args)
     updateHist!(booster,hist,freqs,objFunction)
+
+    println([(1,args[1])])
+
     move(booster,[(1,args[1])])
+    
     if args[3] == "double"
         for i in 1:booster.ndisk
             updateHist!(booster,hist,freqs,objFunction)
-            move(booster,[(i,-2args[1])])
+            move(booster,[(i,-2*args[1])])
             updateHist!(booster,hist,freqs,objFunction)
 
-            g[i] = (hist[2].objvalue-hist[1].objvalue)/2args[1]
+            g[i] = (hist[2].objvalue-hist[1].objvalue)/(2*args[1])
 
             if i != booster.ndisk
                 move(booster,[(i,args[1]),(i+1,args[1])])
@@ -62,14 +66,18 @@ function secondDerivative(g,h,booster,hist,freqs,objFunction,args)
         for i in 1:booster.ndisk, j in 1:booster.ndisk
             move(booster,[(i,args[2]),(j,args[2])])
             updateHist!(booster,hist,freqs,objFunction)
+
             move(booster,[(j,-args[2])])
             updateHist!(booster,hist,freqs,objFunction)
+
             move(booster,[(i,-args[2]),(j,args[2])])
             updateHist!(booster,hist,freqs,objFunction)
+
             move(booster,[(j,-args[2])])
             updateHist!(booster,hist,freqs,objFunction)
+            
             h[i,j] = (hist[4].objvalue-hist[3].objvalue-
-                        hist[2].objvalue+hist[1].objvalue)/args[2]^2
+                        hist[2].objvalue+hist[1].objvalue)/(args[2]^2)
         end
     end
 end
