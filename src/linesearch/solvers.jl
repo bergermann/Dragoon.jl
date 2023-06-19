@@ -18,9 +18,16 @@ const SolverSteep = Callback(solverSteepestDescent)
 # args = (mode,)
 function solverNewton(p,g,h,trace,i,args)
     if args[1] == "cholesky"
-        C = cholesky(h)
+        try
+            C = cholesky(h)
 
-        p[:] = -inv(C.U)*inv(C.L)*g
+            p[:] = -inv(C.U)*inv(C.L)*g
+        catch e
+            println("Hessian not Cholesky decomposable: ", e)
+            println("Falling back to standard inversion.")
+            
+            p[:] = -inv(h)*g
+        end
     else
         p[:] = -inv(h)*g
     end

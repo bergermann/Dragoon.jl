@@ -42,8 +42,12 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
         derivator.func(g,h,booster,hist,freqs,objFunction,derivator.args)
 
+        display(g); display(h)
+
         trace[i] = LSTrace(booster.pos,hist[1].objvalue,copy(g),copy(h),
                                     booster.timestamp,booster.summedtraveltime)
+
+        solver.func(p,g,h,trace,i,solver.args)
 
         showtrace && println("Gradient norm: ",round(pNorm(g),sigdigits=3))
 
