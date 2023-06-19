@@ -42,7 +42,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
         derivator.func(g,h,booster,hist,freqs,objFunction,derivator.args)
 
-        display(g); display(h)
+        # display(g); display(h)
 
         trace[i] = LSTrace(booster.pos,hist[1].objvalue,copy(g),copy(h),
                                     booster.timestamp,booster.summedtraveltime)
@@ -58,11 +58,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         #determine steplength and/or normalize p
         updateHist!(booster,hist,freqs,objFunction)
 
-        display(p)
-
         step.func(p,α,booster,hist,freqs,objFunction,step.args; showtrace=showtrace)
-
-        display(p)
 
         #perform linesearch
         updateHist!(booster,hist,freqs,objFunction)
