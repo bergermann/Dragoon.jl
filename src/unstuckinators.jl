@@ -14,8 +14,7 @@ const UnstuckDont = Callback(unstuckDont)
 # shift discs independently and uniform randomly within [-d,d] if objective
 # threshold is not reached
 # args = (d,threshold)
-function unstuckRandom(booster,hist,freqs,objFunction,args;
-                                                                showtrace=false)
+function unstuckRandom(booster,hist,freqs,objFunction,args; showtrace=false)
     if hist[1].objvalue > args[2]
         move(booster,args[1]*(2*rand(booster.ndisk).-1); additive=true)
         updateHist!(booster,hist,freqs,objFunction)

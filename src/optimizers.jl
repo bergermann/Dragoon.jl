@@ -45,14 +45,6 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         trace[i] = LSTrace(booster.pos,hist[1].objvalue,copy(g),copy(h),
                                     booster.timestamp,booster.summedtraveltime)
 
-        display(g); display(h)
-
-        try
-            solver.func(p,g,h,trace,i,solver.args)
-        catch e
-            println(e); return g, h
-        end
-
         showtrace && println("Gradient norm: ",round(pNorm(g),sigdigits=3))
 
         #early stopping if descend is too slow

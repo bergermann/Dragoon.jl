@@ -5,7 +5,6 @@ export Derivator1, Derivator2
 
 # args = (Δx,mode)
 function firstDerivative(g,h,booster,hist,freqs,objFunction,args)
-
     updateHist!(booster,hist,freqs,objFunction; force=true)
     move(booster,[(1,args[1])])
 
