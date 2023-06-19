@@ -15,7 +15,9 @@ const UnstuckDont = Callback(unstuckDont)
 # threshold is not reached
 # args = (d,threshold)
 function unstuckRandom(booster,hist,freqs,objFunction,args; showtrace=false)
-    if hist[1].objvalue > args[2]
+    threshold = -abs(args[2])
+
+    if hist[1].objvalue > threshold
         move(booster,args[1]*(2*rand(booster.ndisk).-1); additive=true)
         updateHist!(booster,hist,freqs,objFunction)
 
@@ -36,7 +38,9 @@ UnstuckRandom(d,threshold) = Callback(unstuckRandom,(d,threshold))
 # enforce movement by setting dmin to > 0
 # args = (d,dmin,div::Int,threshold)
 function unstuckCoord(booster,hist,freqs,objFunction,args; showtrace=false)
-    if hist[1].objvalue > args[4]
+    threshold = -abs(args[2])
+
+    if hist[1].objvalue > threshold
         pos0 = copy(booster.pos)
 
         for i in 1:booster.ndisk
