@@ -54,14 +54,16 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         #determine steplength and/or normalize p
         updateHist!(booster,hist,freqs,objFunction)
 
-        step.func(p,α,booster,hist,freqs,objFunction,step.args;
-                                                        showtrace=showtrace)
+        display(p)
+
+        step.func(p,α,booster,hist,freqs,objFunction,step.args; showtrace=showtrace)
+
+        display(p)
 
         #perform linesearch
         updateHist!(booster,hist,freqs,objFunction)
 
-        k = search.func(p,α,booster,hist,freqs,objFunction,search.args;
-                                                        showtrace=showtrace)
+        k = search.func(p,α,booster,hist,freqs,objFunction,search.args; showtrace=showtrace)
 
         showtrace && i%showevery == 0 && printIter(booster,hist,i,k)
 

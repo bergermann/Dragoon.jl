@@ -69,6 +69,7 @@ end
 
 function move(booster::AnalyticalBooster,newpos::Array{Float64};
         Δt=0,returntrace=false,tracestep=1e-3,additive=false)
+    
     if additive
         T1 = maximum(abs.(newpos))/booster.vmotor
         T2 = sum(abs.(newpos))/booster.vmotor
