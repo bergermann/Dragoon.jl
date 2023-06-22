@@ -22,7 +22,7 @@ mutable struct AnalyticalBooster <: Booster
     summedtraveltime::Float64
 
     function AnalyticalBooster(initdist; ndisk=20,τ=1e-3,ϵ=24,vmotor=0.1e-3,maxlength=2)
-        new(dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,vmotor,maxlength,unow(),unow(),0.)
+        new(dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,vmotor,maxlength,DateTime(0),unow(),0.)
     end
 
     function AnalyticalBooster(pos,ndisk,thickness,epsilon,vmotor,maxlength,timestamp,codetimestamp,summedtraveltime)

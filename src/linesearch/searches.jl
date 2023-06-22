@@ -29,17 +29,29 @@ const SearchStandard(ϵls,kmax) = Callback(searchStandard,(ϵls,kmax))
 
 # args = (kmax,)
 function searchExtSteps(p,α,booster,hist,freqs,objFunction,args; showtrace=false)
+    updateHist!(booster,hist,freqs,objFunction)
+    
+    k0 = 0
+    obj0 = hist[1].objvalue
+    pos0 = copy(booster.pos)
+
     for k in 1:args[1]
         move(booster,α*p; additive=true)
         updateHist!(booster,hist,freqs,objFunction)
+
+        if hist[1].objvalue < obj0
+            k0 = k
+            obj0 = hist[1].objvalue
+            pos0 = copy(booster.pos)
+        end
     end
 
-    k0 = argmin((x->x.objvalue).(hist[1:(args[1]+1)]))
+    # k0 = argmin((x->x.objvalue).(hist[1:(args[1]+1)]))
 
-    move(booster,hist[k0].pos; additive=false)
+    move(booster,pos0; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
-    return args[1]-k0+1
+    return k0
 end
 
 const SearchExtendedSteps(kmax) = Callback(searchExtSteps,(kmax,))
@@ -50,17 +62,29 @@ const SearchExtendedSteps(kmax) = Callback(searchExtSteps,(kmax,))
 function searchExtDist(p,α,booster,hist,freqs,objFunction,args; showtrace=false)
     kmax = args[1]/(α*pNorm(p))
 
+    updateHist!(booster,hist,freqs,objFunction)
+    
+    k0 = 0
+    obj0 = hist[1].objvalue
+    pos0 = copy(booster.pos)
+
     for i in 1:kmax
         move(booster,α*p; additive=true)
         updateHist!(booster,hist,freqs,objFunction)
+
+        if hist[1].objvalue < obj0
+            k0 = k
+            obj0 = hist[1].objvalue
+            pos0 = copy(booster.pos)
+        end
     end
 
-    k0 = argmin((x->x.objvalue).(hist[1:(kmax+1)]))
+    # k0 = argmin((x->x.objvalue).(hist[1:(kmax+1)]))
 
-    move(booster,hist[k0].pos; additive=false)
+    move(booster,pos0; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
-    return kmax-k0+1
+    return k0
 end
 
 const SearchExtendedDist(d) = Callback(searchExtDist,(d,))
