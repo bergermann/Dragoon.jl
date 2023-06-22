@@ -17,7 +17,7 @@ const SolverSteep = Callback(solverSteepestDescent)
 
 # args = (mode,)
 function solverNewton(p::Vector{Float64},g::Vector{Float64},h::Matrix{Float64},
-        trace::LSTrace,i::Int,args::Tuple{String})
+        trace::Vector{LSTrace},i::Int,args::Tuple{String})
     
     if args[1] == "cholesky"
         try
