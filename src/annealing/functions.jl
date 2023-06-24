@@ -24,7 +24,7 @@ end
 
 function findNeighbour(booster::Booster,rmax::Float64)
     x_ = 2*rand(Float64,booster.ndisk) .- 1
-    x_ /= pNorm(x)
+    x_ /= pNorm(x_)
 
     return rmax*rand()*x_
 end
