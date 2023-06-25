@@ -310,18 +310,18 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         iter += 1
         i += 1
 
-        objx = hist[1].objvalue
-
+        # updateHist!(booster,hist,freqs,objFunction; force=true)
         move(booster,x+findNeighbour(booster,rmax); additive=false)
         updateHist!(booster,hist,freqs,objFunction; force=true)
 
         if hist[1].objvalue <= objx || rand() <= thermal(objx,hist[1].objvalue,τ[i])
             x = copy(booster.pos)
-            objsol = hist[1].objvalue
+            objx = hist[1].objvalue
         end
 
         if hist[1].objvalue <= objsol
             xsol = copy(booster.pos)
+            objsol = hist[1].objvalue
         end
 
         showtrace && i%showevery == 0 && printSAIter(booster,objx,objsol,τ[i],iter)
