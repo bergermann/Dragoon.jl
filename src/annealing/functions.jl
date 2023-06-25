@@ -12,7 +12,7 @@ mutable struct SATrace
     T::Float64
 
     function LSTrace(x,obj,xsol,objsol,τ,iter,t,T)
-        new(x,obj,τ,iter,t,T)
+        new(x,obj,xsol,objsol,τ,iter,t,T)
     end
 
     function LSTrace()
