@@ -4,6 +4,8 @@
 mutable struct SATrace
     x::Array{Float64}
     obj::Float64
+    xsol::Array{Float64}
+    objsol::Float64
     τ::Float64
     iter::Int
     t::DateTime
