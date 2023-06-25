@@ -307,7 +307,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
     iter = 1
     i = 1
     n_τ = length(τ)
-    
+
     while iter <= maxiter && i <= n_τ
         move(booster,x+findNeighbour(booster,rmax); additive=false)
         updateHist!(booster,hist,freqs,objFunction)
@@ -344,9 +344,9 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
     move(booster,xsol; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
-    if hasproperty(booster,:codetimestamp) && resettimer
-        booster.codetimestamp = unow()-t0 + booster.codetimestamp*!resettimer
-    end
+    # if hasproperty(booster,:codetimestamp) && resettimer
+    #     booster.codetimestamp = unow()-t0 + booster.codetimestamp*!resettimer
+    # end
 
     printTermination(booster,hist,i,maxiter)
 
