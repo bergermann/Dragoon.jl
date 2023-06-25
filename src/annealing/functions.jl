@@ -1,6 +1,26 @@
 
 
 
+
+
+function printSAIter(booster::Booster,obj::Float64,objsol::Float64,τ::Float64,iter::Int)
+    if hasproperty(booster,:startingtime)
+        println("Iter: ",iter,", timestamp: ",canonicalize(
+            round(booster.timestamp-booster.startingtime,Second)))
+    else
+        println("Iter: ",iter,", timestamp: ",canonicalize(
+            round(booster.timestamp-DateTime(0),Second)))
+    end
+
+    println("Iter finished. Objective value current:  ",round(obj; digits=3),"\n")
+    println("               Objective value solution: ",round(objsol; digits=3),"\n")
+    println("               Temperature:              ",round(τ; digits=3),"\n")
+end
+
+
+
+
+
 mutable struct SATrace
     x::Array{Float64}
     obj::Float64

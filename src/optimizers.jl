@@ -304,11 +304,14 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
     objx = hist[1].objvalue
 
 
-    iter = 1
-    i = 1
+    iter = 0
+    i = 0
     n_τ = length(τ)
 
-    while iter <= maxiter && i <= n_τ
+    while iter < maxiter && i < n_τ
+        iter += 1
+        i += 1
+
         move(booster,x+findNeighbour(booster,rmax); additive=false)
         updateHist!(booster,hist,freqs,objFunction)
 
@@ -321,7 +324,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
             xsol = copy(booster.pos)
         end
 
-        
+        showtrace && i%showevery == 0 && printSAIter(booster,objx,objsol,τ[i],iter)
 
         if Int(i%traceevery)==0
             trace[Int(i/traceevery)] = SATrace(x,objx,xsol,objsol,τ[i],iter,
@@ -329,27 +332,24 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         end
 
         ## unstucking, alter i
-
-        iter += 1
-        i += 1
     end
-
-
-
-
-
 
 
 
     move(booster,xsol; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
-    # if hasproperty(booster,:codetimestamp) && resettimer
-    #     booster.codetimestamp = unow()-t0 + booster.codetimestamp*!resettimer
-    # end
+
+    if hasproperty(booster,:codetimestamp)
+        if resettimer
+            booster.codetimestamp = DateTime(0)
+        end
+
+        booster.codetimestamp += unow()-t0
+    end
 
     printTermination(booster,hist,i,maxiter)
 
-    # return trace[1:Int(i/traceevery)+1]
-    return trace
+    return trace[1:Int(iter/traceevery)+1]
+    # return trace
 end
