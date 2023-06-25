@@ -307,6 +307,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
     iter = 1
     i = 1
     n_τ = length(τ)
+    
     while iter <= maxiter && i <= n_τ
         move(booster,x+findNeighbour(booster,rmax); additive=false)
         updateHist!(booster,hist,freqs,objFunction)
@@ -323,7 +324,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         
 
         if Int(i%traceevery)==0
-            trace[Int(i/traceevery)] = LSTrace(x,objx,xsol,objsol,τ[i],iter,
+            trace[Int(i/traceevery)] = SATrace(x,objx,xsol,objsol,τ[i],iter,
                                     booster.timestamp,booster.summedtraveltime)
         end
 
