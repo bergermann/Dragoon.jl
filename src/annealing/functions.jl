@@ -11,7 +11,7 @@ mutable struct SATrace
     t::DateTime
     T::Float64
 
-    function LSTrace(x,obj,τ,iter,t,T)
+    function LSTrace(x,obj,xsol,objsol,,τ,iter,t,T)
         new(x,obj,τ,iter,t,T)
     end
 
