@@ -320,7 +320,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
             xsol = copy(booster.pos)
         end
 
-        trace[iter] = SATrace(x,obj,τ[i],iter,booster.timestamp,booster.summedtraveltime)
+        trace[iter] = SATrace(x,objsol,τ[i],iter,booster.timestamp,booster.summedtraveltime)
 
         ## unstucking, alter i
 
