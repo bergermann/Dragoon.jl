@@ -350,5 +350,6 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
 
     printTermination(booster,hist,i,maxiter)
 
-    return trace[1:Int(i/traceevery)+1]
+    # return trace[1:Int(i/traceevery)+1]
+    return trace
 end
