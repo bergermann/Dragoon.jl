@@ -12,8 +12,8 @@ function printSAIter(booster::Booster,obj::Float64,objsol::Float64,τ::Float64,i
             round(booster.timestamp-DateTime(0),Second)))
     end
 
-    println("Iter finished. Objective value current:  ",round(obj; digits=3),"\n")
-    println("               Objective value solution: ",round(objsol; digits=3),"\n")
+    println("Iter finished. Objective value current:  ",round(obj; digits=3))
+    println("               Objective value solution: ",round(objsol; digits=3))
     println("               Temperature:              ",round(τ; digits=3),"\n")
 end
 

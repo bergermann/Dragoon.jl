@@ -301,8 +301,6 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
     objsol = hist[1].objvalue
 
     x = copy(booster.pos)
-    objx = hist[1].objvalue
-
 
     iter = 0
     i = 0
@@ -312,8 +310,10 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         iter += 1
         i += 1
 
+        objx = hist[1].objvalue
+
         move(booster,x+findNeighbour(booster,rmax); additive=false)
-        updateHist!(booster,hist,freqs,objFunction)
+        updateHist!(booster,hist,freqs,objFunction; force=true)
 
         if hist[1].objvalue <= objx || rand() <= thermal(objx,hist[1].objvalue,τ[i])
             x = copy(booster.pos)
@@ -339,7 +339,6 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
     move(booster,xsol; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
-
     if hasproperty(booster,:codetimestamp)
         if resettimer
             booster.codetimestamp = DateTime(0)
@@ -350,6 +349,6 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
 
     printTermination(booster,hist,i,maxiter)
 
-    return trace[1:Int(iter/traceevery)+1]
+    return trace[1:max(round(Int,iter/traceevery)+1,length(trace))]
     # return trace
 end
