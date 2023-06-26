@@ -293,7 +293,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         t0 = unow()
     end
 
-    trace = Vector{SATrace}(undef,maxiter+1)
+    trace = Vector{SATrace}(undef,round(Int,maxiter/traceevery)+1)
 
     updateHist!(booster,hist,freqs,objFunction)
     
