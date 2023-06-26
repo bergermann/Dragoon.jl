@@ -327,8 +327,8 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
 
         showtrace && i%showevery == 0 && printSAIter(booster,objx,objsol,τ[i],iter)
 
-        if Int(i%traceevery)==0
-            trace[Int(i/traceevery)] = SATrace(x,objx,xsol,objsol,τ[i],iter,
+        if Int(iter%traceevery)==0
+            trace[Int(iter/traceevery)] = SATrace(x,objx,xsol,objsol,τ[i],iter,
                                     booster.timestamp,booster.summedtraveltime)
         end
 
@@ -350,6 +350,6 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
 
     printTermination(booster,hist,i,maxiter)
 
-    return trace[1:max(round(Int,iter/traceevery)+1,length(trace))]
+    return trace[1:min(round(Int,iter/traceevery)+1,length(trace))]
     # return trace
 end
