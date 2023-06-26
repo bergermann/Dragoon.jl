@@ -309,10 +309,10 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
 
     while iter < maxiter && i < n_τ
         if Int(iter%traceevery)==0
-            trace[Int(iter/traceevery)] = SATrace(x,objx,xsol,objsol,τ[i],iter,
+            trace[Int(iter/traceevery)+1] = SATrace(x,objx,xsol,objsol,τ[i],iter,
                                     booster.timestamp,booster.summedtraveltime)
         end
-        
+
         iter += 1
         i += 1
 
