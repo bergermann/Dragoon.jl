@@ -25,5 +25,5 @@ function getObjRef1d(booster::Booster,freqs::Array{Float64},args::Tuple{Array{Co
 end
 
 const ObjRefLin(ref0) = Callback(getObjRef1d,(ref0,))
-const ObjRefSquare = Callback(getObjRef1d,(ref0,x->x^2))
-const ObjRefExp = Callback(getObjRef1d,(ref0,exp))
+const ObjRefSquare(ref0) = Callback(getObjRef1d,(ref0,x->x^2))
+const ObjRefExp(ref0) = Callback(getObjRef1d,(ref0,exp))
