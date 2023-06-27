@@ -1,6 +1,6 @@
 ###     convenient convenience functions for convenience
 
-export init, boost1d, findpeak, genFreqs, pos2dist, dist2pos, pNorm,
+export init, boost1d, ref1, findpeak, genFreqs, pos2dist, dist2pos, pNorm,
         copy, getBoost1d
 
 init = [1.00334, 6.94754, 7.1766, 7.22788, 7.19717,

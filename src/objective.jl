@@ -1,7 +1,7 @@
 ###     how to calculate boost and objective functions
 
 export getObjAna1d
-export ObjAnalytical
+export ObjAnalytical, ObjRef1dLin, ObjRef1dSquare, ObjRef1dExp
 
 function getObjAna1d(booster::Booster,freqs::Array{Float64},args::Tuple{})
     return -minimum(boost1d(pos2dist(booster.pos; thickness=booster.thickness),
@@ -24,6 +24,6 @@ function getObjRef1d(booster::Booster,freqs::Array{Float64},args::Tuple{Array{Co
         freqs; eps=booster.epsilon,thickness=booster.thickness)-args[1]))))
 end
 
-const ObjRefLin(ref0) = Callback(getObjRef1d,(ref0,))
-const ObjRefSquare(ref0) = Callback(getObjRef1d,(ref0,x->x^2))
-const ObjRefExp(ref0) = Callback(getObjRef1d,(ref0,exp))
+const ObjRef1dLin(ref0) = Callback(getObjRef1d,(ref0,))
+const ObjRef1dSquare(ref0) = Callback(getObjRef1d,(ref0,x->x^2))
+const ObjRef1dExp(ref0) = Callback(getObjRef1d,(ref0,exp))
