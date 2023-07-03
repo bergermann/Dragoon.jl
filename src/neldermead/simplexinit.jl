@@ -1,7 +1,7 @@
 ###     constructors of the initial simplex
 
-export initSimplexCoord, initSimplexCoord!, initSimplexAffine
-export InitSimplexCoord
+export initSimplexCoord, initSimplexAffine
+export InitSimplexCoord, InitSimplexAffine
 
 # args = (d,)
 function initSimplexCoord(x0::Array{Float64},args::Tuple{Float64})
@@ -18,10 +18,16 @@ const InitSimplexCoord(d) = Callback(initSimplexCoord,(d,))
 
 
 
-# args = (p::Matrix{Float64},a::Float64,b::Float64,)
+# args = (a::Float64,b::Float64,)
 function initSimplexAffine(x0::Array{Float64},args::Tuple{})
     x = repeat(x0,1,length(x0)+1)
-    x[:,:]
+    
+    for i in eachindex(x0)
+        x[i,i+1] *= b
+        x[i,i+1] += a
+    end
 
     return x
 end
+
+const InitSimplexAffine(a,b) = Callback(initSimplexCoord,(a,b))
