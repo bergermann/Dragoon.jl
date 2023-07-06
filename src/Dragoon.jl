@@ -13,7 +13,7 @@ import DateFormats: /ₜ, *ₜ
 include("types.jl")
 include("functions.jl")
 include("optimizers.jl")
-include("objective.jl")
+include("objectivefunctions.jl")
 include("unstuckinators.jl")
 
 include("Analytical1D.jl")
