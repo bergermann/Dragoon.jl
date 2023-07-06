@@ -27,6 +27,6 @@ function getObjRef1d(booster::Booster,freqs::Vector{Float64},args::Tuple{Vector{
         freqs; eps=booster.epsilon,thickness=booster.thickness)-args[1])))
 end
 
-const ObjRef(ref0,Function) = Callback(getObjRef1d,(ref0,Function))
+const ObjRef(ref0,f) = Callback(getObjRef1d,(ref0,f))
 const ObjRefSquare(ref0) = Callback(getObjRef1d,(ref0,x->x^2))
 const ObjRefExp(ref0) = Callback(getObjRef1d,(ref0,exp))
