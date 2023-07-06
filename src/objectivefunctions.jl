@@ -2,7 +2,7 @@
 
 export getObjAna1d, getObjRef1d
 export ObjAnalytical
-export ObjRef, ObjRefLin, ObjRefSquare, ObjRefSquare, ObjRefSquare
+export ObjRef, ObjRefLin, ObjRefSquare, ObjRefSquare, ObjRefExp
 
 function getObjAna1d(booster::Booster,freqs::Vector{Float64},args::Tuple{})
     return -minimum(boost1d(pos2dist(booster.pos; thickness=booster.thickness),
