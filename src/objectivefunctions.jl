@@ -12,7 +12,7 @@ end
 const ObjAnalytical = Callback(getObjAna1d)
 
 # args = (ref_goal,)
-function getObjRef1d(booster::Booster,freqs::Vector{Float64},args::Tuple{Vector{Float64}})
+function getObjRef1d(booster::Booster,freqs::Vector{Float64},args::Tuple{Vector{ComplexF64}})
     return sum(abs.(ref1d(pos2dist(booster.pos; thickness=booster.thickness),
         freqs; eps=booster.epsilon,thickness=booster.thickness)-args[1]))
 end
@@ -20,7 +20,7 @@ end
 const ObjRefLin(ref0) = Callback(getObjRef1d,(ref0,))
 
 # args = (ref_goal,scaling)
-function getObjRef1d(booster::Booster,freqs::Vector{Float64},args::Tuple{Vector{Float64},Function})
+function getObjRef1d(booster::Booster,freqs::Vector{Float64},args::Tuple{Vector{ComplexF64},Function})
     scaling = args[2]
 
     return sum(scaling.(abs.(ref1d(pos2dist(booster.pos; thickness=booster.thickness),
