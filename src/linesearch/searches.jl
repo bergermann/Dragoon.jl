@@ -47,8 +47,6 @@ function searchExtSteps(p,α,booster,hist,freqs,objFunction,args; showtrace=fals
         end
     end
 
-    # k0 = argmin((x->x.objvalue).(hist[1:(args[1]+1)]))
-
     move(booster,pos0; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
