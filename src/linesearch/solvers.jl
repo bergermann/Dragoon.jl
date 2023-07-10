@@ -23,15 +23,15 @@ function solverNewton(p::Vector{Float64},g::Vector{Float64},h::Matrix{Float64},
         try
             C = cholesky(h)
 
-            p[:] = inv(C.U)*inv(C.L)*g
+            p[:] = -inv(C.U)*inv(C.L)*g
         catch e
             println("Hessian not Cholesky decomposable: ", e)
             println("Falling back to standard inversion.")
             
-            p[:] = inv(h)*g
+            p[:] = -inv(h)*g
         end
     else
-        p[:] = inv(h)*g
+        p[:] = -inv(h)*g
     end
 end
 

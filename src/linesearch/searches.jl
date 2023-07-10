@@ -12,11 +12,12 @@ function searchStandard(p,α,booster,hist,freqs,objFunction,args; showtrace=fals
         updateHist!(booster,hist,freqs,objFunction)
 
         if hist[1].objvalue - hist[2].objvalue > -args[1]
-            move(booster,-α*p; additive=true)
+            move(booster,α*p; additive=true)
             updateHist!(booster,hist,freqs,objFunction)
 
             break
         end
+        
         k += 1
     end
 
@@ -45,8 +46,6 @@ function searchExtSteps(p,α,booster,hist,freqs,objFunction,args; showtrace=fals
             pos0 = copy(booster.pos)
         end
     end
-
-    # k0 = argmin((x->x.objvalue).(hist[1:(args[1]+1)]))
 
     move(booster,pos0; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
