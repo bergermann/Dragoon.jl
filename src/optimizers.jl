@@ -49,7 +49,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
         solver.func(p,g,h,trace,i,solver.args)
 
-        showtrace && println("Gradient norm: ",round(pNorm(g),sigdigits=3))
+        showtrace && i%showevery == 0 && println("Gradient norm: ",round(pNorm(g),sigdigits=3))
 
         #early stopping if descend is too slow
         pNorm(g) <= ϵgrad && (println("Gradient threshold reached.
