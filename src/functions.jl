@@ -116,7 +116,7 @@ end
 
 function printTimes(booster::Booster)
     if hasproperty(booster,:startingtime)
-        println("Elapsed movement time:  ",canonicalize(round(booster.timestamp-booster.startime,Second)))
+        println("Elapsed movement time:  ",canonicalize(round(booster.timestamp-booster.startingtime,Second)))
     else
         println("Elapsed movement time:  ",canonicalize(round(booster.timestamp-DateTime(0),Second)))
     end
