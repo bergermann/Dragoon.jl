@@ -21,9 +21,11 @@ function findpeak(f0,n; eps=24.,thickness=1e-3,gran=1000,dev=0.1)
     λ = 299792458.0/f0
     B = zeros(gran)
     D = range(1-dev; stop=1+dev,length=gran)*λ/2
+
     for i in eachindex(D)
         B[i] = boost1d(ones(n)*D[i],[f0]; eps=eps,thickness=thickness)[1]
     end
+
     return D[findmax(B)[2]]
 end
 
@@ -39,6 +41,7 @@ function pos2dist(pos::Array{Float64}; thickness=1e-3)
     pos = [0; pos]
     d = (pos[2:end]-pos[1:end-1])
     d[2:end] .-= thickness
+    
     return d
 end
 
