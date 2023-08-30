@@ -18,6 +18,8 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     resettimer::Bool=true)
 
     if hasproperty(booster,:startingtime) && resettimer
+        println("Resetting starting time.")
+
         booster.startingtime = unow()
     elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
@@ -117,7 +119,10 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
     
 
+
     if hasproperty(booster,:startingtime) && resettimer
+        println("Resetting starting time.")
+        
         booster.startingtime = unow()
     elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
@@ -157,7 +162,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
             updateHist!(booster,hist,freqs,objFunction)
 
             trace[i].x_ = x_
-            trace[i].obj = hist[1].objvalue
+            trace[i].obj_ = hist[1].objvalue
         end
 
         #reflection point, reflection
@@ -252,7 +257,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         updateHist!(booster,hist,freqs,objFunction)
 
         trace[end].x_ = x_
-        trace[end].obj = hist[1].objvalue
+        trace[end].obj_ = hist[1].objvalue
     end
 
     #move to optimal point
