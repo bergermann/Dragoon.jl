@@ -18,7 +18,10 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     resettimer::Bool=true)
 
     if hasproperty(booster,:startingtime) && resettimer
+        println("Resetting starting time.")
+        
         booster.startingtime = unow()
+        booster.timestamp = unow()
     elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
 
@@ -111,14 +114,16 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     showtrace::Bool=false,
                     showevery::Integer=1,
                     unstuckisiter::Bool=true,
+                    forcesimplexobj::Bool=false,
                     tracecentroid::Bool=false,
                     traceevery::Int=1,
                     resettimer::Bool=true)
 
-    
-
     if hasproperty(booster,:startingtime) && resettimer
+        println("Resetting starting time.")
+        
         booster.startingtime = unow()
+        booster.timestamp = unow()
     elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
 
@@ -130,10 +135,10 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     trace = Vector{NMTrace}(undef,floor(Int,maxiter/traceevery)+1)
 
     # x = zeros(booster.ndisk,booster.ndisk+1)
-    f = zeros(booster.ndisk+1)
+    # f = zeros(booster.ndisk+1)
 
     x = initSimplex.func(booster.pos,initSimplex.args)
-    f = simplexObj.func(x,Vector(1:booster.ndisk+1),booster,hist,freqs,
+    f = simplexObj.func(x,collect(1:booster.ndisk+1),booster,hist,freqs,
                                             objFunction,simplexObj.args)
 
     i = 0
@@ -142,8 +147,8 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
         #sort
         sp = sortperm(f; rev=false)
-        x = x[:,sp]
-        f = f[sp]
+        x[:,:] = x[:,sp]
+        f[:] = f[sp]
 
         if Int(i%traceevery)==0
             trace[Int(i/traceevery)] = NMTrace(x,f,zeros(booster.ndisk),0.,
@@ -157,13 +162,14 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
             updateHist!(booster,hist,freqs,objFunction)
 
             trace[i].x_ = x_
-            trace[i].obj = hist[1].objvalue
+            trace[i].obj_ = hist[1].objvalue
         end
 
         #reflection point, reflection
         xr = x_+α*(x_-x[:,end])
         move(booster,xr; additive=false)
         updateHist!(booster,hist,freqs,objFunction)
+
         fr = hist[1].objvalue
 
         if f[1] <= fr < f[end-1]
@@ -207,6 +213,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                         v = x[:,1]+δ*(x[:,j]-x[:,1])
                         x[:,j] = v
                     end
+
                     f[2:end] = simplexObj.func(x,Vector(2:booster.ndisk+1),
                                 booster,hist,freqs,objFunction,simplexObj.args)
                 end
@@ -226,6 +233,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                         v = x[:,1]+δ*(x[:,j]-x[:,1])
                         x[:,j] = v
                     end
+
                     f[2:end] = simplexObj.func(x,collect(2:booster.ndisk+1),
                                 booster,hist,freqs,objFunction,simplexObj.args)
                 end
@@ -235,12 +243,17 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         showtrace && i%showevery==0 && printNMIter(booster,f,i)
 
         #iteration end
+
+        if forcesimplexobj
+            f[:] = simplexObj.func(x,collect(1:booster.ndisk+1),booster,hist,freqs,
+                objFunction,simplexObj.args)
+        end
     end
 
     #sort and trace the end result
     sp = sortperm(f; rev=false)
-    x = x[:,sp]
-    f = f[sp]
+    x[:,:] = x[:,sp]
+    f[:] = f[sp]
 
     trace[end] = NMTrace(x,f,zeros(booster.ndisk),0.,booster.timestamp,
                                                 booster.summedtraveltime)
@@ -252,7 +265,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         updateHist!(booster,hist,freqs,objFunction)
 
         trace[end].x_ = x_
-        trace[end].obj = hist[1].objvalue
+        trace[end].obj_ = hist[1].objvalue
     end
 
     #move to optimal point
@@ -288,9 +301,16 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         resettimer::Bool=true)
 
     if hasproperty(booster,:startingtime) && resettimer
+        println("Resetting starting time.")
+        
         booster.startingtime = unow()
+        booster.timestamp = unow()
     elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
+
+        if resettimer
+            booster.timestamp = DateTime(0)
+        end
     end
 
     trace = Vector{SATrace}(undef,round(Int,maxiter/traceevery)+1)
