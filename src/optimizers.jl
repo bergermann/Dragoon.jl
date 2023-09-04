@@ -135,10 +135,10 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     trace = Vector{NMTrace}(undef,floor(Int,maxiter/traceevery)+1)
 
     # x = zeros(booster.ndisk,booster.ndisk+1)
-    f = zeros(booster.ndisk+1)
+    # f = zeros(booster.ndisk+1)
 
     x = initSimplex.func(booster.pos,initSimplex.args)
-    f = simplexObj.func(x,Vector(1:booster.ndisk+1),booster,hist,freqs,
+    f = simplexObj.func(x,collect(1:booster.ndisk+1),booster,hist,freqs,
                                             objFunction,simplexObj.args)
 
     i = 0
@@ -147,8 +147,8 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
         #sort
         sp = sortperm(f; rev=false)
-        x = x[:,sp]
-        f = f[sp]
+        x[:,:] = x[:,sp]
+        f[:] = f[sp]
 
         if Int(i%traceevery)==0
             trace[Int(i/traceevery)] = NMTrace(x,f,zeros(booster.ndisk),0.,
@@ -169,6 +169,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         xr = x_+α*(x_-x[:,end])
         move(booster,xr; additive=false)
         updateHist!(booster,hist,freqs,objFunction)
+
         fr = hist[1].objvalue
 
         if f[1] <= fr < f[end-1]
@@ -212,6 +213,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                         v = x[:,1]+δ*(x[:,j]-x[:,1])
                         x[:,j] = v
                     end
+
                     f[2:end] = simplexObj.func(x,Vector(2:booster.ndisk+1),
                                 booster,hist,freqs,objFunction,simplexObj.args)
                 end
@@ -243,15 +245,15 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         #iteration end
 
         if forcesimplexobj
-            f = simplexObj.func(x,Vector(1:booster.ndisk+1),booster,hist,freqs,
+            f = simplexObj.func(x,collect(1:booster.ndisk+1),booster,hist,freqs,
                 objFunction,simplexObj.args)
         end
     end
 
     #sort and trace the end result
     sp = sortperm(f; rev=false)
-    x = x[:,sp]
-    f = f[sp]
+    x[:,:] = x[:,sp]
+    f[:] = f[sp]
 
     trace[end] = NMTrace(x,f,zeros(booster.ndisk),0.,booster.timestamp,
                                                 booster.summedtraveltime)
