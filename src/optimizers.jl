@@ -19,8 +19,9 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
     if hasproperty(booster,:startingtime) && resettimer
         println("Resetting starting time.")
-
+        
         booster.startingtime = unow()
+        booster.timestamp = unow()
     elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
 
@@ -113,17 +114,16 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     showtrace::Bool=false,
                     showevery::Integer=1,
                     unstuckisiter::Bool=true,
+                    forcesimplexobj::Bool=false,
                     tracecentroid::Bool=false,
                     traceevery::Int=1,
                     resettimer::Bool=true)
-
-    
-
 
     if hasproperty(booster,:startingtime) && resettimer
         println("Resetting starting time.")
         
         booster.startingtime = unow()
+        booster.timestamp = unow()
     elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
 
@@ -231,6 +231,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                         v = x[:,1]+δ*(x[:,j]-x[:,1])
                         x[:,j] = v
                     end
+
                     f[2:end] = simplexObj.func(x,collect(2:booster.ndisk+1),
                                 booster,hist,freqs,objFunction,simplexObj.args)
                 end
@@ -240,6 +241,11 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         showtrace && i%showevery==0 && printNMIter(booster,f,i)
 
         #iteration end
+
+        if forcesimplexobj
+            f = simplexObj.func(x,Vector(1:booster.ndisk+1),booster,hist,freqs,
+                objFunction,simplexObj.args)
+        end
     end
 
     #sort and trace the end result
@@ -293,9 +299,16 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         resettimer::Bool=true)
 
     if hasproperty(booster,:startingtime) && resettimer
+        println("Resetting starting time.")
+        
         booster.startingtime = unow()
+        booster.timestamp = unow()
     elseif hasproperty(booster,:codetimestamp)
         t0 = unow()
+
+        if resettimer
+            booster.timestamp = DateTime(0)
+        end
     end
 
     trace = Vector{SATrace}(undef,round(Int,maxiter/traceevery)+1)
