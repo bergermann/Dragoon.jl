@@ -245,7 +245,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         #iteration end
 
         if forcesimplexobj
-            f = simplexObj.func(x,collect(1:booster.ndisk+1),booster,hist,freqs,
+            f[:] = simplexObj.func(x,collect(1:booster.ndisk+1),booster,hist,freqs,
                 objFunction,simplexObj.args)
         end
     end
