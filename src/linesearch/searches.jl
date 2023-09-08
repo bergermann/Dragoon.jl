@@ -5,6 +5,8 @@ export SearchStandard, SearchExtendedSteps, SearchExtendedDist, SearchTrueNewton
 
 # args = (ϵls,kmax)
 function searchStandard(p,α,booster,hist,freqs,objFunction,args; showtrace=false)
+    updateHist!(booster,hist,freqs,objFunction)
+    
     k = 0
 
     while k < args[2]
