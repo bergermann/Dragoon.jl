@@ -1,6 +1,6 @@
 ###     convenient convenience functions for convenience
 
-export init, boost1d, ref1, findpeak, genFreqs, pos2dist, dist2pos, pNorm,
+export init, boost1d, ref1d, findpeak, genFreqs, pos2dist, dist2pos, pNorm,
         copy, getBoost1d, getRef1d
 
 init = [1.00334, 6.94754, 7.1766, 7.22788, 7.19717,
@@ -8,14 +8,13 @@ init = [1.00334, 6.94754, 7.1766, 7.22788, 7.19717,
         7.21708, 7.18317, 7.13025, 7.2198, 7.45585,
         7.39873, 7.15403, 7.14252, 6.83105, 7.42282]*1e-3
 
-boost1d(spacs::Vector{Float64},f::Vector{Float64};eps::Real=24.,thickness::Real=1e-3) = 
+boost1d(spacs::Vector{Float64},f::Vector{Float64};eps::Real=24.,thickness::Real=1e-3,tand::Real=0.) = 
     abs2.(disk_system(f;
-        spacings=[spacs;0],disk_thickness=thickness,disk_epsilon=eps,
+        tand=tand,spacings=[spacs;0],disk_thickness=thickness,disk_epsilon=eps,
         num_disk=length(spacs))[2])
 
-ref1d(spacs::Vector{Float64},f::Vector{Float64};eps::Real=24.,thickness::Real=1e-3) = 
-    disk_system(f; spacings=[spacs;0],disk_thickness=thickness,disk_epsilon=eps,
-        num_disk=length(spacs))[1]
+ref1d(spacs::Vector{Float64},f::Vector{Float64}; eps::Real=24.,thickness::Real=1e-3,tand::Real=0.) = 
+    disk_system(f; tand=tand,spacings=[spacs;0],disk_thickness=thickness,disk_epsilon=eps,num_disk=length(spacs))[1]
 
 function findpeak(f0,n; eps=24.,thickness=1e-3,gran=1000,dev=0.1)
     λ = 299792458.0/f0
