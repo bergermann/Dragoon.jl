@@ -48,7 +48,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         # display(g); display(h)
 
         trace[i] = LSTrace(booster.pos,hist[1].objvalue,copy(g),copy(h),
-                                    booster.timestamp,booster.summedtraveltime)
+                                    booster.timestamp,booster.summeddistance)
 
         solver.func(p,g,h,trace,i,solver.args)
 
@@ -95,7 +95,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     printTermination(booster,hist,i,maxiter)
 
     trace[i+1] = LSTrace(booster.pos,hist[1].objvalue,g,h,
-                                booster.timestamp,booster.summedtraveltime)
+                                booster.timestamp,booster.summeddistance)
 
     return trace[1:i+1]
 end
@@ -152,7 +152,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
         if Int(i%traceevery)==0
             trace[Int(i/traceevery)] = NMTrace(x,f,zeros(booster.ndisk),0.,
-                                    booster.timestamp,booster.summedtraveltime)
+                                    booster.timestamp,booster.summeddistance)
         end
 
         #centroid
@@ -256,7 +256,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     f[:] = f[sp]
 
     trace[end] = NMTrace(x,f,zeros(booster.ndisk),0.,booster.timestamp,
-                                                booster.summedtraveltime)
+                                                booster.summeddistance)
 
     x_ = reshape(sum(x[:,1:end-1]; dims=2),:)/booster.ndisk
 
@@ -330,7 +330,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
     while iter < maxiter && i < n_τ
         if Int(iter%traceevery)==0
             trace[Int(iter/traceevery)+1] = SATrace(x,objx,xsol,objsol,τ[i+1],iter,
-                                    booster.timestamp,booster.summedtraveltime)
+                                    booster.timestamp,booster.summeddistance)
         end
 
         iter += 1

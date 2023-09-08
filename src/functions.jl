@@ -47,6 +47,8 @@ function move(booster::AnalyticalBooster,newpos::Vector{Tuple{Int64,Float64}};
     
     T = zeros(length(newpos))
 
+    booster.summeddistance += sum(abs.(booster.pos-newpos))
+
     if additive
         for i in 1:length(newpos)
             T[i] = abs(newpos[i][2])/booster.vmotor
@@ -60,7 +62,6 @@ function move(booster::AnalyticalBooster,newpos::Vector{Tuple{Int64,Float64}};
     end
 
     booster.timestamp += (Δt + maximum(T)) *ₜ Second
-    booster.summedtraveltime += sum(T)
 
     if returntrace
         return 0
@@ -69,6 +70,8 @@ end
 
 function move(booster::AnalyticalBooster,newpos::Array{Float64};
         Δt=0,returntrace=false,tracestep=1e-3,additive=false)
+
+    booster.summeddistance += sum(abs.(booster.pos-newpos))
     
     if additive
         T1 = maximum(abs.(newpos))/booster.vmotor
@@ -91,7 +94,6 @@ function move(booster::AnalyticalBooster,newpos::Array{Float64};
     end
 
     booster.timestamp += (Δt + T1) *ₜ Second
-    booster.summedtraveltime += T2
 
     if returntrace
         return trace
@@ -121,7 +123,7 @@ function printTimes(booster::Booster)
         println("Elapsed movement time:  ",canonicalize(round(booster.timestamp-DateTime(0),Second)))
     end
 
-    println("Summed movement time:   ",canonicalize(round(booster.summedtraveltime*ₜSecond,Second)))
+    println("Summed distance:   ",canonicalize(round(booster.summeddistance*ₜSecond,Second)))
 
     if hasproperty(booster,:codetimestamp)
         println("Elapsed computing time: ",canonicalize(booster.codetimestamp-DateTime(0)))
