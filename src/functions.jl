@@ -123,7 +123,7 @@ function printTimes(booster::Booster)
         println("Elapsed movement time:  ",canonicalize(round(booster.timestamp-DateTime(0),Second)))
     end
 
-    println("Summed distance:   ",canonicalize(round(booster.summeddistance*ₜSecond,Second)))
+    println("Summed distance:   ",round(booster.summeddistance; digits=3))
 
     if hasproperty(booster,:codetimestamp)
         println("Elapsed computing time: ",canonicalize(booster.codetimestamp-DateTime(0)))

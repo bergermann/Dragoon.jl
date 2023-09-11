@@ -15,9 +15,7 @@ const UnstuckDont = Callback(unstuckDont)
 # threshold is not reached
 # args = (d,threshold)
 function unstuckRandom(booster,hist,freqs,objFunction,args; showtrace=false)
-    threshold = abs(args[2])
-
-    if hist[1].objvalue > threshold
+    if hist[1].objvalue > arg[2]
         move(booster,args[1]*(2*rand(booster.ndisk).-1); additive=true)
         updateHist!(booster,hist,freqs,objFunction)
 
