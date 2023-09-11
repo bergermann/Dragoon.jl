@@ -294,6 +294,8 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         objFunction::Callback,
         unstuckinator::Callback;
         maxiter::Integer=Int(1e2),
+        nreset::Int64,
+        nresetterm::Int64,
         showtrace::Bool=false,
         showevery::Integer=1,
         unstuckisiter::Bool=true,
@@ -326,6 +328,8 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
     iter = 0
     i = 0
     n_τ = length(τ)
+    resetcounter = 0
+    resetcounterterm = 0
 
     while iter < maxiter && i < n_τ
         if Int(iter%traceevery)==0
@@ -348,7 +352,25 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         if hist[1].objvalue <= objsol
             xsol = copy(booster.pos)
             objsol = hist[1].objvalue
+
+            resetcounter = 0
+            resetcounterterm = 0
+        else
+            resetcounter += 1
         end
+
+        if nreset > 0 && resetcounter >= nreset
+            println("Resetting to best solution.")
+            resetcounter = 0
+            resetcounterterm += 1
+
+            if nresetterm > 0 && resetcounterterm >= nresetterm
+                println("$nresetterm times resetted. Terminating.")
+
+                break
+            end
+        end
+    
 
         showtrace && i%showevery == 0 && printSAIter(booster,objx,objsol,τ[i],iter)
 
