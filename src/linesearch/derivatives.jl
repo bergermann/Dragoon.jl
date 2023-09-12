@@ -27,7 +27,7 @@ function firstDerivative(g,h,booster,hist,freqs,objFunction,args)
         for i in 1:booster.ndisk
             updateHist!(booster,hist,freqs,objFunction; force=true)
 
-            g[i] = (hist[1].objvalue-hist[i+1].objvalue)
+            g[i] = (hist[1].objvalue-hist[i+1].objvalue)/(args[1])
 
             if i != booster.ndisk
                 move(booster,[(i,-args[1]),(i+1,args[1])])

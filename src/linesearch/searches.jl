@@ -13,8 +13,8 @@ function searchStandard(p,α,booster,hist,freqs,objFunction,args; showtrace=fals
         move(booster,α*p; additive=true)
         updateHist!(booster,hist,freqs,objFunction)
 
-        if hist[1].objvalue - hist[2].objvalue > -args[1]
-            move(booster,α*p; additive=true)
+        if hist[1].objvalue  > hist[2].objvalue-args[1]
+            move(booster,-α*p; additive=true)
             updateHist!(booster,hist,freqs,objFunction)
 
             break
