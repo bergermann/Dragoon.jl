@@ -48,7 +48,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         # display(g); display(h)
 
         trace[i] = LSTrace(booster.pos,hist[1].objvalue,copy(g),copy(h),
-                                    booster.timestamp,booster.summedtraveltime)
+                                    booster.timestamp,booster.summeddistance)
 
         solver.func(p,g,h,trace,i,solver.args)
 
@@ -95,7 +95,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     printTermination(booster,hist,i,maxiter)
 
     trace[i+1] = LSTrace(booster.pos,hist[1].objvalue,g,h,
-                                booster.timestamp,booster.summedtraveltime)
+                                booster.timestamp,booster.summeddistance)
 
     return trace[1:i+1]
 end
@@ -152,7 +152,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
 
         if Int(i%traceevery)==0
             trace[Int(i/traceevery)] = NMTrace(x,f,zeros(booster.ndisk),0.,
-                                    booster.timestamp,booster.summedtraveltime)
+                                    booster.timestamp,booster.summeddistance)
         end
 
         #centroid
@@ -256,7 +256,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     f[:] = f[sp]
 
     trace[end] = NMTrace(x,f,zeros(booster.ndisk),0.,booster.timestamp,
-                                                booster.summedtraveltime)
+                                                booster.summeddistance)
 
     x_ = reshape(sum(x[:,1:end-1]; dims=2),:)/booster.ndisk
 
@@ -294,6 +294,8 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         objFunction::Callback,
         unstuckinator::Callback;
         maxiter::Integer=Int(1e2),
+        nreset::Int64,
+        nresetterm::Int64,
         showtrace::Bool=false,
         showevery::Integer=1,
         unstuckisiter::Bool=true,
@@ -326,11 +328,13 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
     iter = 0
     i = 0
     n_τ = length(τ)
+    resetcounter = 0
+    resetcounterterm = 0
 
     while iter < maxiter && i < n_τ
         if Int(iter%traceevery)==0
             trace[Int(iter/traceevery)+1] = SATrace(x,objx,xsol,objsol,τ[i+1],iter,
-                                    booster.timestamp,booster.summedtraveltime)
+                                    booster.timestamp,booster.summeddistance)
         end
 
         iter += 1
@@ -348,7 +352,25 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         if hist[1].objvalue <= objsol
             xsol = copy(booster.pos)
             objsol = hist[1].objvalue
+
+            resetcounter = 0
+            resetcounterterm = 0
+        else
+            resetcounter += 1
         end
+
+        if nreset > 0 && resetcounter >= nreset
+            println("Resetting to best solution.")
+            resetcounter = 0
+            resetcounterterm += 1
+
+            if nresetterm > 0 && resetcounterterm >= nresetterm
+                println("$nresetterm times resetted. Terminating.")
+
+                break
+            end
+        end
+    
 
         showtrace && i%showevery == 0 && printSAIter(booster,objx,objsol,τ[i],iter)
 

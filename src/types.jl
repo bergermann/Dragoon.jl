@@ -15,18 +15,19 @@ mutable struct AnalyticalBooster <: Booster
     ndisk::Int
     thickness::Real
     epsilon::Float64
+    tand::Number
     vmotor::Real
     maxlength::Real
     timestamp::DateTime
     codetimestamp::DateTime
-    summedtraveltime::Float64
+    summeddistance::Float64
 
-    function AnalyticalBooster(initdist; ndisk=20,τ=1e-3,ϵ=24,vmotor=0.1e-3,maxlength=2)
-        new(dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,vmotor,maxlength,DateTime(0),unow(),0.)
+    function AnalyticalBooster(initdist; ndisk=20,τ=1e-3,ϵ=24,tand=0,vmotor=0.1e-3,maxlength=2)
+        new(dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,tand,vmotor,maxlength,DateTime(0),unow(),0.)
     end
 
-    function AnalyticalBooster(pos,ndisk,thickness,epsilon,vmotor,maxlength,timestamp,codetimestamp,summedtraveltime)
-        new(pos,ndisk,thickness,epsilon,vmotor,maxlength,timestamp,codetimestamp,summedtraveltime)
+    function AnalyticalBooster(pos,ndisk,thickness,epsilon,tand,vmotor,maxlength,timestamp,codetimestamp,summeddistance)
+        new(pos,ndisk,thickness,epsilon,tand,vmotor,maxlength,timestamp,codetimestamp,summeddistance)
     end
 end
 
@@ -40,7 +41,7 @@ mutable struct PhysicalBooster <: Booster
     maxlength::Real
     timestamp::DateTime
     startingtime::DateTime
-    summedtraveltime::Float64
+    summeddistance::Float64
 
     function PhysicalBooster(devices,initdist; ndisk=20,τ=1e-3,ϵ=24,maxlength=2)
         new(devices,dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,maxlength,
@@ -49,10 +50,10 @@ mutable struct PhysicalBooster <: Booster
 
     function PhysicalBooster(
             devices,pos,ndisk,thickness,epsilon,maxlength,timestamp,
-            startingtime,summedtraveltime)
+            startingtime,summeddistance)
 
         new(devices,pos,ndisk,thickness,epsilon,maxlength,timestamp,
-            startingtime,summedtraveltime)
+            startingtime,summeddistance)
     end
 end
 

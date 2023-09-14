@@ -27,7 +27,7 @@ function firstDerivative(g,h,booster,hist,freqs,objFunction,args)
         for i in 1:booster.ndisk
             updateHist!(booster,hist,freqs,objFunction; force=true)
 
-            g[i] = (hist[1].objvalue-hist[i+1].objvalue)
+            g[i] = (hist[1].objvalue-hist[i+1].objvalue)/(args[1])
 
             if i != booster.ndisk
                 move(booster,[(i,-args[1]),(i+1,args[1])])
@@ -61,22 +61,62 @@ function secondDerivative(g,h,booster,hist,freqs,objFunction,args)
             end
         end
 
-        for i in 1:booster.ndisk, j in 1:booster.ndisk
-            move(booster,[(i,args[2]),(j,args[2])])
-            updateHist!(booster,hist,freqs,objFunction; force=true)
+        for i in 1:booster.ndisk, j in 1:i
+            if i == j
+                move(booster,[(i,args[2])])
+                updateHist!(booster,hist,freqs,objFunction; force=true)
+                
+                move(booster,[(i,-args[2])])
+                updateHist!(booster,hist,freqs,objFunction; force=true)
 
-            move(booster,[(j,-args[2])])
-            updateHist!(booster,hist,freqs,objFunction; force=true)
+                move(booster,[(i,-args[2])])
+                updateHist!(booster,hist,freqs,objFunction; force=true)
 
-            move(booster,[(i,-args[2]),(j,args[2])])
-            updateHist!(booster,hist,freqs,objFunction; force=true)
+                h[i,i] = (hist[3].objvalue-2*hist[2].objvalue+hist[1].objvalue)/(args[2]^2)
 
-            move(booster,[(j,-args[2])])
-            updateHist!(booster,hist,freqs,objFunction; force=true)
-            
-            h[i,j] = (hist[4].objvalue-hist[3].objvalue-
-                        hist[2].objvalue+hist[1].objvalue)/(args[2]^2)
+                move(booster,[(i,args[2])])
+            else
+                # x + h*e_i + h*e_j
+                move(booster,[(i,args[2]),(j,args[2])])
+                updateHist!(booster,hist,freqs,objFunction; force=true)
+
+                # x + h*e_i - h*e_j
+                move(booster,[(j,-2*args[2])])
+                updateHist!(booster,hist,freqs,objFunction; force=true)
+
+                # x - h*e_i + h*e_j
+                move(booster,[(i,-2*args[2]),(j,2*args[2])])
+                updateHist!(booster,hist,freqs,objFunction; force=true)
+
+                # x - h*e_i - h*e_j
+                move(booster,[(j,-2args[2])])
+                updateHist!(booster,hist,freqs,objFunction; force=true)
+
+                h[i,j] = h[j,i] = (hist[4].objvalue-hist[3].objvalue-
+                            hist[2].objvalue+hist[1].objvalue)/(4*args[2]^2)
+
+                move(booster,[(i,args[2]),(j,args[2])])
+            end
         end
+    else
+                # # x + h*e_i + h*e_j
+        # move(booster,[(i,args[2]),(j,args[2])])
+        # updateHist!(booster,hist,freqs,objFunction; force=true)
+
+        # # x + h*e_i
+        # move(booster,[(j,-args[2])])
+        # updateHist!(booster,hist,freqs,objFunction; force=true)
+
+        # # x + h*e_j
+        # move(booster,[(i,-args[2]),(j,args[2])])
+        # updateHist!(booster,hist,freqs,objFunction; force=true)
+
+        # # x 
+        # move(booster,[(j,-args[2])])
+        # updateHist!(booster,hist,freqs,objFunction; force=true)
+        
+        # h[i,j] = (hist[4].objvalue-hist[3].objvalue-
+        #             hist[2].objvalue+hist[1].objvalue)/(args[2]^2)
     end
 end
 
