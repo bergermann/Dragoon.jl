@@ -50,7 +50,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         trace[i] = LSTrace(booster.pos,hist[1].objvalue,copy(g),copy(h),
                                     booster.timestamp,booster.summeddistance)
 
-        solver.func(p,g,h,trace,i,solver.args)
+        solver.func(booster,hist,freqs,p,g,h,trace,i,solver.args)
 
         showtrace && i%showevery == 0 && println("Gradient norm: ",round(pNorm(g),sigdigits=3))
 

@@ -7,7 +7,9 @@ import LinearAlgebra: cholesky
 
 
 # args = ()
-function solverSteepestDescent(p,g,h,trace,i,args)
+function solverSteepestDescent(booster::Booster,hist::Vector{State},
+        freqs::Vector{Float64},p,g,h,trace,i,args)
+    
     p[:] = -g
 end
 
@@ -16,7 +18,8 @@ const SolverSteep = Callback(solverSteepestDescent)
 
 
 # args = (mode,)
-function solverNewton(p::Vector{Float64},g::Vector{Float64},h::Matrix{Float64},
+function solverNewton(booster::Booster,hist::Vector{State},freqs::Vector{Float64},
+        p::Vector{Float64},g::Vector{Float64},h::Matrix{Float64},
         trace::Vector{LSTrace},i::Int,args::Tuple{String})
     
     if args[1] == "cholesky"
@@ -40,7 +43,8 @@ const SolverNewton(mode::String) = Callback(solverNewton,(mode,))
 
 
 # args = (h0,)
-function solverBFGS(p,g,h,trace,i,args)
+function solverBFGS(booster::Booster,hist::Vector{State},freqs::Vector{Float64},
+        p,g,h,trace,i,args)
     if i == 1
         trace[i].h = args[1]
 
