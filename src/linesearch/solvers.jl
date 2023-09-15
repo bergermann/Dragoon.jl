@@ -64,3 +64,86 @@ function solverBFGS(booster::Booster,hist::Vector{State},freqs::Vector{Float64},
 end
 
 const SolverBFGS(h0) = Callback(solverBFGS,(h0,))
+
+
+
+
+# args = (mode,ϵls,αtest,ntest)
+function solverHybrid(booster::Booster,hist::Vector{State},freqs::Vector{Float64},
+        objFunction::Callback,p::Vector{Float64},g::Vector{Float64},h::Matrix{Float64},
+        trace::Vector{Dragoon.LSTrace},i::Int,
+        (mode,ϵls,αtest,ntest)::Tuple{String,Real,Real,Int})
+
+    if mode == "cholesky"
+        try
+            C = cholesky(h)
+
+            p[:] = inv(C.U)*inv(C.L)*g
+        catch e
+            println("Hessian not Cholesky decomposable: ", e)
+            println("Falling back to standard inversion.")
+            
+            p[:] = inv(h)*g
+        end
+    else
+        p[:] = inv(h)*g
+    end
+
+    p[:] = p/pNorm(p)
+
+    p0 = copy(booster.pos)
+    updateHist!(booster,hist,freqs,objFunction)
+
+    # test forward
+    for i in ntest
+        move(booster,αtest*p; additive=true)
+        updateHist!(booster,hist,freqs,objFunction)
+
+        if hist[1].objvalue > hist[i+1].objvalue+ϵls
+            move(booster,p0)
+            updateHist!(booster,hist,freqs,objFunction)
+
+            break
+        end
+
+        if i == ntest
+            println("Forward test successfull.")
+            move(booster,p0)
+            updateHist!(booster,hist,freqs,objFunction)
+
+            return
+        end
+    end
+
+    # test backward
+    for i in ntest
+        move(booster,-αtest*p; additive=true)
+        updateHist!(booster,hist,freqs,objFunction)
+
+        if hist[1].objvalue > hist[i+1].objvalue+ϵls
+            move(booster,p0)
+            updateHist!(booster,hist,freqs,objFunction)
+
+            break
+        end
+
+        if i == ntest
+            println("Backward test successfull.")
+            move(booster,p0)
+            updateHist!(booster,hist,freqs,objFunction)
+
+            p[:] = -p[:]
+            
+            return
+        end
+    end
+
+    # fall back to steepest descend
+    println("Falling back to steepest descend.")
+    p[:] = -g
+
+    return
+end
+
+const SolverHybrid(mode::String,ϵls::Real,αtest::Real,ntest::Int) =
+    Callback(solverHybrid,(mode,ϵls,αtest,ntest))
