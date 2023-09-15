@@ -21,7 +21,7 @@ end
 
 
 
-mutable struct SATrace
+mutable struct SATrace <: Trace
     x::Array{Float64}
     obj::Float64
     xsol::Array{Float64}

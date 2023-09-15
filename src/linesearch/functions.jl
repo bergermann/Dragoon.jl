@@ -8,7 +8,7 @@ import Plots: plot, plot!, scatter, vline!, title!, xlabel!, ylabel!,
 
 ###     information tracing
 
-mutable struct LSTrace
+mutable struct LSTrace <: Trace
     x::Array{Float64}
     obj::Float64
     g::Vector{Float64}

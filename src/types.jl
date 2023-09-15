@@ -10,6 +10,8 @@ abstract type Booster end
 abstract type DevicesType end
 abstract type BoundariesType end
 
+abstract type Trace end
+
 mutable struct AnalyticalBooster <: Booster
     pos::Array{<:Real}
     ndisk::Int

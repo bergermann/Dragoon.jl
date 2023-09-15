@@ -6,7 +6,7 @@ import Plots: plot, plot!, scatter, vline!, title!, xlabel!, ylabel!,
         annotate!, display
 
 
-mutable struct NMTrace
+mutable struct NMTrace <: Trace
     x::Matrix{Float64}
     obj::Vector{Float64}
     x_::Vector{Float64}
