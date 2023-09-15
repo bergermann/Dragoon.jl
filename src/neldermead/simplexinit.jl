@@ -1,7 +1,7 @@
 ###     constructors of the initial simplex
 
-export initSimplexCoord, initSimplexAffine
-export InitSimplexCoord, InitSimplexAffine
+export initSimplexCoord, initSimplexAffine, initSimplexRegular
+export InitSimplexCoord, InitSimplexAffine, initSimplexRegular
 
 # args = (d,)
 function initSimplexCoord(x0::Array{Float64},args::Tuple{Float64})
@@ -59,8 +59,11 @@ end
 
 const InitSimplexRegular(a,b) = Callback(initSimplexRegular,(a,b))
 
+
+
+# simplex validation functions
 function simplexBaricenter(x::Matrix{Float64})
-    return 1/size(x,1)*sum(x; dims=2)
+    return 1/size(x,2)*sum(x; dims=2)
 end
 
 function simplexEdgeLengths(x::Matrix{Float64})
@@ -73,4 +76,16 @@ function simplexEdgeLengths(x::Matrix{Float64})
     end
 
     return E
+end
+
+function simplexRadius(x::Matrix{Float64})
+    x0 = simplexBaricenter(x)
+
+    R = zeros(Float64,size(x,2))
+
+    for i in axes(x,2)
+        R[i] = pNorm(x0-x[:,i])
+    end
+
+    return R
 end
