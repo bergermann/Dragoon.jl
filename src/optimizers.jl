@@ -15,7 +15,8 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     showtrace::Bool=false,
                     showevery::Integer=1,
                     unstuckisiter::Bool=true,
-                    resettimer::Bool=true)
+                    resettimer::Bool=true,
+                    returntimes::Bool=false)
 
     if hasproperty(booster,:startingtime) && resettimer
         println("Resetting starting time.")
@@ -92,11 +93,15 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         booster.codetimestamp += unow()-t0
     end
 
-    printTermination(booster,hist,i,maxiter)
-
     trace[i+1] = LSTrace(booster.pos,hist[1].objvalue,g,h,
                                 booster.timestamp,booster.summeddistance)
 
+    term = printTermination(booster,hist,i,maxiter)
+
+    if returntimes
+        return trace[1:i+1], term
+    end
+    
     return trace[1:i+1]
 end
 
@@ -117,7 +122,8 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     forcesimplexobj::Bool=false,
                     tracecentroid::Bool=false,
                     traceevery::Int=1,
-                    resettimer::Bool=true)
+                    resettimer::Bool=true,
+                    returntimes::Bool=false)
 
     if hasproperty(booster,:startingtime) && resettimer
         println("Resetting starting time.")
@@ -286,7 +292,11 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         booster.codetimestamp += unow()-t0
     end
 
-    printTermination(booster,hist,i,maxiter)
+    term = printTermination(booster,hist,i,maxiter)
+
+    if returntimes
+        return trace[1:Int(i/traceevery)+1], term
+    end
 
     return trace[1:Int(i/traceevery)+1]
 end
@@ -306,7 +316,8 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         showevery::Integer=1,
         unstuckisiter::Bool=true,
         traceevery::Int=1,
-        resettimer::Bool=true)
+        resettimer::Bool=true,
+        returntimes::Bool=false)
 
     if hasproperty(booster,:startingtime) && resettimer
         println("Resetting starting time.")
@@ -396,7 +407,11 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         booster.codetimestamp += unow()-t0
     end
 
-    printTermination(booster,hist,i,maxiter)
+    term = printTermination(booster,hist,i,maxiter)
+
+    if returntimes
+        return trace[1:min(round(Int,iter/traceevery)+1,length(trace))], term
+    end
 
     return trace[1:min(round(Int,iter/traceevery)+1,length(trace))]
     # return trace
