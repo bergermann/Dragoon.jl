@@ -118,7 +118,7 @@ end
 
 
 function getSimplexSize(x::Matrix{Float64},f::Vector{Float64})
-    idx = minimum(f)
+    idx = argmin(f)
 
     s = 0
 
