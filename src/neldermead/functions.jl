@@ -114,3 +114,23 @@ function analyse(hist,trace::Vector{NMTrace},freqsplot;
         return plt1, plt2, plt3, plt4, plt5, plt6
     end
 end
+
+
+
+function getSimplexSize(x::Matrix{Float64},f::Vector{Float64})
+    idx = minimum(f)
+
+    s = 0
+
+    for i in eachindex(f)
+        if i == idx; continue; end
+
+        d = pNorm(x[:,i]-x[:,idx])
+
+        if d > s
+            s = d
+        end
+    end
+
+    return s
+end

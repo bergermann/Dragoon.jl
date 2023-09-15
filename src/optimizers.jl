@@ -105,7 +105,7 @@ end
 
 
 function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
-                    α::Float64,β::Float64,γ::Float64,δ::Float64,
+                    α::Float64,β::Float64,γ::Float64,δ::Float64,Δmin::Real,
                     objFunction::Callback,
                     initSimplex::Callback,
                     simplexObj::Callback,
@@ -247,6 +247,12 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         if forcesimplexobj
             f[:] = simplexObj.func(x,collect(1:booster.ndisk+1),booster,hist,freqs,
                 objFunction,simplexObj.args)
+        end
+
+        if getSimplexSize(x,f) < Δmin
+            showtrace && println("Minimum simplex size reached. Terminating.")
+
+            break
         end
     end
 

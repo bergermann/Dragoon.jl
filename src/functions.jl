@@ -127,17 +127,26 @@ end
 ###     information output functions
 
 function printTimes(booster::Booster)
+    ttotal = 0.
+
     if hasproperty(booster,:startingtime)
-        println("Elapsed movement time:  ",canonicalize(round(booster.timestamp-booster.startingtime,Second)))
+        ttotal = canonicalize(round(booster.timestamp-booster.startingtime,Second))
+        println("Elapsed movement time:  ",ttotal)
     else
-        println("Elapsed movement time:  ",canonicalize(round(booster.timestamp-DateTime(0),Second)))
+        ttotal = canonicalize(round(booster.timestamp-DateTime(0),Second))
+        println("Elapsed movement time:  ",ttotal)
     end
 
-    println("Summed distance:   ",round(booster.summeddistance; digits=3))
+    sumdist = round(booster.summeddistance; digits=3)
+    println("Summed distance:   ",sumdist)
 
+    tcomp = 0.
     if hasproperty(booster,:codetimestamp)
-        println("Elapsed computing time: ",canonicalize(booster.codetimestamp-DateTime(0)))
+        tcomp = canonicalize(booster.codetimestamp-DateTime(0))
+        println("Elapsed computing time: ",tcomp)
     end
+
+    return ttotal, sumdist, tcomp
 end
 
 function printTermination(booster::Booster,hist,i::Int,maxiter::Int)
@@ -148,5 +157,6 @@ function printTermination(booster::Booster,hist,i::Int,maxiter::Int)
     end
 
     println("Final objective value: ",round(hist[1].objvalue; digits=3))
-    printTimes(booster)
+    
+    return hist[1].objvalue, printTimes(booster)
 end
