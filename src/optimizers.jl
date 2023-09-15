@@ -50,7 +50,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         trace[i] = LSTrace(booster.pos,hist[1].objvalue,copy(g),copy(h),
                                     booster.timestamp,booster.summeddistance)
 
-        solver.func(p,g,h,trace,i,solver.args)
+        solver.func(booster,hist,freqs,objFunction,p,g,h,trace,i,solver.args)
 
         showtrace && i%showevery == 0 && println("Gradient norm: ",round(pNorm(g),sigdigits=3))
 
@@ -105,7 +105,7 @@ end
 
 
 function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
-                    α::Float64,β::Float64,γ::Float64,δ::Float64,
+                    α::Float64,β::Float64,γ::Float64,δ::Float64,Δmin::Real,
                     objFunction::Callback,
                     initSimplex::Callback,
                     simplexObj::Callback,
@@ -247,6 +247,12 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         if forcesimplexobj
             f[:] = simplexObj.func(x,collect(1:booster.ndisk+1),booster,hist,freqs,
                 objFunction,simplexObj.args)
+        end
+
+        if getSimplexSize(x,f) < Δmin
+            showtrace && println("Minimum simplex size reached. Terminating.")
+
+            break
         end
     end
 

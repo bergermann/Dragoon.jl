@@ -11,22 +11,25 @@ init = [1.00334, 6.94754, 7.1766, 7.22788, 7.19717,
         
 
 
-boost1d(spacs::Vector{Float64},f::Vector{Float64};eps::Real=24.,thickness::Real=1e-3,tand::Real=0.) = 
+boost1d(spacs::Vector{Float64},f::Vector{Float64};
+        eps::Real=24.,thickness::Real=1e-3,tand::Real=0.) = 
     abs2.(disk_system(f;
         tand=tand,spacings=[spacs;0],disk_thickness=thickness,disk_epsilon=eps,
         num_disk=length(spacs))[2])
-    
-ref1d(spacs::Vector{Float64},f::Vector{Float64}; eps::Real=24.,thickness::Real=1e-3,tand::Real=0.) = 
-    disk_system(f; tand=tand,spacings=[spacs;0],disk_thickness=thickness,disk_epsilon=eps,num_disk=length(spacs))[1]
-    
 
-function findpeak(f0,n; eps=24.,thickness=1e-3,gran=1000,dev=0.1)
+ref1d(spacs::Vector{Float64},f::Vector{Float64};
+        eps::Real=24.,thickness::Real=1e-3,tand::Real=0.) = 
+    disk_system(f; spacings=[spacs;0],disk_thickness=thickness,disk_epsilon=eps,
+        tand=tand,num_disk=length(spacs))[1]
+
+function findpeak(f0,n; eps=24.,tand=0.,thickness=1e-3,gran=1000,dev=0.1)
     λ = 299792458.0/f0
     B = zeros(gran)
     D = range(1-dev; stop=1+dev,length=gran)*λ/2
 
     for i in eachindex(D)
-        B[i] = boost1d(ones(n)*D[i],[f0]; eps=eps,thickness=thickness)[1]
+        B[i] = boost1d(ones(n)*D[i],[f0];
+            eps=eps,tand=tand,thickness=thickness)[1]
     end
 
     return D[findmax(B)[2]]
@@ -61,12 +64,12 @@ Base.copy(x::T) where T = T([getfield(x, k) for k ∈ fieldnames(T)]...)
 
 function getBoost1d(booster::Booster,freqs::Array{Float64})
     return boost1d(pos2dist(booster.pos; thickness=booster.thickness),freqs;
-        eps=booster.epsilon,thickness=booster.thickness)
+        eps=booster.epsilon,tand=booster.tand,thickness=booster.thickness)
 end
 
 function getRef1d(booster::Booster,freqs::Array{Float64})
     return ref1d(pos2dist(booster.pos; thickness=booster.thickness),freqs;
-        eps=booster.epsilon,thickness=booster.thickness)
+        eps=booster.epsilon,tand=booster.tand,thickness=booster.thickness)
 end
 
 

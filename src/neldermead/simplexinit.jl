@@ -30,4 +30,47 @@ function initSimplexAffine(x0::Array{Float64},args::Tuple{})
     return x
 end
 
-const InitSimplexAffine(a,b) = Callback(initSimplexCoord,(a,b))
+const InitSimplexAffine(a,b) = Callback(initSimplexAffine,(a,b))
+
+
+
+function inCircleRadius(ndims::Int)
+    return 1/sqrt(2*ndims*(ndims+1))
+end
+    
+function circumCircleRadius(ndims::Int)
+    return sqrt(ndims/(2*(ndims+1)))
+end
+
+function initSimplexRegular(x0::Array{Float64},(d,)::Tuple{Float64,})
+    x = zeros(length(x0),length(x0)+1)
+
+    for i in eachindex(x0)
+        x[i,1:i] .-= d*inCircleRadius(i)
+        x[i,i+1] += d*circumCircleRadius(i)
+    end
+
+    for i in 1:length(x0)+1
+        x[:,i] += x0
+    end
+
+    return x
+end
+
+const InitSimplexRegular(a,b) = Callback(initSimplexRegular,(a,b))
+
+function simplexBaricenter(x::Matrix{Float64})
+    return 1/size(x,1)*sum(x; dims=2)
+end
+
+function simplexEdgeLengths(x::Matrix{Float64})
+    E = []
+
+    for i in axes(x,2)
+        for j in i+1:size(x,2)
+            push!(E,pNorm(x[:,i]-x[:,j]))
+        end
+    end
+
+    return E
+end
