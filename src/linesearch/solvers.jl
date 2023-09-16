@@ -1,7 +1,8 @@
 ### solvers to determine directions
 
-export solverSteepestDescent, solverNewton, solverBFGS
-export SolverSteep, SolverNewton, SolverBFGS
+export solverSteepestDescent, solverNewton, solverBFGS,
+    solverHybrid
+export SolverSteep, SolverNewton, SolverBFGS, SolverHybrid
 
 import LinearAlgebra: cholesky
 
