@@ -57,7 +57,7 @@ function initSimplexRegular(x0::Array{Float64},(d,)::Tuple{Float64,})
     return x
 end
 
-const InitSimplexRegular(a,b) = Callback(initSimplexRegular,(a,b))
+const InitSimplexRegular(d) = Callback(initSimplexRegular,(d,))
 
 
 
