@@ -12,11 +12,12 @@ end
 function initHist(booster::Booster,
                     length::Int64,
                     freqs::Array{Float64},
-                    objFunction::Callback)
+                    objFunction::Callback;
+                    showtrace::Bool=false)
 
     s0 = State(booster)
     hist = fill(s0,length)
-    updateHist!(booster,hist,freqs,objFunction; showtrace=true,force=true)
+    updateHist!(booster,hist,freqs,objFunction; showtrace=showtrace,force=true)
 
     return hist
 end
