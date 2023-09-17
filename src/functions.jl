@@ -126,37 +126,41 @@ end
 
 ###     information output functions
 
-function printTimes(booster::Booster)
+function printTimes(booster::Booster,showtrace::Bool)
     ttotal = 0.
 
     if hasproperty(booster,:startingtime)
-        ttotal = canonicalize(round(booster.timestamp-booster.startingtime,Second))
-        println("Elapsed movement time:  ",ttotal)
+        ttotal = round(booster.timestamp-
+            booster.startingtime,Second)
+        showtrace && println("Elapsed movement time:  ",
+            canonicalize(ttotal))
     else
-        ttotal = canonicalize(round(booster.timestamp-DateTime(0),Second))
-        println("Elapsed movement time:  ",ttotal)
+        ttotal = round(booster.timestamp-DateTime(0),Second)
+        showtrace && println("Elapsed movement time:  ",
+            canonicalize(ttotal))
     end
 
     sumdist = round(booster.summeddistance; digits=3)
-    println("Summed distance:   ",sumdist)
+    showtrace && println("Summed distance:   ",sumdist)
 
     tcomp = 0.
     if hasproperty(booster,:codetimestamp)
-        tcomp = canonicalize(booster.codetimestamp-DateTime(0))
-        println("Elapsed computing time: ",tcomp)
+        tcomp = booster.codetimestamp-DateTime(0)
+        showtrace && println("Elapsed computing time: ",
+            canonicalize(tcomp))
     end
 
     return ttotal, sumdist, tcomp
 end
 
-function printTermination(booster::Booster,hist,i::Int,maxiter::Int)
+function printTermination(booster::Booster,hist,i::Int,maxiter::Int,showtrace::Bool)
     if i == maxiter
-        println("Terminated. Max iterations reached.")
+        showtrace && println("Terminated. Max iterations reached.")
     else
-        println("Terminated. ",i," Iterations.")
+        showtrace && println("Terminated. ",i," Iterations.")
     end
 
-    println("Final objective value: ",round(hist[1].objvalue; digits=3))
+    showtrace && println("Final objective value: ",round(hist[1].objvalue; digits=3))
     
-    return hist[1].objvalue, printTimes(booster)
+    return hist[1].objvalue, printTimes(booster,showtrace)
 end

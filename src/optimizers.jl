@@ -320,7 +320,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         returntimes::Bool=false)
 
     if hasproperty(booster,:startingtime) && resettimer
-        println("Resetting starting time.")
+        showtrace && println("Resetting starting time.")
         
         booster.startingtime = unow()
         booster.timestamp = unow()
@@ -377,12 +377,12 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         end
 
         if nreset > 0 && resetcounter >= nreset
-            println("Resetting to best solution.")
+            showtrace && println("Resetting to best solution.")
             resetcounter = 0
             resetcounterterm += 1
 
             if nresetterm > 0 && resetcounterterm >= nresetterm
-                println("$nresetterm times resetted. Terminating.")
+                showtrace && println("$nresetterm times resetted. Terminating.")
 
                 break
             end
@@ -407,7 +407,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         booster.codetimestamp += unow()-t0
     end
 
-    term = printTermination(booster,hist,i,maxiter)
+    term = printTermination(booster,hist,i,maxiter,showtrace)
 
     if returntimes
         return trace[1:min(round(Int,iter/traceevery)+1,length(trace))], term
