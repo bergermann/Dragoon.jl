@@ -19,7 +19,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     returntimes::Bool=false)
 
     if hasproperty(booster,:startingtime) && resettimer
-        println("Resetting starting time.")
+        showtrace && println("Resetting starting time.")
         
         booster.startingtime = unow()
         booster.timestamp = unow()
@@ -56,8 +56,8 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         showtrace && i%showevery == 0 && println("Gradient norm: ",round(pNorm(g),sigdigits=3))
 
         #early stopping if descend is too slow
-        pNorm(g) <= ϵgrad && (println("Gradient threshold reached.
-                                                        Terminating."); break)
+        pNorm(g) <= ϵgrad && ((showtrace && println("Gradient threshold reached.
+                                                        Terminating.")); break)
 
         #determine steplength and/or normalize p
         updateHist!(booster,hist,freqs,objFunction)
@@ -96,7 +96,7 @@ function linesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
     trace[i+1] = LSTrace(booster.pos,hist[1].objvalue,g,h,
                                 booster.timestamp,booster.summeddistance)
 
-    term = printTermination(booster,hist,i,maxiter)
+    term = printTermination(booster,hist,i,maxiter,showtrace)
 
     if returntimes
         return trace[1:i+1], term
@@ -126,7 +126,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
                     returntimes::Bool=false)
 
     if hasproperty(booster,:startingtime) && resettimer
-        println("Resetting starting time.")
+        showtrace && println("Resetting starting time.")
         
         booster.startingtime = unow()
         booster.timestamp = unow()
@@ -292,8 +292,8 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         booster.codetimestamp += unow()-t0
     end
 
-    term = printTermination(booster,hist,i,maxiter)
-
+    term = printTermination(booster,hist,i,maxiter,showtrace)
+    
     if returntimes
         return trace[1:Int(i/traceevery)+1], term
     end
