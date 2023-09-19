@@ -259,7 +259,7 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         if getSimplexSize(x,f) < Δmin
             showtrace && println("Minimum simplex size reached.")
 
-            stuck = unstuckinator.func(booster,hist,freqs,objFunction,
+            stuck = unstuckinator.func(booster,hist,freqs,objFunction,x,f,
                                         unstuckinator.args; showtrace=showtrace)
 
             !unstuckisiter && (i -= 1)
@@ -316,8 +316,8 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         objFunction::Callback,
         unstuckinator::Callback;
         maxiter::Integer=Int(1e2),
-        nreset::Int64,
-        nresetterm::Int64,
+        nreset::Int64=0,
+        nresetterm::Int64=0,
         showtrace::Bool=false,
         showevery::Integer=1,
         unstuckisiter::Bool=true,
