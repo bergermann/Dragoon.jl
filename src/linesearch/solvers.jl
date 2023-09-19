@@ -108,7 +108,6 @@ function solverHybrid(booster::Booster,hist::Vector{State},freqs::Vector{Float64
         end
 
         if i == ntest
-            println("Forward test successfull.")
             move(booster,p0)
             updateHist!(booster,hist,freqs,objFunction)
 
@@ -129,7 +128,6 @@ function solverHybrid(booster::Booster,hist::Vector{State},freqs::Vector{Float64
         end
 
         if i == ntest
-            println("Backward test successfull.")
             move(booster,p0)
             updateHist!(booster,hist,freqs,objFunction)
 
@@ -140,7 +138,6 @@ function solverHybrid(booster::Booster,hist::Vector{State},freqs::Vector{Float64
     end
 
     # fall back to steepest descend
-    println("Falling back to steepest descend.")
     p[:] = -g
 
     return
