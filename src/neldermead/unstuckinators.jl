@@ -8,7 +8,7 @@ export unstuckExpandSimplex, UnstuckExpand
 
 
 
-function unstuckDont(booster,hist,freqs,objFunction,x,f,args; showtrace=false)
+function unstuckDont(booster,hist,freqs,objFunction,simplexObj,x,f,args; showtrace=false)
     showtrace && println("No unstucking tried. Terminating.")
 
     return true
