@@ -29,6 +29,8 @@ function unstuckNewSimplex(booster,hist,freqs,objFunction,simplexObj,x,f,(initSi
     f[:] = simplexObj.func(x,collect(1:booster.ndisk+1),booster,hist,freqs,
                                             objFunction,simplexObj.args)
 
+    showtrace && println("Unstuck successfull.")
+
     return false
 end
 
@@ -52,6 +54,8 @@ function unstuckExpandSimplex(booster,hist,freqs,objFunction,simplexObj,x,f,(δ,
     end
 
     f[1:end-1] = simplexObj.func(x,collect(1:booster.ndisk),booster,hist,freqs,objFunction,simplexObj.args)
+
+    showtrace && println("Unstuck successfull.")
 
     return false
 end
