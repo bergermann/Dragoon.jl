@@ -30,6 +30,7 @@ include("linesearch/searches.jl")
 include("neldermead/functions.jl")
 include("neldermead/simplexinit.jl")
 include("neldermead/simplexobj.jl")
+include("neldermead/unstuckinators.jl")
 
 # Simulated Annealing options
 include("annealing/functions.jl")
