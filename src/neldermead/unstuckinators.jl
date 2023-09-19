@@ -2,7 +2,7 @@
 
 
 
-export unstuckDont, UnstuckDont
+export unstuckDont
 export unstuckNewSimplex, UnstuckNew
 export unstuckExpandSimplex, UnstuckExpand
 
@@ -14,10 +14,8 @@ function unstuckDont(booster,hist,freqs,objFunction,simplexObj,x,f,args; showtra
     return true
 end
 
-const UnstuckDont = Callback(unstuckDont)
-
 function unstuckNewSimplex(booster,hist,freqs,objFunction,simplexObj,x,f,(initSimplex,best,threshold); showtrace=false)
-    if min(f) < threshold
+    if minimum(f) < threshold
         showtrace && println("Unstuck threshold reached. Terminating.")
 
         return true
@@ -38,7 +36,7 @@ const UnstuckNew(init,best,threshold) = Callback(unstuckNewSimplex,(init,best,th
 
 
 function unstuckExpandSimplex(booster,hist,freqs,objFunction,simplexObj,x,f,(δ,threshold); showtrace=false)
-    if min(f) < threshold
+    if minimum(f) < threshold
         showtrace && println("Unstuck threshold reached. Terminating.")
         
         return true
