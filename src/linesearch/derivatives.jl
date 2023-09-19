@@ -185,11 +185,11 @@ function secondDerivative_(g,h,booster,hist,freqs,objFunction,args)
                 move(booster,[(j,-2args[2])])
                 updateHist!(booster,hist,freqs,objFunction; force=true)
 
-                h[i,j] = (hist[4].objvalue-hist[3].objvalue-
-                            hist[2].objvalue+hist[1].objvalue)/(4*args[2]^2)
-
-                # h[i,j] = h[j,i] = (hist[4].objvalue-hist[3].objvalue-
+                # h[i,j] = (hist[4].objvalue-hist[3].objvalue-
                 #             hist[2].objvalue+hist[1].objvalue)/(4*args[2]^2)
+
+                h[i,j] = h[j,i] = (hist[4].objvalue-hist[3].objvalue-
+                            hist[2].objvalue+hist[1].objvalue)/(4*args[2]^2)
 
                 move(booster,[(i,args[2]),(j,args[2])])
                 move(booster,p0; additive=false)
