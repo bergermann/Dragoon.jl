@@ -156,19 +156,20 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         x[:,:] = x[:,sp]
         f[:] = f[sp]
 
-        if Int(i%traceevery)==0
-            trace[Int(i/traceevery)] = NMTrace(x,f,zeros(booster.ndisk),0.,
-                                    booster.timestamp,booster.summeddistance)
+        if Int(i % traceevery) == 0
+            trace[Int(i / traceevery)] = NMTrace(copy(x), copy(f), zeros(booster.ndisk), 0.0,
+                booster.timestamp, booster.summeddistance)
         end
 
         #centroid
-        x_ = reshape(sum(x[:,1:end-1]; dims=2),:)/booster.ndisk
+        x_ = reshape(sum(x[:, 1:end-1]; dims=2), :) / booster.ndisk
+        
         if tracecentroid
-            move(booster,x_; additive=false)
-            updateHist!(booster,hist,freqs,objFunction)
+            move(booster, x_; additive=false)
+            updateHist!(booster, hist, freqs, objFunction)
 
-            trace[i].x_ = x_
-            trace[i].obj_ = hist[1].objvalue
+            trace[Int(i / traceevery)].x_ = x_
+            trace[Int(i / traceevery)].obj_ = hist[1].objvalue
         end
 
         #reflection point, reflection
@@ -256,9 +257,14 @@ function nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         end
 
         if getSimplexSize(x,f) < Δmin
-            showtrace && println("Minimum simplex size reached. Terminating.")
+            showtrace && println("Minimum simplex size reached.")
 
-            break
+            stuck = unstuckinator.func(booster,hist,freqs,objFunction,
+                                        unstuckinator.args; showtrace=showtrace)
+
+            !unstuckisiter && (i -= 1)
+
+            stuck && break
         end
     end
 

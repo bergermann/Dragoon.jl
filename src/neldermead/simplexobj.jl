@@ -41,7 +41,7 @@ function getSimplexObj(x::Matrix{Float64},
 
     reset && move(booster,xc; additive=false)
 
-    return (a->a.objvalue).(hist[1:length(indices)])
+    return reverse((a->a.objvalue).(hist[1:length(indices)]))
 end
 
 const DefaultSimplexSampler = Callback(getSimplexObj)
