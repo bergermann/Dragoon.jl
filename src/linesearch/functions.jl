@@ -90,7 +90,7 @@ function analyse(hist,trace::Vector{LSTrace},freqsplot;
         xlabel!("Disk")
         ylabel!("d_i")
 
-        plt5 = plot((x->x.objvalue).(hist[(x->x.objvalue).(hist) .!= 0.])[end:-1:1][1:end];
+        plt5 = plot((x->x.objvalue).(hist[(x->x.objvalue).(hist) .!= 0.])[end-1:-1:1][1:end];
                     legend=false)
         title!("History")
         xlabel!("Step")
