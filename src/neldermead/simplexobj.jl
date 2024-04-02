@@ -3,12 +3,24 @@
 export getSimplexObj
 export DefaultSimplexSampler
 
+"""
+    getSimplexObj(x::Matrix{Float64},
+        booster::Booster,
+        hist::Array{State},
+        freqs::Array{Float64},
+        objFunction::Callback,
+        ()::Tuple{};
+        reset=false)
+
+Iteratively sample all vertices in ascending order, write result to x. Return to starting
+position if `reset`.
+"""
 function getSimplexObj(x::Matrix{Float64},
                         booster::Booster,
                         hist::Array{State},
                         freqs::Array{Float64},
                         objFunction::Callback,
-                        args::Tuple{};
+                        ()::Tuple;
                         reset=false)
     
     reset && (xc = copy(booster.pos))
@@ -23,6 +35,18 @@ function getSimplexObj(x::Matrix{Float64},
     return (a->a.objvalue).(hist[axes(x,2)])
 end
 
+"""
+    getSimplexObj(x::Matrix{Float64},
+        booster::Booster,
+        hist::Array{State},
+        freqs::Array{Float64},
+        objFunction::Callback,
+        ()::Tuple{};
+        reset=false)
+
+Iteratively sample all vertices by given indices in ascending order, write result to x.
+Return to starting position if `reset`.
+"""
 function getSimplexObj(x::Matrix{Float64},
                         indices::Vector{Int},
                         booster::Booster,
@@ -44,4 +68,10 @@ function getSimplexObj(x::Matrix{Float64},
     return reverse((a->a.objvalue).(hist[1:length(indices)]))
 end
 
-const DefaultSimplexSampler = Callback(getSimplexObj)
+"""
+    DefaultSimplexSampler
+
+Callback for Nelder-Mead simplex sampler option by iteration for [`nelderMead`](@ref).
+See [`getSimplexObj`](@ref).
+"""
+DefaultSimplexSampler = Callback(getSimplexObj)

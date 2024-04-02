@@ -116,13 +116,17 @@ function analyse(hist,trace::Vector{NMTrace},freqsplot;
 end
 
 
+"""
+    getSimplexSize(x::Matrix{Float64},f::Vector{Float64})
 
+Return furthest vertex distance from best vertex.
+"""
 function getSimplexSize(x::Matrix{Float64},f::Vector{Float64})
     idx = argmin(f)
 
     s = 0
 
-    for i in eachindex(f)
+    for i in axes(x,2)
         if i == idx; continue; end
 
         d = pNorm(x[:,i]-x[:,idx])

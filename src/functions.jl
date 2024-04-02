@@ -165,3 +165,37 @@ function printTermination(booster::Booster,hist,i::Int,maxiter::Int,showtrace::B
     
     return hist[1].objvalue, printTimes(booster,showtrace)
 end
+
+
+
+
+function setTimes!(booster::Booster,reset::Bool)
+    if hasproperty(booster, :startingtime) && reset
+        t0 = DateTime(0)
+
+        showtrace && println("Resetting starting time.")
+
+        booster.startingtime = unow()
+        booster.timestamp = unow()
+    elseif hasproperty(booster, :codetimestamp)
+        t0 = unow()
+
+        if reset
+            booster.timestamp = DateTime(0)
+        end
+    end
+
+    return t0
+end
+
+function updateTimeStamp!(booster::Booster,name::Symbol,reset::Bool,t0::DateTime)
+    if hasproperty(booster, name)
+        if reset
+            setfield!(booster,name,DateTime(0))
+        end
+
+        setfield!(booster,name,getfield(booster,name)+(unow()-t0))
+    end
+
+    return
+end
