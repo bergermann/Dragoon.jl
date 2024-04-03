@@ -1,0 +1,15 @@
+
+
+To-Do-List (01.04.24):
+[ ] clean up repositories
+[ ] document repositories
+[ ] improve nelder-mead for movement distance
+[ ] nelder-mead linesearch
+[ ] implement missing unstuckinators
+[ ] optimize derivative calculations?
+[ ] frequency shift, optimization from optimized state
+- direct re-optimization
+- sophisticated linesearch beforehand, then re-optimization
+
+[ ] show redundancy in optimized states
+[ ] write paper i guess
