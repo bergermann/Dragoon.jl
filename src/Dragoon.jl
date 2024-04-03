@@ -11,15 +11,15 @@ import DateFormats: /ₜ, *ₜ
 
 # General optimizers
 include("types.jl")
-include("functions.jl")
-include("optimizers.jl")
+include("helper_functions.jl")
 include("objectivefunctions.jl")
 include("unstuckinators.jl")
 
 include("Analytical1D.jl")
-include("utilities.jl")
+include("general_utilities.jl")
 
 # Linesearch options
+include("linesearch/optimizer.jl")
 include("linesearch/functions.jl")
 include("linesearch/solvers.jl")
 include("linesearch/derivatives.jl")
@@ -27,12 +27,14 @@ include("linesearch/steps.jl")
 include("linesearch/searches.jl")
 
 # Nelder-Mead options
+include("neldermead/optimizer.jl")
 include("neldermead/functions.jl")
 include("neldermead/simplexinit.jl")
 include("neldermead/simplexobj.jl")
 include("neldermead/unstuckinators.jl")
 
 # Simulated Annealing options
+include("annealing/optimizer.jl")
 include("annealing/functions.jl")
 
 end

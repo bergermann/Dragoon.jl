@@ -27,12 +27,28 @@ function printNMIter(booster::Booster,f::Vector{Float64},i::Int)
     println("Iter finished. Objective value: ",round(minimum(f); digits=3),"\n")
 end
 
+
+
+"""
+    analyse(hist,trace::Vector{NMTrace},freqsplot;
+    freqs=nothing,
+    plotting=true,
+    div=5,
+    ylim=[-0.05e4,3e4])
+
+Analyse neldermead trace and create plot output using Analytical1d.
+
+# Arguments
+- `hist`: Vector containing history of states.
+- `trace::Vector{LSTrace}`:  Trace from linesearch algorithm.
+- `freqsplot`: Frequencies to plot on. Don't have to be same as optimized freqs.
+- `freqs=nothing`: Optimized frequencies, used to show their bounds.
+- `plotting=true`: If false, return subtraces as plain vectors instead.
+- `div=5`: Amount of intermediate steps.
+- `ylim=[-0.05e4,3e4]`: Manual limit of y-axis.
+"""
 function analyse(hist,trace::Vector{NMTrace},freqsplot;
-                        freqs=nothing,
-                        plotting=true,
-                        div=5,
-                        scale=1e9,
-                        ylim=[-0.05e4,3e4])
+        freqs=nothing,plotting=true,div=5,ylim=[-0.05e4,3e4])
     
     tracex = hcat((x->x.x[:,1]).(trace)...)
     tracex_ = hcat((x->x.x_).(trace)...)
@@ -49,6 +65,8 @@ function analyse(hist,trace::Vector{NMTrace},freqsplot;
     histx = hcat((x->x.pos).(hist[lh:-1:1])...)
     histf = (x->x.objvalue).(hist[lh:-1:1])
     histd = hcat((x->pos2dist(x.pos)).(hist[lh:-1:1])...)
+    
+    mag = getMag(maximum(freqsplot)); scale = 10^mag
 
     if plotting
         plt1 = plot(freqsplot/scale,boost1d(pos2dist(tracex[:,1]),freqsplot);
@@ -69,7 +87,7 @@ function analyse(hist,trace::Vector{NMTrace},freqsplot;
                     label="")
         end
         title!("Boostfactor")
-        xlabel!("Frequency [GHz]")
+        xlabel!("Frequency [$(magLabel(mag))Hz]")
         ylabel!("β²")
         annotate!([(minimum(freqsplot)/scale,0.9*ylim[2],
                     "Final value:\n"*string(round(tracef[l],digits=1)),:left)])

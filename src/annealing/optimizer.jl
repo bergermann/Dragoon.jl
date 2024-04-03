@@ -1,14 +1,41 @@
 
-
 export simulatedAnnealing
 
+"""
+    simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Float64},
+        τ::Array{Float64},rmax::Float64,
+        objFunction::Callback,
+        unstuckinator::Callback;
+        maxiter::Integer=Int(1e2),
+        nreset::Int64=0,
+        nresetterm::Int64=0,
+        showtrace::Bool=false,
+        showevery::Integer=1,
+        unstuckisiter::Bool=true,
+        traceevery::Int=1,
+        resettimer::Bool=true,
+        returntimes::Bool=false)
 
+Perform simulated annealing optimization on a physical or analytical booster, returns
+process trace.
 
-
-
-
-
-
+# Arguments
+- `booster::Booster`: Booster struct to operate on.
+- `hist::Vector{State}`: External vector to save visited states.
+- `freqs::Array{Float64}`: Frequencies to optimize for.
+- `objFunction::Callback`: Objective function of the booster system.
+- `unstuckinator::Callback`: Softresets optimization when stuck.
+- `maxiter::Integer=Int(1e2)`: Maximum iterations (duh).
+- `nreset::Int64=0`: Softreset to best found position after `nreset` bad neighbours.
+    Set 0 to disable.
+- `nresetterm::Int64=0`: Maximum allowed softresets before termination.
+- `showtrace::Bool=false`: Display progress informations.
+- `showevery::Integer=1`: Show trace every n iterations.
+- `unstuckisiter::Bool=true`: Count iteration where unstucking occured towards maxiter.
+- `traceevery::Int=1`: Write to trace every n iterations.
+- `resettimer::Bool=true`: Reset timestamps of booster.
+- `returntimes::Bool=false`: Return timestamps additionally to the trace.
+"""
 function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         τ::Array{Float64},rmax::Float64,
         objFunction::Callback,
@@ -23,18 +50,7 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
         resettimer::Bool=true,
         returntimes::Bool=false)
 
-    if hasproperty(booster,:startingtime) && resettimer
-        showtrace && println("Resetting starting time.")
-        
-        booster.startingtime = unow()
-        booster.timestamp = unow()
-    elseif hasproperty(booster,:codetimestamp)
-        t0 = unow()
-
-        if resettimer
-            booster.timestamp = DateTime(0)
-        end
-    end
+    t0 = setTimes!(booster,resettimer)
 
     trace = Vector{SATrace}(undef,round(Int,maxiter/traceevery)+1)
 
@@ -92,31 +108,18 @@ function simulatedAnnealing(booster::Booster,hist::Vector{State},freqs::Array{Fl
             end
         end
     
-
         showtrace && i%showevery == 0 && printSAIter(booster,objx,objsol,τ[i],iter)
 
-        ## unstucking, alter i
+        ## unstucking, alter i?
     end
-
-
 
     move(booster,xsol; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
 
-    if hasproperty(booster,:codetimestamp)
-        if resettimer
-            booster.codetimestamp = DateTime(0)
-        end
-
-        booster.codetimestamp += unow()-t0
-    end
+    updateTimeStamp!(booster,:codetimestamp,resettimer,t0)
 
     term = printTermination(booster,hist,i,maxiter,showtrace)
 
-    if returntimes
-        return trace[1:min(round(Int,iter/traceevery)+1,length(trace))], term
-    end
-
-    return trace[1:min(round(Int,iter/traceevery)+1,length(trace))]
-    # return trace
+    return returntimes ? (trace[1:min(round(Int,iter/traceevery)+1,length(trace))], term) : 
+        trace[1:min(round(Int,iter/traceevery)+1,length(trace))]
 end
