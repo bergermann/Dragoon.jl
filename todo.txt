@@ -6,7 +6,7 @@ To-Do-List (01.04.24):
 [x] improve nelder-mead for movement distance
 [x] nelder-mead linesearch
 [ ] annealing linesearch?
-[ ] implement missing unstuckinators
+[x] implement missing unstuckinators
 [ ] optimize derivative calculations?
 [ ] test and debug everything
 [ ] frequency shift, optimization from optimized state
