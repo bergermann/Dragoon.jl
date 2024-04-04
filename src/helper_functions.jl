@@ -45,7 +45,8 @@ end
         showtrace=false,force=false)
 
 Shift all data one index down, write current state to first entry. Last entry of
-`hist` is always lost.
+`hist` is always lost. Update only if current position is not last position, unless
+`forced`. Return objective value.
 """
 function updateHist!(booster::Booster,
         hist::Vector{State},
@@ -63,7 +64,7 @@ function updateHist!(booster::Booster,
                     ", Timestamp: ",hist[1].timestamp)
     end
 
-    returnß
+    return hist[1].objvalue
 end
 
 

@@ -121,6 +121,8 @@ mutable struct State
     end
 end
 
+const States::Type = Vector{State}
+
 """
     Callback
 

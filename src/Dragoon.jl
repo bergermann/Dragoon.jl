@@ -2,6 +2,15 @@
 
 __precompile__(true)
 
+"""
+    Dragoon
+
+MADMAX disc position optimization package. `Dragoon` contains multiple MADMAX specific
+implementations of optimization algorithms, namely `nelderMead`, `linesearch` and
+`simulatedAnnealing`. Each algorithm features high customizability through modular options.
+
+See [`here`](insertlinkformasterthesis), mainly chapter 5, for a comprehensive guide.
+"""
 module Dragoon
 
 using BoostFractor
@@ -36,5 +45,6 @@ include("neldermead/unstuckinators.jl")
 # Simulated Annealing options
 include("annealing/optimizer.jl")
 include("annealing/functions.jl")
+include("annealing/unstuckinators.jl")
 
 end
