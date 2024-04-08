@@ -77,6 +77,82 @@ function getRef1d(booster::Booster,frequencies::Array{Float64})
 end
 
 
+"""
+    boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
+        eps::Real=24.,tand::Real=0.,thickness::Real=1e-3,R::Real=0.15,
+        M::Int=1,L::Int=0,gridwidth::Real=1.0,dx=0.2)
+
+Return 3d boost values for given `spacings` and `frequencies` using Bessel-mode
+calculations.
+
+# Arguments
+- spacings::Vector{Float64}: Distances between discs.
+- frequencies::Vector{Float64}: Frequencies to calculate boost for.
+- eps::Real=24.: Relative dielectric constant of disc material.
+- tand::Real=0.: Dieletric loss of disc material.
+- thickness::Real=1e-3: Thickness of discs.
+- R::Real=0.15: Radius of discs.
+- M::Int=1: Maximum M value for mode calculations.
+- L::Int=0: Maximum L value for mode calculations.
+- gridwidth::Real=1.0: Size of discretization grid.
+- dx::Real=0.02: Tile size of discretization grid.
+"""
+function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
+        eps::Real=24.,tand::Real=0.,thickness::Real=1e-3,R::Real=0.15,
+        M::Int=1,L::Int=0,gridwidth::Real=1.0,dx::Real=0.02)
+
+    ndisk = length(spacings)
+
+    coords = SeedCoordinateSystem(X = -gridwidth/2:dx:gridwidth/2,
+                                  Y = -gridwidth/2:dx:gridwidth/2)
+    
+    epsilon = ComplexF64[NaN; [isodd(i) ? 1.0 : eps+1.0im*eps/tand for i in 1:2*ndisk+1]]
+    distance = [0.0; [isodd(i) ? spacings[div(i+1,2)] : thickness for i in 1:2*ndisk]; 0.0]
+        
+    sbdry = SeedSetupBoundaries(coords, diskno=ndisk, distance=distance, epsilon=epsilon)
+    modes = SeedModes(coords, ThreeDim=true, Mmax=Mmax, Lmax=Lmax, diskR=R)
+    
+    m_reflect = zeros(M*(2*L+1)); m_reflect[L+1] = 1.0
+
+    if isdefined(Main,:Distributed) && nworkers() > 1
+        boost_ = @sync @distributed (cat) for f in frequencies  
+            boost, _ = transformer(sbdry,coords,modes;
+                reflect=m_reflect, prop=propagator,diskR=R,f=f)
+
+            abs2.(sum(conj.(boost).*m_reflect, dims=1)[1,:])
+        end
+    else
+        boost_ = zeros(Float64,length(frequencies))
+
+        for i in eachindex(frequencies)
+            boost, _ = transformer(sbdry,coords,modes;
+                reflect=m_reflect, prop=propagator,diskR=R,f=f)
+
+            boost_[i] = abs2.(sum(conj.(boost).*m_reflect, dims=1)[1,:])
+        end
+    end
+    
+    return boost_
+end
+
+
+"""
+    getBoost3d(booster::Booster,frequencies::Array{Float64},
+        (M,L,gridwidth,dx)::Tuple{Int,Int,Real,Real}=(1,0,1,0.02))
+
+
+Return 3d boost values for given `booster` and `frequencies` using Bessel-mode calculations.
+See [`boost3d`](@ref).
+"""
+function getBoost3d(booster::Booster,frequencies::Array{Float64},
+        (M,L,gridwidth,dx)::Tuple{Int,Int,Real,Real}=(1,0,1,0.02))
+
+    return boost3d(pos2dist(booster.pos; disk_thickness=booster.thickness),
+        frequencies; eps=booster.epsilon,tand=booster.tand,
+        thickness=booster.thickness,R=booster.R,
+        M=M,L=L,gridwidth=gridwidth,dx=dx)
+end
+
 
 
 """
@@ -103,6 +179,8 @@ function findpeak(frequency::Real,n::Int;
 
     return D[findmax(B)[2]]
 end
+
+
 
 """
     genFreqs(fcenter::Real,fwidth::Real; n::Int=100)
@@ -188,3 +266,19 @@ magnitude_labels = Dict{Int,String}(
      9 => "G",
      12 => "T"
 )
+
+function e(n::Int,idxs::NTuple{N,Int},T::Type=Float64) where N
+    e_ = zeros(T,n)
+
+    for i in eachindex(idxs)
+        e_[i] = 1
+    end
+
+    return e_
+end
+
+function e(n::Int,idx::Int,T::Type=Float64)
+    e_ = zeros(T,n); e_[idx] = 1
+
+    return e_
+end

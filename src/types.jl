@@ -1,7 +1,10 @@
 
 ###     physical state of the booster
 
-export Booster, DevicesType, BoundariesType, AnalyticalBooster, PhysicalBooster, State, Callback, F
+export Booster,
+    AnalyticalBooster, PhysicalBooster,
+    DevicesType, BoundariesType, 
+    State, Callback, F
 
 unow() = now(UTC)
 
@@ -33,12 +36,14 @@ mutable struct AnalyticalBooster <: Booster
     pos::Array{<:Real}
     "Amount of discs."
     ndisk::Int
-    "Disc thickness τ in meter."
-    thickness::Real
     "Disc relative dielectric constant."
     epsilon::Float64
     "Disc dielectric loss angle."
     tand::Number
+    "Disc thickness τ in meter."
+    thickness::Real
+    "Disc radius in meter."
+    R::Real
     "Velocity of hypothetical motor."
     vmotor::Real
     "Maximum allowed booster length in meter."
@@ -50,12 +55,16 @@ mutable struct AnalyticalBooster <: Booster
     "Summed movement distance of discs."
     summeddistance::Float64
 
-    function AnalyticalBooster(initdist; ndisk=20,τ=1e-3,ϵ=24,tand=0,vmotor=0.1e-3,maxlength=2)
-        new(dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,tand,vmotor,maxlength,DateTime(0),unow(),0.)
+    function AnalyticalBooster(initdist; ndisk=20,ϵ=24,tand=0,τ=1e-3,R=0.15,
+            vmotor=0.1e-3,maxlength=2)
+        new(dist2pos(initdist*ones(ndisk)),ndisk,ϵ,tand,τ,R,
+            vmotor,maxlength,DateTime(0),unow(),0.)
     end
 
-    function AnalyticalBooster(pos,ndisk,thickness,epsilon,tand,vmotor,maxlength,timestamp,codetimestamp,summeddistance)
-        new(pos,ndisk,thickness,epsilon,tand,vmotor,maxlength,timestamp,codetimestamp,summeddistance)
+    function AnalyticalBooster(pos,ndisk,epsilon,tand,thickness,R,
+            vmotor,maxlength,timestamp,codetimestamp,summeddistance)
+        new(pos,ndisk,epsilon,tand,thickness,R,
+            vmotor,maxlength,timestamp,codetimestamp,summeddistance)
     end
 end
 

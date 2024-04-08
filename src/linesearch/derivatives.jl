@@ -231,3 +231,44 @@ function secondDerivative_(g,h,booster,hist,freqs,objFunction,args)
 end
 
 const Derivator2_(Δx1,Δx2,mode) = Callback(secondDerivative_,(Δx1,Δx2,mode))
+
+
+
+function secondDerivative__(g,h,booster,hist,freqs,objFunction,(Δx1,Δx2,mode))
+    fx = updateHist!(booster,hist,freqs,objFunction; force=true)
+    x0 = copy(booster.pos)
+    
+    if mode == "double"
+        for i in 1:booster.ndisk
+            move(booster,[(i,-Δx1)])
+            updateHist!(booster,hist,freqs,objFunction)
+
+            move(booster,[(i,Δx1)])
+            updateHist!(booster,hist,freqs,objFunction)
+
+            g[i] = (hist[1].objvalue-hist[2].objvalue)/2Δx1
+            h[i,i] = (hist[1].objvalue+hist[2].objvalue-2fx)/Δx1^2
+
+            for j in i+1:booster.ndisk
+                move(booster,x0+e(booster.ndisk,(i,j)); additive=false)
+                updateHist!(booster,hist,freqs,objFunction) #++
+
+                move(booster,[(i,-2Δx2)])
+                updateHist!(booster,hist,freqs,objFunction) #-+
+
+                move(booster,[(j,-2Δx2)])
+                updateHist!(booster,hist,freqs,objFunction) #--
+
+                move(booster,[(i,2Δx2)])
+                updateHist!(booster,hist,freqs,objFunction) #+-
+
+                h[i,j] = h[j,i] = (hist[4].objvalue-hist[1].objvalue-hist[3].objvalue+
+                    hist[2].objvalue)/4Δx^2
+            end
+        end
+    else
+
+    end
+
+    move(booster,x0; additive=false)
+end
