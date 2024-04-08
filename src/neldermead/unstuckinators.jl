@@ -27,7 +27,7 @@ end
 Create newly initialized simplex to unstuck Nelder-Mead.
 
 # args
-- initSimplex: Simplex initializer.
+- initSimplex: Simplex initializer callback.
 - best: Construct new simplex around best or worst old vertex.
 - threshold: Objective threshold under which no further unstucking is tried.
 """

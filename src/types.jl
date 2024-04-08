@@ -5,6 +5,11 @@ export Booster, DevicesType, BoundariesType, AnalyticalBooster, PhysicalBooster,
 
 unow() = now(UTC)
 
+"""
+    Booster
+
+Abstract supertype of boosters.
+"""
 abstract type Booster end
 
 abstract type DevicesType end
@@ -12,16 +17,37 @@ abstract type BoundariesType end
 
 abstract type Trace end
 
+"""
+    AnalyticalBooster <: Booster
+
+Booster type for analytical calculations.
+
+- `AnalyticalBooster(initdist; ndisk=20,τ=1e-3,ϵ=24,tand=0,
+        vmotor=0.1e-3,maxlength=2)`
+    
+- `AnalyticalBooster(pos,ndisk,thickness,epsilon,tand,
+        vmotor,maxlength,timestamp,codetimestamp,summeddistance)`
+"""
 mutable struct AnalyticalBooster <: Booster
+    "Disc positions."
     pos::Array{<:Real}
+    "Amount of discs."
     ndisk::Int
+    "Disc thickness τ in meter."
     thickness::Real
+    "Disc relative dielectric constant."
     epsilon::Float64
+    "Disc dielectric loss angle."
     tand::Number
+    "Velocity of hypothetical motor."
     vmotor::Real
+    "Maximum allowed booster length in meter."
     maxlength::Real
+    "Summed movement time of discs."
     timestamp::DateTime
+    "Elapsed runtime."
     codetimestamp::DateTime
+    "Summed movement distance of discs."
     summeddistance::Float64
 
     function AnalyticalBooster(initdist; ndisk=20,τ=1e-3,ϵ=24,tand=0,vmotor=0.1e-3,maxlength=2)
@@ -60,9 +86,22 @@ mutable struct PhysicalBooster <: Booster
 end
 
 
+"""
+    State
+
+Type for booster states.
+
+- `State(booster)`
+- `State(booster::AnalyticalBooster,objvalue)`
+- `State(booster::PhysicalBooster,objvalue)`
+- `State(booster,objvalue,timestamp)`
+"""
 mutable struct State
+    "Disc positions."
     pos::Array{Float64}
+    "Objective value at current position."
     objvalue::Float64
+    "Booster timestamp."
     timestamp::DateTime
 
     function State(booster)
@@ -82,8 +121,23 @@ mutable struct State
     end
 end
 
+const States::Type = Vector{State}
+
+"""
+    Callback
+
+Type combining a function with flexible, extra arguments for a later call.
+NOTE: args are not necessarily the only arguements of func!
+
+Alias: `F`
+
+- `Callback(func,args)`
+- `Callback(func)`
+"""
 mutable struct Callback
+    "Function to be called."
     func::Function
+    "Arguments to add on function call."
     args::Tuple
 
     function Callback(func,args)
@@ -95,4 +149,5 @@ mutable struct Callback
     end
 end
 
+"Alias for `Callback`."
 const F = Callback

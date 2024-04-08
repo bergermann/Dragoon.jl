@@ -19,8 +19,6 @@ end
 
 
 
-
-
 mutable struct SATrace <: Trace
     x::Array{Float64}
     obj::Float64
@@ -44,6 +42,8 @@ mutable struct SATrace <: Trace
     end    
 end
 
+
+
 function findNeighbour(booster::Booster,rmax::Float64)
     x_ = 2*rand(Float64,booster.ndisk) .- 1
     x_ /= pNorm(x_)
@@ -55,27 +55,25 @@ function thermal(objx::Float64,objy::Float64,T::Float64)
     return exp((objx-objy)/T)
 end
 
-function thermal(booster::Booster,obj0::Float64,pos2::Vector{Float64},
-        objFunction::Callback)
-
-    move()
-    obj0
-    
-    return
-end
 
 
+"""
+    analyse(hist,trace::Vector{SATrace},freqsplot;
+        freqs=nothing,plotting=true,div=5,ylim=[-0.05e4,3e4])
 
+Analyse simulated annealing trace and create plot output using Analytical1d.
 
-
-
-
-
-
-
-
+# Arguments
+- `hist`: Vector containing history of states.
+- `trace::Vector{LSTrace}`:  Trace from linesearch algorithm.
+- `freqsplot`: Frequencies to plot on. Don't have to be same as optimized freqs.
+- `freqs=nothing`: Optimized frequencies, used to show their bounds.
+- `plotting=true`: If false, return subtraces as plain vectors instead.
+- `div=5`: Amount of intermediate steps.
+- `ylim=[-0.05e4,3e4]`: Manual limit of y-axis.
+"""
 function analyse(hist,trace::Vector{SATrace},freqsplot;
-        freqs=nothing,plotting=true,div=5,scale=1e9,ylim=[-0.05e4,3e4])
+        freqs=nothing,plotting=true,div=5,ylim=[-0.05e4,3e4])
 
     tracex = hcat((x -> x.x).(trace)...)
     traced = hcat((x -> pos2dist(x.x)).(trace)...)
@@ -90,6 +88,8 @@ function analyse(hist,trace::Vector{SATrace},freqsplot;
 
     l = length(trace)
     n = length(tracex[:, 1])
+
+    mag = getMag(maximum(freqsplot)); scale = 10^mag
 
     if plotting
         plt1 = plot(freqsplot / scale, boost1d(pos2dist(tracexsol[:, 1]), freqsplot);
@@ -111,7 +111,7 @@ function analyse(hist,trace::Vector{SATrace},freqsplot;
         end
 
         title!("Boostfactor")
-        xlabel!("Frequency [GHz]")
+        xlabel!("Frequency [$(magLabel(mag))Hz]")
         ylabel!("β²")
         annotate!([(minimum(freqsplot) / scale, 0.9 * ylim[2],
             "Final value:\n" * string(round(traceobjsol[l], digits=1)), :left)])

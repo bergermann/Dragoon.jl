@@ -3,20 +3,38 @@
 export unstuckDont, unstuckRandom, unstuckCoord
 export UnstuckDont, UnstuckRandom, UnstuckCoord
 
+
+
+"""
+    unstuckDont(booster,hist,freqs,objFunction,args; showtrace=false)
+
+Don't attempt to unstuck booster, terminate instead.
+"""
 function unstuckDont(booster,hist,freqs,objFunction,args; showtrace=false)
     showtrace && println("No unstucking tried. Terminating.")
 
     return true
 end
 
-const UnstuckDont = Callback(unstuckDont)
+"""
+    UnstuckDont
 
-# shift discs independently and uniform randomly within [-d,d] if objective
-# threshold is not reached
-# args = (d,threshold)
-function unstuckRandom(booster,hist,freqs,objFunction,args; showtrace=false)
-    if hist[1].objvalue > args[2]
-        move(booster,args[1]*(2*rand(booster.ndisk).-1); additive=true)
+Callback for default unstuck option that doesn't unstuck.
+See [`unstuckDont`](@ref).
+"""
+UnstuckDont = Callback(unstuckDont)
+
+
+
+"""
+    unstuckRandom(booster,hist,freqs,objFunction,(d,threshold); showtrace=false)
+
+Attempt to unstuck booster by shifting every disc by a uniformly random value
+``∈`` `[-d,d]`. Don't unstuck if objective value is below `threshold`.
+"""
+function unstuckRandom(booster,hist,freqs,objFunction,(d,threshold); showtrace=false)
+    if hist[1].objvalue > threshold
+        move(booster,d*(2*rand(booster.ndisk).-1); additive=true)
         updateHist!(booster,hist,freqs,objFunction)
 
         showtrace && println("Unstuck successfull.")
@@ -29,35 +47,46 @@ function unstuckRandom(booster,hist,freqs,objFunction,args; showtrace=false)
     end
 end
 
+"""
+    UnstuckRandom(d,threshold)
+
+Callback for random unstuck option. See [`unstuckRandom`](@ref).
+"""
 UnstuckRandom(d,threshold) = Callback(unstuckRandom,(d,threshold))
 
-# search every coordinate axis for better points
-# search along distance d divided into div steps
-# enforce movement by setting dmin to > 0
-# args = (d,dmin,div::Int,threshold)
-function unstuckCoord(booster,hist,freqs,objFunction,args; showtrace=false)
-    threshold = -abs(args[2])
+
+
+"""
+    unstuckCoord(booster,hist,freqs,objFunction,
+        (d,dmin,div,threshold); showtrace=false)
+
+Attempt to unstuck booster by performing search for `div` steps from `dmin`
+to `d` along every coordinate axis. Don't unstuck if objective value is below 
+`threshold`.
+"""
+function unstuckCoord(booster,hist,freqs,objFunction,
+        (d,dmin,div,threshold); showtrace=false)
 
     if hist[1].objvalue > threshold
         pos0 = copy(booster.pos)
 
         for i in 1:booster.ndisk
-            if args[2] > 0.
-                move(booster,[(i,args[2])]; additive=true)
+            if dmin > 0.
+                move(booster,[(i,dmin)]; additive=true)
                 updateHist!(booster,hist,freqs,objFunction)
             end
 
-            δ = (args[1]-args[2])/args[3]
+            δ = (d-dmin)/div
 
-            for j in 1:args[3]
+            for _ in 1:div
                 move(booster,[(i,δ)])
                 updateHist!(booster,hist,freqs,objFunction)
             end
 
-            move(booster,[(i,-(args[1]+args[2]))])
+            move(booster,[(i,-(d+dmin))])
             updateHist!(booster,hist,freqs,objFunction)
 
-            for j in 1:args[3]
+            for _ in 1:div
                 move(booster,[(i,-δ)])
                 updateHist!(booster,hist,freqs,objFunction)
             end
@@ -82,4 +111,11 @@ function unstuckCoord(booster,hist,freqs,objFunction,args; showtrace=false)
     end
 end
 
-const UnstuckCoord(d,dmin,div,threshold) = Callback(unstuckCoord,(d,dmin,div,threshold))
+
+"""
+    UnstuckCoord(d,dmin,div,threshold)
+
+Callback for unstuck search along coordinate axes. See [`unstuckCoord`](@ref).
+"""
+UnstuckCoord(d,dmin,div,threshold) = 
+    Callback(unstuckCoord,(d,dmin,div,threshold))

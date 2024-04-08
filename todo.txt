@@ -1,0 +1,19 @@
+
+
+To-Do-List (01.04.24):
+[x] clean up repositorie(s, assuming nick did a good job)
+[x] document repositories
+[x] improve nelder-mead for movement distance
+[x] nelder-mead linesearch
+[ ] annealing linesearch?
+[x] implement missing unstuckinators
+[ ] optimize derivative calculations?
+[ ] test and debug everything
+[ ] frequency shift, optimization from optimized state
+- direct re-optimization
+- sophisticated linesearch beforehand, then re-optimization
+[ ] 3d objective function
+[ ] move repo to rwth gitlab
+
+[ ] show redundancy in optimized states
+[ ] write paper i guess
