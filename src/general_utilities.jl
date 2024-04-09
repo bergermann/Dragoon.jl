@@ -256,7 +256,7 @@ function magLabel(mag::Int)
     return get(magnitude_labels,mag,"10^$mag ")
 end
 
-magnitude_labels = Dict{Int,String}(
+const magnitude_labels = Dict{Int,String}(
     -9 => "n",
     -6 => "µ",
     -3 => "m",
@@ -267,18 +267,23 @@ magnitude_labels = Dict{Int,String}(
      12 => "T"
 )
 
+"""
+    e(n::Int,idxs::NTuple{N,Int},T::Type=Float64) where N
+
+    e(n::Int,idx::Int,T::Type=Float64)
+
+Return vector of type `T` with all zeros, except for ones at `idxs`.
+"""
 function e(n::Int,idxs::NTuple{N,Int},T::Type=Float64) where N
     e_ = zeros(T,n)
 
-    for i in eachindex(idxs)
-        e_[i] = 1
-    end
+    e_[idxs] .= one(T)
 
     return e_
 end
 
 function e(n::Int,idx::Int,T::Type=Float64)
-    e_ = zeros(T,n); e_[idx] = 1
+    e_ = zeros(T,n); e_[idx] = one(T)
 
     return e_
 end

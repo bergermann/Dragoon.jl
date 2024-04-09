@@ -240,17 +240,17 @@ function secondDerivative__(g,h,booster,hist,freqs,objFunction,(Δx1,Δx2,mode))
     
     if mode == "double"
         for i in 1:booster.ndisk
-            move(booster,[(i,-Δx1)])
+            move(booster,x0-Δx1*e(booster.ndisk,(i,)); additive=false)
             updateHist!(booster,hist,freqs,objFunction)
 
-            move(booster,[(i,Δx1)])
+            move(booster,[(i,2Δx1)])
             updateHist!(booster,hist,freqs,objFunction)
 
             g[i] = (hist[1].objvalue-hist[2].objvalue)/2Δx1
             h[i,i] = (hist[1].objvalue+hist[2].objvalue-2fx)/Δx1^2
 
             for j in i+1:booster.ndisk
-                move(booster,x0+e(booster.ndisk,(i,j)); additive=false)
+                move(booster,x0+Δx2*e(booster.ndisk,(i,j)); additive=false)
                 updateHist!(booster,hist,freqs,objFunction) #++
 
                 move(booster,[(i,-2Δx2)])
@@ -267,8 +267,68 @@ function secondDerivative__(g,h,booster,hist,freqs,objFunction,(Δx1,Δx2,mode))
             end
         end
     else
+        for i in 1:booster.ndisk
+            if Δx1 < Δx2
+                move(booster,x0+Δx1*e(booster.ndisk,(i,)); additive=false)
+                updateHist!(booster,hist,freqs,objFunction)
 
+                g[i] = (hist[1].objvalue-fx)/Δx1
+
+                move(booster,[i,Δx2-Δx1])
+                fx_i = updateHist!(booster,hist,freqs,objFunction)
+
+                move(booster,[i,Δx2])
+                updateHist!(booster,hist,freqs,objFunction)
+
+                h[i,i] = (hist[1].objvalue-2fx_i+fx)/Δx2^2
+            elseif Δx2 < Δx1 < 2Δx2
+                move(booster,x0+Δx2*e(booster.ndisk,(i,)); additive=false)
+                fx_i = updateHist!(booster,hist,freqs,objFunction)
+
+                move(booster,[(i,Δx1-Δx2)])
+                updateHist!(booster,hist,freqs,objFunction)
+
+                g[i] = (hist[1].objvalue-fx)/Δx1
+
+                move(booster,[(i,2Δx2-Δx1)])
+                updateHist!(booster,hist,freqs,objFunction)
+
+                h[i,i] = (hist[1].objvalue-2fx_i+fx)/Δx2^2
+            else
+                move(booster,x0+Δx2*e(booster.ndisk,(i,)); additive=false)
+                fx_i = updateHist!(booster,hist,freqs,objFunction)
+
+                move(booster,[(i,Δx2)])
+                updateHist!(booster,hist,freqs,objFunction)
+
+                h[i,i] = (hist[1].objvalue-2fx_i+fx)/Δx2^2
+
+                move(booster,[(i,Δx1-2Δx2)])
+                updateHist!(booster,hist,freqs,objFunction)
+            end
+
+            for j in i+1:booster.ndisk
+                move(booster,x0+Δx2*e(booster.ndisk,(i,j)); additive=false)
+                updateHist!(booster,hist,freqs,objFunction)
+
+                move(booster,[(i,-Δx2)])
+                updateHist!(booster,hist,freqs,objFunction)
+
+                h[i,j] = h[j,i] = (hist[2].objvalue-hist[1].objvalue-fx_i-fx)/Δx2^2
+            end
+        end
     end
 
     move(booster,x0; additive=false)
+
+    return
 end
+
+"""
+    Derivator2(Δx1,Δx2,mode)
+
+Callback for second order derivator option in [`linesearch`](@ref). See 
+[`secondDerivative`](@ref).
+"""
+const Derivator2__(Δx1,Δx2,mode) = Callback(secondDerivative__,(Δx1,Δx2,mode))
+

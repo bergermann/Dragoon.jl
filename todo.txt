@@ -5,9 +5,8 @@ To-Do-List (01.04.24):
 [x] document repositories
 [t] improve nelder-mead for movement distance
 [t] nelder-mead linesearch
-[ ] annealing linesearch?
 [t] implement missing unstuckinators
-[ ] optimize derivative calculations?
+[t] optimize derivative calculations?
 [t] 3d objective function
 [ ] test and debug everything
 

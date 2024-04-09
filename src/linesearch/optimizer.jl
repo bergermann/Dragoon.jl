@@ -77,13 +77,12 @@ function linesearch(booster::Booster, hist::Vector{State}, freqs::Array{Float64}
 
         solver.func(booster, hist, freqs, objFunction, p, g, h, trace, i, solver.args)
 
-        showtrace && i % showevery == 0 && println("Gradient norm: ",
+        showtrace && i%showevery == 0 && println("Gradient norm: ",
                                                 round(pNorm(g), sigdigits=3))
 
         #early stopping if descend is too slow
         pNorm(g) <= ϵgrad && ((showtrace && println("Gradient threshold reached.
-                                                Terminating."));
-        break)
+                                                Terminating.")); break)
 
         #determine steplength and/or normalize p
         updateHist!(booster, hist, freqs, objFunction)
@@ -96,7 +95,7 @@ function linesearch(booster::Booster, hist::Vector{State}, freqs::Array{Float64}
         k = search.func(p, α, booster, hist, freqs, objFunction, search.args;
             showtrace=showtrace)
 
-        showtrace && i % showevery == 0 && printIter(booster, hist, i, k)
+        showtrace && i%showevery == 0 && printIter(booster, hist, i, k)
 
         #perform unstucking
         if k == 0
