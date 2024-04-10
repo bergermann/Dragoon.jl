@@ -147,7 +147,7 @@ function secondDerivative(g,h,booster,hist,freqs,objFunction,(Δx1,Δx2,mode))
                 move(booster,[(i,-Δx2)])
                 updateHist!(booster,hist,freqs,objFunction)
 
-                h[i,j] = h[j,i] = (hist[2].objvalue-hist[1].objvalue-fx_i-fx)/Δx2^2
+                h[i,j] = h[j,i] = (hist[2].objvalue-hist[1].objvalue-fx_i+fx)/Δx2^2
             end
         end
     end
