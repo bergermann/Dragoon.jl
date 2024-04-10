@@ -116,7 +116,7 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
     
     m_reflect = zeros(M*(2*L+1)); m_reflect[L+1] = 1.0
 
-    boost_ = @sync @distributed (cat(dims=1)) for f in frequencies  
+    boost_ = @sync @distributed (cat) for f in frequencies  
         boost, _ = transformer(sbdry,coords,modes;
             reflect=m_reflect, prop=propagator,diskR=R,f=f)
 
