@@ -203,7 +203,8 @@ end
         resettimer::Bool=true,
         returntimes::Bool=false)
 
-Perform Nelder-Mead optimization on a physical or analytical booster, returns process trace.
+Perform Nelder-Mead optimization with linesearch on a physical or analytical booster,
+returns process trace.
 
 # Arguments
 - `booster::Booster`: Booster struct to operate on.

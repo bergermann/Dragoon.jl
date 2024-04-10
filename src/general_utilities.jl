@@ -112,7 +112,7 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
     distance = [0.0; [isodd(i) ? spacings[div(i+1,2)] : thickness for i in 1:2*ndisk]; 0.0]
         
     sbdry = SeedSetupBoundaries(coords, diskno=ndisk, distance=distance, epsilon=epsilon)
-    modes = SeedModes(coords, ThreeDim=true, Mmax=Mmax, Lmax=Lmax, diskR=R)
+    modes = SeedModes(coords, ThreeDim=true, Mmax=M, Lmax=L, diskR=R)
     
     m_reflect = zeros(M*(2*L+1)); m_reflect[L+1] = 1.0
 
