@@ -270,7 +270,7 @@ const magnitude_labels = Dict{Int,String}(
 
 Return vector of type `T` with all zeros, except for ones at `idxs`.
 """
-function e(n::Int,idxs::NTuple{N,Int},T::Type=Float64) where N
+function e(n::Int,idxs::Array{<:Integer},T::Type=Float64) where N
     e_ = zeros(T,n)
 
     e_[idxs] .= one(T)
