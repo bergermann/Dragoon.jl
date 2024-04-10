@@ -204,7 +204,7 @@ Return distances corresponding to `position`.
 """
 function pos2dist(position::Array{Float64}; disk_thickness::Real=1e-3)
     pos = [0; position]
-    d = (position[2:end]-position[1:end-1])
+    d = (pos[2:end]-pos[1:end-1])
     d[2:end] .-= disk_thickness
     
     return d
@@ -216,8 +216,8 @@ end
 
 Return position corresponding to `distances`.
 """
-function dist2pos(dist::Array{Float64}; disc_thickness::Real=1e-3)
-    return [sum(dist[1:i])+(i-1)*disc_thickness for i in 1:length(distances)]
+function dist2pos(distances::Array{Float64}; disc_thickness::Real=1e-3)
+    return [sum(distances[1:i])+(i-1)*disc_thickness for i in 1:length(distances)]
 end
 
 
