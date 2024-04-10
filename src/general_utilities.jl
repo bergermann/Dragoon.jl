@@ -2,9 +2,11 @@
 
 export spacings_stefan,
     boost1d, ref1d, getBoost1d, getRef1d,
-    findpeak, genFreqs, 
+    boost3d, getBoost3d,
+    findpeak1d, findpeak3d,
+    genFreqs, 
     pos2dist, dist2pos,
-    pNorm, copy,
+    pNorm, copy
 
 """
     const spacings_stefan
@@ -160,11 +162,11 @@ end
         eps::Real=24.,tand::Real=0.,thickness::Real=1e-3,granularity::Int=1000,
         deviation::Real=0.1)
     
-Return the best found spacing that maximizes the boost value at the given
-`frequency` for `n` equidistant discs. Search for `granularity` steps between
+Return the best found spacing using analytical1d that maximizes the boost value at the
+given `frequency` for `n` equidistant discs. Search for `granularity` steps between
 `(1-deviation)*λ`, `(1+deviation)*λ`.
 """
-function findpeak(frequency::Real,n::Int;
+function findpeak1d(frequency::Real,n::Int;
         eps::Real=24.,tand::Real=0.,thickness::Real=1e-3,granularity::Int=1000,
         deviation::Real=0.1)
 
@@ -178,6 +180,11 @@ function findpeak(frequency::Real,n::Int;
     end
 
     return D[findmax(B)[2]]
+end
+
+"Not yet implemented."
+function findpeak3d()
+
 end
 
 

@@ -8,6 +8,7 @@ To-Do-List (01.04.24):
 [t] implement missing unstuckinators
 [t] optimize derivative calculations?
 [t] 3d objective function
+[ ] findpeak 3d
 [ ] test and debug everything
 
 [ ] move repo to rwth gitlab
