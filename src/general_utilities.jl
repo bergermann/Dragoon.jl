@@ -160,7 +160,7 @@ function findpeak1d(frequency::Real,n::Int;
         deviation::Real=0.1)
 
     λ = 299792458.0/frequency
-    B = zeros(gran)
+    B = zeros(granularity)
     D = range(1-deviation; stop=1+deviation,length=granularity)*λ/2
 
     for i in eachindex(D)
