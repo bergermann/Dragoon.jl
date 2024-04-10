@@ -33,15 +33,15 @@ Booster type for analytical calculations.
 """
 mutable struct AnalyticalBooster <: Booster
     "Disc positions."
-    pos::Array{<:Real}
+    pos::Array{<:AbstractFloat}
     "Amount of discs."
-    ndisk::Int
+    ndisk::Integer
     "Disc relative dielectric constant."
-    epsilon::Float64
+    epsilon::AbstractFloat
     "Disc dielectric loss angle."
-    tand::Number
+    tand::AbstractFloat
     "Disc thickness τ in meter."
-    thickness::Real
+    thickness::AbstractFloat
     "Disc radius in meter."
     R::Real
     "Velocity of hypothetical motor."
@@ -53,7 +53,7 @@ mutable struct AnalyticalBooster <: Booster
     "Elapsed runtime."
     codetimestamp::DateTime
     "Summed movement distance of discs."
-    summeddistance::Float64
+    summeddistance::AbstractFloat
 
     function AnalyticalBooster(initdist; ndisk=20,ϵ=24,tand=0,τ=1e-3,R=0.15,
             vmotor=0.1e-3,maxlength=2)
