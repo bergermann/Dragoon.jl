@@ -488,7 +488,7 @@ function search(booster::Booster,hist::States,freqs::Vector{Float64},objFunction
         x_start::Vector{Float64},x_stop::Vector{Float64},αls::Real)
 
     dx = x_stop-x_start; dx_l = pNorm(dx); dx /= dx_l
-    nsteps = floor(dx_l/αls)
+    nsteps = floor(Int,dx_l/αls)
 
     move(booster,x_start; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
