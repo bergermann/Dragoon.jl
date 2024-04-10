@@ -116,22 +116,11 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
     
     m_reflect = zeros(M*(2*L+1)); m_reflect[L+1] = 1.0
 
-    if isdefined(Main,:Distributed) && nworkers() > 1
-        boost_ = @sync @distributed (cat) for f in frequencies  
-            boost, _ = transformer(sbdry,coords,modes;
-                reflect=m_reflect, prop=propagator,diskR=R,f=f)
+    boost_ = @sync @distributed (cat) for f in frequencies  
+        boost, _ = transformer(sbdry,coords,modes;
+            reflect=m_reflect, prop=propagator,diskR=R,f=f)
 
-            abs2.(sum(conj.(boost).*m_reflect, dims=1)[1,:])
-        end
-    else
-        boost_ = zeros(Float64,length(frequencies))
-
-        for i in eachindex(frequencies)
-            boost, _ = transformer(sbdry,coords,modes;
-                reflect=m_reflect, prop=propagator,diskR=R,f=f)
-
-            boost_[i] = abs2.(sum(conj.(boost).*m_reflect, dims=1)[1,:])
-        end
+        abs2.(sum(conj.(boost).*m_reflect, dims=1)[1,:])
     end
     
     return boost_

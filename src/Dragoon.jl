@@ -14,6 +14,8 @@ See [`here`](insertlinkformasterthesis), mainly chapter 5, for a comprehensive g
 module Dragoon
 
 using BoostFractor
+using Distributed
+using LinearAlgebra
 using Plots
 
 import Dates: DateTime, now, UTC, canonicalize, Second, Nanosecond

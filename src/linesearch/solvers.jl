@@ -43,7 +43,7 @@ Return Newton's descend direction ``h^(-1)*g``.
 function solverNewton(booster::Booster,hist::Vector{State},freqs::Vector{Float64},
         objFunction::Callback,
         p::Vector{Float64},g::Vector{Float64},h::Matrix{Float64},
-        trace::Vector{LSTrace},i::Int,(mode::String,))
+        trace::Vector{LSTrace},i::Int,(mode,)::Tuple{String,})
     
     if lowercase(mode) == "cholesky"
         try
