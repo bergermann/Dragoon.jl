@@ -12,7 +12,7 @@ export unstuckExpandSimplex, UnstuckExpand
 
 Default Nelder-Mead unstucker that just terminates.
 """
-function unstuckDont(booster,hist,freqs,objFunction,simplexObj,x,f,(); showtrace=false)
+function unstuckDont(booster,hist,freqs,objFunction,simplexObj,x,f,args; showtrace=false)
     showtrace && println("No unstucking tried. Terminating.")
 
     return true
