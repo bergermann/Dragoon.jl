@@ -514,5 +514,7 @@ function search(booster::Booster,hist::States,freqs::Vector{Float64},objFunction
 
     idx = argmin(x->x.objvalue,hist[1:nsteps+2])
 
+    display(idx)
+
     return hist[idx].pos, hist[idx].objvalue
 end
