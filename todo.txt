@@ -6,7 +6,7 @@ To-Do-List (01.04.24):
 [t] improve nelder-mead for movement distance
 [t] nelder-mead linesearch
 [t] implement missing unstuckinators
-[t] optimize derivative calculations?
+[x] optimize derivative calculations?
 [t] 3d objective function
 [ ] findpeak 3d
 [ ] test and debug everything
