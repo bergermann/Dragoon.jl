@@ -17,6 +17,8 @@ To-Do-List (01.04.24):
 - sophisticated linesearch beforehand, then re-optimization
 [ ] synchronize movement to measurement
 [ ] larger performance trials/tests
+[ ] 3d tests
+[ ] loss tests?
 
 [ ] reflectivity fitting?
 [ ] gradient method?
