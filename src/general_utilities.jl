@@ -32,7 +32,7 @@ function boost1d(spacings::Vector{Float64},frequencies::Vector{Float64};
     
     return abs2.(disk_system(frequencies;
         tand=tand,spacings=[spacings;0],disk_thickness=thickness,
-        disk_epsilon=eps+1.0im*atan(tand/eps),num_disk=length(spacings))[2])
+        disk_epsilon=eps,num_disk=length(spacings))[2])
 end
 
 
@@ -49,7 +49,7 @@ function ref1d(spacings::Vector{Float64},frequencies::Vector{Float64};
 
     return disk_system(frequencies;
         tand=tand,spacings=[spacings;0],disk_thickness=thickness,
-        disk_epsilon=eps+1.0im*atan(tand/eps),num_disk=length(spacings))[1]
+        disk_epsilon=eps,num_disk=length(spacings))[1]
 end
 
 
