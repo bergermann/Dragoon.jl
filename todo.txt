@@ -7,9 +7,12 @@ To-Do-List (01.04.24):
 [x] nelder-mead linesearch
 [t] implement missing unstuckinators
 [x] optimize derivative calculations
-[t] 3d objective function
+[x] 3d objective function
 [ ] findpeak 3d
 [ ] test and debug everything
+[ ] rewrite readme (add stuff about nworkers for dist/3d, add option list for optimizers,
+    remove/rework examples?, add info about XIMC addon)
+
 
 [ ] move repo to rwth gitlab
 [ ] frequency shift, optimization from optimized state
