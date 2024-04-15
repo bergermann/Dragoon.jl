@@ -181,8 +181,8 @@ end
         eps::Real=24.,tand::Real=0.,thickness::Real=1e-3,granularity::Int=1000,
         deviation::Real=0.1)
     
-Return the best found spacing using analytical1d that maximizes the boost value at the
-given `frequency` for `n` equidistant discs. Search for `granularity` steps between
+Return the best found spacing using transformer 3d boost that maximizes the boost value at
+the given `frequency` for `n` equidistant discs. Search for `granularity` steps between
 `(1-deviation)*λ`, `(1+deviation)*λ`. See [`boost3d`](@ref) for remaining parameters.
 """
 function findpeak3d(frequency::Real,n::Int;
@@ -196,11 +196,8 @@ function findpeak3d(frequency::Real,n::Int;
 
     for i in eachindex(D)
         B[i] = boost3d(ones(n)*D[i],[frequency];
-            eps=eps,tand=tand,thickness=thickness)[1]
-
-        boost3d(ones(n)*D[i],[frequency];
             eps=eps,tand=tand,thickness=thickness,R=R,
-            M=M,L=L,gridwidth=gridwidth,dx=dx)
+            M=M,L=L,gridwidth=gridwidth,dx=dx)[1]
     end
 
     return D[findmax(B)[2]]
