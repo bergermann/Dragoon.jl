@@ -185,10 +185,10 @@ Return the best found spacing using transformer 3d boost that maximizes the boos
 the given `frequency` for `n` equidistant discs. Search for `granularity` steps between
 `(1-deviation)*λ`, `(1+deviation)*λ`. See [`boost3d`](@ref) for remaining parameters.
 """
-function findpeak3d(frequency::Real,n::Int;
+function findpeak3d(frequency::Real,n::Int,
+        (R,M,L,gridwidth,dx)::Tuple{Real,Int,Int,Real,Real}=(0.15,1,0,1,0.02);
         eps::Real=24.,tand::Real=0.,thickness::Real=1e-3,
-        granularity::Int=1000,deviation::Real=0.1,
-        (R,M,L,gridwidth,dx)::Tuple{Real,Int,Int,Real,Real}=(0.15,1,0,1,0.02))
+        granularity::Int=1000,deviation::Real=0.1)
 
     λ = 299792458.0/frequency
     B = zeros(granularity)
