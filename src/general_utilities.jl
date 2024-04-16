@@ -110,7 +110,7 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
         R = $R; M = $M; L = $L
         gw = $gridwidth; dx = $dx
         
-        m_reflect = $r
+        m_reflect = copy($r)
         
         dists = $spacings; ndisk = length(dists)
 
@@ -123,7 +123,7 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
         modes = SeedModes(coords,ThreeDim=true,Mmax=M,Lmax=L,diskR=R)
     end
 
-    boost_total = @sync @distributed (cat_) for f in frequencies
+    boost_total = @distributed (cat_) for f in frequencies
         boost, _ = transformer(sbdry,coords,modes; reflect=m_reflect, prop=propagator,
             diskR=0.15,f=f)
 

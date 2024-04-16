@@ -163,5 +163,5 @@ end
 Callback for second order derivator option in [`linesearch`](@ref). See 
 [`secondDerivative`](@ref).
 """
-Derivator(Δx1,Δx2,mode) = Callback(secondDerivative,(Δx1,Δx2,mode))
+Derivator2(Δx1,Δx2,mode) = Callback(secondDerivative,(Δx1,Δx2,mode))
 
