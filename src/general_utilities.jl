@@ -106,13 +106,13 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
     r = zeros(M*(2*L+1)); r[L+1] = 1.0
 
     @everywhere begin
-        eps = $eps+1.0im*atan($tand/$eps); thick = $thickness
-        R = $R; M = $M; L = $L
-        gw = $gridwidth; dx = $dx
+        eps = $(eps)+1.0im*atan($(tand)/$(eps)); thick = $(thickness)
+        R = $(R); M = $(M); L = $(L)
+        gw = $(gridwidth); dx = $(dx)
         
-        m_reflect = copy($r)
+        m_reflect = copy($(r))
         
-        dists = $spacings; ndisk = length(dists)
+        dists = $(spacings); ndisk = length(dists)
 
         coords = SeedCoordinateSystem(X = -gw/2:dx:gw/2,Y = -gw/2:dx:gw/2)
 
