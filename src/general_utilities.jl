@@ -107,11 +107,11 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
 
     eps = eps+1.0im*atan(tand/eps)
 
-    coords = SeedCoordinateSystem(; X=-gridwidth/2:dx:gridwidth/2,
-        Y=-gridwidth/2:dx:gridwidth/2)
-
     epsilon = ComplexF64[NaN; [isodd(i) ? 1.0 : eps for i in 1:2*ndisk+1]]
     distance = [0.0; [isodd(i) ? spacings[div(i+1,2)] : thickness for i in 1:2*ndisk]; 0.0]
+
+    coords = SeedCoordinateSystem(; X=-gridwidth/2:dx:gridwidth/2,
+        Y=-gridwidth/2:dx:gridwidth/2)
 
     sbdry = SeedSetupBoundaries(coords,diskno=ndisk,distance=distance,epsilon=epsilon)
     modes = SeedModes(coords,ThreeDim=true,Mmax=M,Lmax=L,diskR=R)
@@ -127,9 +127,6 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
     end
 
     boost_total = @sync @distributed (cat_) for f in frequencies
-        display(eps)
-        display(dists)
-        display(m_reflect)
         boost, _ = transformer(sbdry,coords,modes; reflect=m_reflect, prop=propagator,
             diskR=R,f=f)
 
