@@ -33,11 +33,11 @@ from [BoostFractor](https://github.com/mppmu/BoostFractor.jl).
 NOTE: The 3d calculations use distributed computing, hence be sure to do
 ```julia
 julia> using Distributed
-julia> addprocs(n) # n is the number of workers you want to use
+julia> addprocs(n) # n is the number of cores/workers you want to use
 julia> println(nworkers()) # check if workers are correctly available
 julia> @everywhere using BoostFractor, Dragoon
 ```
-before using any 3d function. 
+before using any 3d function (not necessary if you want to work on a single core (default)). 
 
 For use with an actual physical booster and VNA, additional packages are available:
 [Motor Control](https://git.rwth-aachen.de/nick1/XIMC-jl), 
