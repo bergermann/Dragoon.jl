@@ -123,7 +123,10 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
         modes = SeedModes(coords,ThreeDim=true,Mmax=M,Lmax=L,diskR=R)
     end
 
-    boost_total = @distributed (cat_) for f in frequencies
+    boost_total = @sync @distributed (cat_) for f in frequencies
+        display(dists)
+        display(eps)
+        display(m_reflect)
         boost, _ = transformer(sbdry,coords,modes; reflect=m_reflect, prop=propagator,
             diskR=0.15,f=f)
 
