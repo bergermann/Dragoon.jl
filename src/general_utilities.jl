@@ -103,29 +103,27 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
         eps::Real=24.,tand::Real=0.,thickness::Real=1e-3,R::Real=0.15,
         M::Int=1,L::Int=0,gridwidth::Real=1.0,dx::Real=0.02)
 
-    r = zeros(M*(2*L+1))
-    r[L+1] = 1.0
+    ndisk = length(spacings)
+
+    eps = eps+1.0im*atan(tand/eps)
+
+    coords = SeedCoordinateSystem(; X=-gridwidth/2:dx:gridwidth/2,
+        Y=-gridwidth/2:dx:gridwidth/2)
+
+    epsilon = ComplexF64[NaN; [isodd(i) ? 1.0 : eps for i in 1:2*ndisk+1]]
+    distance = [0.0; [isodd(i) ? spacings[div(i+1,2)] : thickness for i in 1:2*ndisk]; 0.0]
+
+    sbdry = SeedSetupBoundaries(coords,diskno=ndisk,distance=distance,epsilon=epsilon)
+    modes = SeedModes(coords,ThreeDim=true,Mmax=M,Lmax=L,diskR=R)
+
+    m_reflect = zeros(M*(2*L+1)); m_reflect[L+1] = 1.0
 
     @everywhere begin
-        eps = $(eps)+1.0im*atan($(tand)/$(eps))
-        thick = $(thickness)
+        sbdry = $(sbdry)
+        coords = $(coords)
+        modes = $(modes)
+        m_reflect = $(m_reflect)
         R = $(R)
-        M = $(M)
-        L = $(L)
-        gw = $(gridwidth)
-        dx = $(dx)
-        
-        m_reflect = $(r)
-        
-        dists = $(spacings); ndisk = length(dists)
-
-        coords = SeedCoordinateSystem(; X=-gw/2:dx:gw/2,Y=-gw/2:dx:gw/2)
-
-        epsilon = ComplexF64[NaN; [isodd(i) ? 1.0 : eps for i in 1:2*ndisk+1]]
-        distance = [0.0; [isodd(i) ? dists[div(i+1,2)] : thick for i in 1:2*ndisk]; 0.0]
-            
-        sbdry = SeedSetupBoundaries(coords,diskno=ndisk,distance=distance,epsilon=epsilon)
-        modes = SeedModes(coords,ThreeDim=true,Mmax=M,Lmax=L,diskR=R)
     end
 
     boost_total = @sync @distributed (cat_) for f in frequencies
@@ -133,7 +131,7 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
         display(dists)
         display(m_reflect)
         boost, _ = transformer(sbdry,coords,modes; reflect=m_reflect, prop=propagator,
-            diskR=0.15,f=f)
+            diskR=R,f=f)
 
         sum(abs2.(boost))
     end
