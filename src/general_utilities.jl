@@ -103,10 +103,14 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
         eps::Real=24.,tand::Real=0.,thickness::Real=1e-3,R::Real=0.15,
         M::Int=1,L::Int=0,gridwidth::Real=1.0,dx::Real=0.02)
 
+    r = zeros(M*(2*L+1)); r[L+1] = 1.0
+
     @everywhere begin
         eps = $eps+1.0im*atan($tand/$eps); thick = $thickness
         R = $R; M = $M; L = $L
-        gw = $gridwidth; dx = $dx;
+        gw = $gridwidth; dx = $dx
+        
+        m_reflect = $r
         
         dists = $spacings; ndisk = length(dists)
 
@@ -117,8 +121,6 @@ function boost3d(spacings::Vector{Float64},frequencies::Vector{Float64};
             
         sbdry = SeedSetupBoundaries(coords,diskno=ndisk,distance=distance,epsilon=epsilon)
         modes = SeedModes(coords,ThreeDim=true,Mmax=M,Lmax=L,diskR=R)
-
-        m_reflect = zeros(M*(2*L+1)); m_reflect[L+1] = 1.0
     end
 
     boost_total = @sync @distributed (cat_) for f in frequencies
