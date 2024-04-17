@@ -18,7 +18,7 @@ using Distributed
 using LinearAlgebra
 using Plots
 
-import Dates: DateTime, now, UTC, canonicalize, Second, Nanosecond
+import Dates: DateTime, now, UTC, canonicalize, Year, Day, Hour, Minute, Second, Nanosecond
 import DateFormats: /ₜ, *ₜ
 
 # General optimizers

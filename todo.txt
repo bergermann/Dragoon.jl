@@ -1,10 +1,12 @@
 
 
 To-Do-List (17.04.24):
-Package work:
+Package:
 [t] implement missing unstuckinators
 [t] rework examples
+[ ] fix analyse functions
 
+Computation:
 [ ] move repo to rwth gitlab
 [ ] frequency shift, optimization from optimized state
 - direct re-optimization
@@ -14,8 +16,10 @@ Package work:
 [ ] 3d tests
 [ ] loss tests?
 
-[ ] reflectivity fitting?
-[ ] gradient method?
-
+Main:
 [ ] show redundancy in optimized states
 [ ] write paper i guess
+
+New/Cross features:
+[ ] reflectivity fitting?
+[ ] gradient method?
