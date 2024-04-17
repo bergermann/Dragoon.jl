@@ -2,8 +2,8 @@
 export nelderMead, nelderMeadLinesearch
 
 """
-    nelderMead(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
-        α::Float64, β::Float64, γ::Float64, δ::Float64, Δmin::Real,
+    nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
+        α::Float64,β::Float64,γ::Float64,δ::Float64,Δmin::Real,
         objFunction::Callback,
         initSimplex::Callback,
         simplexObj::Callback,
@@ -43,8 +43,8 @@ Perform Nelder-Mead optimization on a physical or analytical booster, returns pr
 - `resettimer::Bool=true`: Reset timestamps of booster.
 - `returntimes::Bool=false`: Return timestamps additionally to the trace.
 """
-function nelderMead(booster::Booster, hist::States, freqs::Array{Float64},
-        α::Float64, β::Float64, γ::Float64, δ::Float64, Δmin::Real,
+function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
+        α::Float64,β::Float64,γ::Float64,δ::Float64,Δmin::Real,
         objFunction::Callback,
         initSimplex::Callback,
         simplexObj::Callback,
@@ -187,8 +187,8 @@ end
 
 
 """
-    nelderMead(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
-        α::Float64, β::Float64, γ::Float64, δ::Float64, Δmin::Real, αls::Real,
+    nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
+        α::Float64,β::Float64,γ::Float64,δ::Float64,Δmin::Real,αls::Real,
         objFunction::Callback,
         initSimplex::Callback,
         simplexObj::Callback,
