@@ -1,2 +1,13 @@
 neldermead:
-1 - 
+1 - 1d,
+
+
+
+linesearch:
+1 -
+
+
+
+simulated annealing:
+1 -
+

@@ -327,7 +327,7 @@ cat_(args...) = Base.cat(dims=1,args...)
 Return current UTC time as DD_MM_YY-HH_MM string.
 """
 function getDateString()
-    d = now()
+    d = unow()
 
     return "$(Day(d).value)_$(Month(d).value)_$(Year(d).value)-$(Hour(d).value)_$(Minute(d).value)"
 end

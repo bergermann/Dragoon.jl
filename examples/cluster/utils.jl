@@ -43,18 +43,3 @@ function saveStuff(folderpath::String,optimizer::String,scan,ref0,hist,trace,fre
 end
 
 
-
-
-
-# setSweepPoints(vna,128)
-# send(vna, "FORMat:DATA REAL,64\n") # Set the return type to a 64 bit Float
-# send(vna, "FORMat:BORDer SWAPPed;*OPC?\n") # Swap the byte order and wait for the completion of the commands
-# send(vna, "SENSe:AVERage:STATe ON;*OPC?\n")
-# send(vna, "SENSe:AVERage:STATe OFF;*OPC?\n")
-# send(vna, "SENSe:AVERage:COUNt 10;*OPC\n")
-# send(vna, "SENS:SWE:GRO:COUN 20;*OPC?\n")
-
-# getTrace(vna; set=true)
-
-# getTraceG(vna,10; set=true)
-
