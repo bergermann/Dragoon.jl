@@ -19,6 +19,7 @@ export linesearch
         returntimes::Bool=false)
 
 Perform linesearch optimization on a physical or analytical booster, returns process trace.
+[`Linesearch`](https://en.wikipedia.org/wiki/Line_search)
 
 # Arguments
 - `booster::Booster`: Booster struct to operate on.

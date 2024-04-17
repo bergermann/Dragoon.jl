@@ -5,6 +5,7 @@ export simulatedAnnealing
 
 Perform simulated annealing optimization on a physical or analytical booster, returns
 process trace.
+[`Simulated Annealing`](https://en.wikipedia.org/wiki/Simulated_annealing)
 
 # Arguments
 - `booster::Booster`: Booster struct to operate on.

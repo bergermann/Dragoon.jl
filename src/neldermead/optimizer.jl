@@ -19,6 +19,7 @@ export nelderMead, nelderMeadLinesearch
         returntimes::Bool=false)
 
 Perform Nelder-Mead optimization on a physical or analytical booster, returns process trace.
+[`Nelder-Mead`](https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method)
 
 # Arguments
 - `booster::Booster`: Booster struct to operate on.
