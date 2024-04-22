@@ -1,5 +1,5 @@
 
-using Distributed, SharedArrays, JLD2
+using Distributed, ParallelUtilities, SharedArrays, JLD2, Dragoon
 
 println("Available processors: ",nprocs())
 println("Available workers:    ",nworkers())
@@ -7,7 +7,7 @@ println("Available workers:    ",nworkers())
 include("standard_settings.jl")
 
 sigx = parse(Float64,ARGS[1])
-Nsig = parse(Float64,ARGS[2])
+Nsig = parse(Int,ARGS[2])
 
 @assert length(ARGS[3:end]) <= fieldcount(Settings) 
 
@@ -35,18 +35,20 @@ booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
     booster = $booster
 end
 
-data = SharedArray{Float64}((Nsig,s.ndisk+4); pids=procs())
+data = SharedArray{Float64}((Nsig,s.ndisk+4); pids=ParallelUtilities.workers_myhost())
+
+seed = rand(UInt)
 
 @distributed for i in collect(1:Nsig)
-    Random.seed!(366821+i)
+    Random.seed!(seed+i)
 
-    move(booster,p0+randn(booster.ndisk)*sigx; additive=false)
+    move(booster,pos0+randn(booster.ndisk)*sigx; additive=false)
 
     hist = initHist(booster,100,freqs,ObjAnalytical)
-    b.summeddistance = 0.
+    booster.summeddistance = 0.
 
     trace, term = nelderMead(booster,hist,freqs,
-        1.,1+2/b.ndisk,0.75-1/(2*b.ndisk),1-1/(b.ndisk),1e-6,
+        1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-6,
         ObjAnalytical,
         InitSimplexRegular(5e-5),
         DefaultSimplexSampler,
@@ -67,4 +69,4 @@ data = SharedArray{Float64}((Nsig,s.ndisk+4); pids=procs())
 end
 
 date = Dragoon.getDateString()
-@save "NM1/$(sigx)_$(Nsig)_$(f0)_$(df)_$(nf)_$(ndisk)_$(eps)_$(tand)/$(date).jld2" data
+@save "NM1/$(sigx)_$(Nsig)_$(f0)_$(df)_$(nf)_$(ndisk)_$(eps)_$(tand)/$(date).jld2" data seed

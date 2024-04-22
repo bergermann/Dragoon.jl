@@ -6,7 +6,8 @@ export spacings_stefan,
     findpeak1d, findpeak3d,
     genFreqs, 
     pos2dist, dist2pos,
-    pNorm, copy
+    pNorm, copy,
+    getDateString
 
 """
     const spacings_stefan
