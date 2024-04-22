@@ -15,9 +15,11 @@ for (i,arg) in enumerate(ARGS[3:end])
     if arg == "_" || arg == "*"
         continue
     else
-        setfield!(s,i,parse(fieldtype(s,i),arg))
+        setfield!(s,i,parse(fieldtype(Settings,i),arg))
     end
 end
+
+println(s)
 
 freqs = genFreqs(s.f0,s.df; n=s.nf)
 
@@ -68,5 +70,12 @@ out = @distributed (+) for i in collect(1:Nsig)
     0
 end
 
-date = Dragoon.getDateString()
-@save "NM1/$(sigx)_$(Nsig)_$(f0)_$(df)_$(nf)_$(ndisk)_$(eps)_$(tand)/$(date).jld2" data seed
+date = getDateString()
+path = joinpath("NM1",
+    "$(sigx)_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)")
+
+if !isdir(path)
+    mkpath(path)
+end
+
+@save joinpath(path,"$(date).jld2") data seed
