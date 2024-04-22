@@ -39,7 +39,7 @@ data = SharedArray{Float64}((Nsig,s.ndisk+4); pids=ParallelUtilities.workers_myh
 
 seed = rand(UInt)
 
-@distributed for i in collect(1:Nsig)
+out = @distributed (+) for i in collect(1:Nsig)
     Random.seed!(seed+i)
 
     move(booster,pos0+randn(booster.ndisk)*sigx; additive=false)
