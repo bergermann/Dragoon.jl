@@ -330,5 +330,5 @@ Return current UTC time as DD_MM_YY-HH_MM_SS string.
 function getDateString()
     d = unow()
 
-    return Dates.format(d,"yyyy_mm_dd-HH_MM_SS")
+    return format(d,"yyyy_mm_dd-HH_MM_SS")
 end
