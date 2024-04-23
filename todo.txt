@@ -5,6 +5,7 @@ Package:
 [t] implement missing unstuckinators
 [t] rework examples
 [ ] fix analyse functions
+[ ] check allocations (e.g. updateHist)
 
 Computation:
 [ ] move repo to rwth gitlab

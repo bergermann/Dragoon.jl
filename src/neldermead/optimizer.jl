@@ -95,7 +95,7 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
         fr = updateHist!(booster, hist, freqs, objFunction)
 
         if Int(i % traceevery) == 0
-            trace[Int(i / traceevery)] = NMTrace(copy(x), copy(f), zeros(booster.ndisk), 0.0,
+            trace[Int(i / traceevery)] = NMTrace(copy(x),copy(f),zeros(booster.ndisk),0.0,
                 booster.timestamp, booster.summeddistance)
             trace[Int(i / traceevery)].x_ = copy(x_)
             trace[Int(i / traceevery)].obj_ = f_

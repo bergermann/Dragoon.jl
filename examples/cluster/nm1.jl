@@ -45,13 +45,14 @@ data = SharedArray{Float64}((Nsig,s.ndisk+4); pids=ParallelUtilities.workers_myh
 seed = rand(UInt)
 
 @time out = @distributed (+) for i in collect(1:Nsig)
+
     Random.seed!(seed+i)
 
     move(booster,pos0+randn(booster.ndisk)*sigx; additive=false)
 
     hist = initHist(booster,100,freqs,ObjAnalytical)
     booster.summeddistance = 0.
-
+    
     trace, term = nelderMead(booster,hist,freqs,
         1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-6,
         ObjAnalytical,
