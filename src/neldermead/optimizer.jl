@@ -352,7 +352,8 @@ function nelderMeadLinesearch(booster::Booster, hist::States, freqs::Array{Float
 
     term = printTermination(booster, hist, i, maxiter, showtrace)
 
-    return returntimes ? (trace[1:i+1], term) : trace[1:i+1]
+    return returntimes ? (trace[1:floor(Int, i/traceevery)+1], term) :
+        trace[1:floor(Int, i/traceevery)+1]
 end
 
 function search(booster::Booster,hist::States,freqs::Vector{Float64},objFunction::Callback,

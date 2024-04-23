@@ -2,12 +2,15 @@
 using Distributed, ParallelUtilities, SharedArrays, JLD2, Dragoon
 
 println("Available processors: ",nprocs())
-println("Available workers:    ",nworkers())
+println("Available workers:    ",nworkers(),"\n")
 
 include("standard_settings.jl")
 
 sigx = parse(Float64,ARGS[1])
 Nsig = parse(Int,ARGS[2])
+
+println("σ: ",sigx)
+println("N: ",Nsig,"\n")
 
 @assert length(ARGS[3:end]) <= fieldcount(Settings) 
 
@@ -41,7 +44,7 @@ data = SharedArray{Float64}((Nsig,s.ndisk+4); pids=ParallelUtilities.workers_myh
 
 seed = rand(UInt)
 
-out = @distributed (+) for i in collect(1:Nsig)
+@time out = @distributed (+) for i in collect(1:Nsig)
     Random.seed!(seed+i)
 
     move(booster,pos0+randn(booster.ndisk)*sigx; additive=false)
@@ -56,6 +59,7 @@ out = @distributed (+) for i in collect(1:Nsig)
         DefaultSimplexSampler,
         UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
         maxiter=2000,
+        traceevery=typemax(Int),
         showtrace=false,
         unstuckisiter=true,
         resettimer=true,
@@ -78,4 +82,4 @@ if !isdir(path)
     mkpath(path)
 end
 
-@save joinpath(path,"$(date).jld2") data seed
+@save joinpath(path,"$(date).jld2") data s seed
