@@ -83,4 +83,4 @@ if !isdir(path)
     mkpath(path)
 end
 
-@save joinpath(path,"$(date).jld2") data s seed
+@save joinpath(path,"$(date).jld2") data sigx s seed
