@@ -1,6 +1,6 @@
 
 
-To-Do-List (17.04.24):
+To-Do-List (23.04.24):
 Package:
 [t] implement missing unstuckinators
 [t] rework examples
@@ -13,9 +13,13 @@ Computation:
 - direct re-optimization
 - sophisticated linesearch beforehand, then re-optimization
 [ ] synchronize movement to measurement
-[ ] larger performance trials/tests, try clustering results
+[ ] larger performance trials/tests
 [ ] 3d tests
 [ ] loss tests?
+
+Analysis:
+[ ] plot obj value vs movement time
+[ ] try clustering results
 
 Main:
 [ ] show redundancy in optimized states
