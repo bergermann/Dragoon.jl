@@ -13,6 +13,7 @@ ParallelUtilities = "fad6cfc8-4f83-11e9-06cc-151124046ad0"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
+ParallelUtilities = "0.8"
 Plots = "1"
 
 [extras]
