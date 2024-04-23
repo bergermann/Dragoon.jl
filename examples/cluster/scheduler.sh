@@ -9,4 +9,4 @@
 #SBATCH --mem-per-cpu=2000M
 
 cd /home/jn226467"
-/home/jn226467/julia-1.10.2/bin/julia -p 47 /home/jn226467/${1} "${@:2}"
+/home/jn226467/julia-1.10.2/bin/julia -p 47 /home/jn226467/optimizers/${1}.jl "${@:2}"
