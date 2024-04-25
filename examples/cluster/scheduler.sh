@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --output=joboutputs/%x_%j.out
-#SBATCH --error=joboutputs/%x_%j.err
+#SBATCH --output=./joboutputs/%x_%j.out
+#SBATCH --error=./joboutputs/%x_%j.err
 
 #SBATCH --time=00:05:00
 #SBATCH --nodes 1
