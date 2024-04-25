@@ -1,12 +1,13 @@
 #!/bin/bash
 
-#SBATCH --account=
+#SBATCH --output=joboutputs/%x_%j.out
+#SBATCH --error=joboutputs/%x_%j.err
 
 #SBATCH --time=00:05:00
-#SBATCH --nodes=1
-#SBATCH --ntasks=48
-#SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=2000M
+#SBATCH --nodes 1
+#SBATCH --ntasks 1
+#SBATCH --cpus-per-task 47
+#SBATCH --mem-per-cpu 1G
 
-cd /home/jn226467"
+cd /home/jn226467/
 /home/jn226467/julia-1.10.2/bin/julia -p 47 /home/jn226467/optimizers/${1}.jl "${@:2}"

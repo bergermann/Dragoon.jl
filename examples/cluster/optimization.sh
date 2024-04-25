@@ -3,10 +3,10 @@
 
 ### add memory/time scaling in future?
 
-NAME=opt_${1}_${2}
-OUT=out_${1}_${2}
+cd /home/jn226467/
+
+NAME=opt_${1}
 
 echo "Jobname: $NAME"
-echo "Output:  $OUT"
 
-sbatch --jobname=$NAME --output=$OUT scheduler.sh "$@"
+sbatch -J $NAME scheduler.sh "$@"
