@@ -22,7 +22,7 @@ for (i,arg) in enumerate(ARGS[3:end])
     end
 end
 
-println(s)
+println(s,"\n")
 
 freqs = genFreqs(s.f0,s.df; n=s.nf)
 
@@ -45,7 +45,6 @@ data = SharedArray{Float64}((Nsig,s.ndisk+4); pids=ParallelUtilities.workers_myh
 seed = rand(UInt)
 
 @time out = @distributed (+) for i in collect(1:Nsig)
-
     Random.seed!(seed+i)
 
     move(booster,pos0+randn(booster.ndisk)*sigx; additive=false)
