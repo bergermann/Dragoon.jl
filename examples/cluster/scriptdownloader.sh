@@ -7,8 +7,6 @@ wget "${DIR}variants.txt" -O "optimizers/variants.txt"
 
 wget "${DIR}optimizers/nm1.jl" -O "optimizers/nm1.jl"
 
-
-
 ### get cluster scheduler scripts
 wget "${DIR}optimization.sh" -O "optimization.sh"
 wget "${DIR}scheduler.sh" -O "scheduler.sh"
