@@ -13,4 +13,4 @@ wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/clus
 wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/scheduler.sh" -O "scheduler.sh"
 
 ### update Dragoon
-julia -e "using Pkg; Pkg.add(\"https://github.com/mppmu/BoostFractor.jl.git\"); Pkg.update()"
+julia -e "using Pkg; Pkg.add(url=\"https://github.com/bergermann/Dragoon.jl.git\"); Pkg.update()"
