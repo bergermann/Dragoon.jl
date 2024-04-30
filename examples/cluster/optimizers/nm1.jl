@@ -22,7 +22,8 @@ for (i,arg) in enumerate(ARGS[3:end])
     end
 end
 
-println(s,"\n")
+println(s)
+println("\n")
 
 freqs = genFreqs(s.f0,s.df; n=s.nf)
 
@@ -40,36 +41,43 @@ booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
     booster = $booster
 end
 
-data = SharedArray{Float64}((Nsig,s.ndisk+4); pids=ParallelUtilities.workers_myhost())
+pids = ParallelUtilities.workers_myhost()
+
+data = SharedArray{Float64}((Nsig,s.ndisk+4); pids=pids)
+T = SharedArray{Float64}(Nsig; pids=pids)
 
 seed = rand(UInt)
 
 @time out = @distributed (+) for i in collect(1:Nsig)
-    Random.seed!(seed+i)
+    t = @elapsed begin
+        Random.seed!(seed+i)
 
-    move(booster,pos0+randn(booster.ndisk)*sigx; additive=false)
+        move(booster,pos0+randn(booster.ndisk)*sigx; additive=false)
 
-    hist = initHist(booster,100,freqs,ObjAnalytical)
-    booster.summeddistance = 0.
-    
-    trace, term = nelderMead(booster,hist,freqs,
-        1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-6,
-        ObjAnalytical,
-        InitSimplexRegular(5e-5),
-        DefaultSimplexSampler,
-        UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
-        maxiter=2000,
-        traceevery=typemax(Int),
-        showtrace=false,
-        unstuckisiter=true,
-        resettimer=true,
-        returntimes=true)
+        hist = initHist(booster,100,freqs,ObjAnalytical)
+        booster.summeddistance = 0.
+        
+        trace, term = nelderMead(booster,hist,freqs,
+            1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-6,
+            ObjAnalytical,
+            InitSimplexRegular(5e-5),
+            DefaultSimplexSampler,
+            UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
+            maxiter=2000,
+            traceevery=typemax(Int),
+            showtrace=false,
+            unstuckisiter=true,
+            resettimer=true,
+            returntimes=true)
 
-    data[i,1:booster.ndisk] .= booster.pos
-    data[i,booster.ndisk+1] = term[1]
-    data[i,booster.ndisk+2] = term[2][1].value
-    data[i,booster.ndisk+3] = term[2][2]
-    data[i,booster.ndisk+4] = term[2][3].value
+        data[i,1:booster.ndisk] .= booster.pos
+        data[i,booster.ndisk+1] = term[1]
+        data[i,booster.ndisk+2] = term[2][1].value
+        data[i,booster.ndisk+3] = term[2][2]
+        data[i,booster.ndisk+4] = term[2][3].value
+    end
+
+    T[i] = t
 
     0
 end
@@ -85,4 +93,4 @@ if !isdir(path)
     mkpath(path)
 end
 
-@save joinpath(path,"$(date).jld2") data sigx s seed
+@save joinpath(path,"$(date).jld2") data sigx s seed T
