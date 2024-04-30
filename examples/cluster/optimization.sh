@@ -14,7 +14,18 @@
 
 ### add memory/time scaling in future?
 
-cd /home/jn226467/
+# cd /home/jn226467/
+
+if ! test -f /optimizers/${1}.jl; then
+    echo "Optimizer file ${1}.jl does not exist. Aborting."
+    exit 1
+fi
+
+if [[ "$#" -lt 3 ]]; then
+    echo "Invalid number of arguments. At least 3 required."
+    echo "ARGS: algorith sigx nsig [fcenter fwidth npoints ndisk eps tand]"
+    exit 1
+fi
 
 NAME=opt_${1}
 
