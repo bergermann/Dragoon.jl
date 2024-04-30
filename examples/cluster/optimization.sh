@@ -16,7 +16,7 @@
 
 # cd /home/jn226467/
 
-if ! test -f /optimizers/${1}.jl; then
+if ! test -f optimizers/${1}.jl; then
     echo "Optimizer file ${1}.jl does not exist. Aborting."
     exit 1
 fi

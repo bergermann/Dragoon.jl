@@ -9,5 +9,4 @@
 #SBATCH --cpus-per-task 47
 #SBATCH --mem-per-cpu 1G
 
-cd /home/jn226467/
-/home/jn226467/julia-1.10.2/bin/julia -p 47 /home/jn226467/optimizers/${1}.jl "${@:2}"
+julia -p 47 optimizers/${1}.jl "${@:2}"
