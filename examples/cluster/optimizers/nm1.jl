@@ -48,6 +48,7 @@ T = SharedArray{Float64}(Nsig; pids=pids)
 
 seed = rand(UInt)
 
+println("Total loop time:")
 @time out = @distributed (+) for i in collect(1:Nsig)
     t = @elapsed begin
         Random.seed!(seed+i)
@@ -81,6 +82,8 @@ seed = rand(UInt)
 
     0
 end
+
+printOutput(data,T,booster.ndisk)
 
 date = getDateString()
 path = joinpath(

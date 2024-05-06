@@ -29,3 +29,16 @@ function Base.println(s::Settings)
     println("Disc epsilon:     $(s.eps)")
     println("Disc loss (tand): $(s.tand)")
 end
+
+function printOutput(data,T,ndisk)
+    println()
+    println("Best objective value:\n$(minimum(data[:,ndisk+1]))")
+    println("Worst objective value:\n$(maximum(data[:,ndisk+1]))")
+    println()
+    println("Longest optimization time:\n$(maximum(T))")
+    println("Shortest optimization time:\n$(minimum(T))")
+    println("Average optimization time:\n$(sum(T)/length(T))")
+    println()
+
+    return
+end
