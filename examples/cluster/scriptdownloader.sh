@@ -10,4 +10,4 @@ wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/clus
 wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/scheduler.sh" -O "scheduler.sh"
 
 ### update Dragoon
-julia -e "using Pkg; Pkg.add(url=\"https://github.com/bergermann/Dragoon.jl.git\"); Pkg.update()"
+/home/jn226467/julia-1.10.2/bin/julia -e "using Pkg; Pkg.add(url=\"https://github.com/bergermann/Dragoon.jl.git\"); Pkg.update()"
