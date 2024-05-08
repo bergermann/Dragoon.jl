@@ -95,28 +95,62 @@ function showClusters(data,k,showmax=typemax(Int))
             c=colors[i],legend=false,ylims=ylim,title="assignments $i - dist",markersize=2))
     end
 
-    pbc = plot(; legend=false,ylims=ylim,title="centers - boost",markersize=2)
+    pbc = plot(; legend=false,title="centers - boost",seriestype=:line)
     for i in 1:k
-        scatter!(pbc,1:ndisk,
-            boost1d(c.centers[:,i],data.freqs; eps=data.s.eps,tand=data.s.tand);
-            c=colors[i])
+        boost = boost1d(c.centers[:,i],data.freqs; eps=data.s.eps,tand=data.s.tand)
+        plot!(pbc,data.freqs/1e9,boost; c=colors[i])
     end
     display(pbc)
-
-    prc = plot(; legend=false,ylims=ylim,title="centers - ref")
-    for i in 1:k
-        ref = ref1d(c.centers[:,i],data.freqs; eps=data.s.eps,tand=data.s.tand)
-        plot!(prc,1:ndisk,real.(ref); c=colors[i],linestyle=:solid)
-        plot!(prc,1:ndisk,imag.(ref); c=colors[i],linestyle=:dash)
-    end
-    # display(prc)
 
     for i in 1:k
         idxs = (1:size(data.dist,2))[c.assignments .== i]
         idxs = idxs[1:min(length(idxs),showmax)]
 
-        display(plot(data.freqs,data.boost[:,idxs];
+        display(plot(data.freqs/1e9,data.boost[:,idxs];
             c=colors[i],legend=false,title="assignments $i - boost"))
+    end
+
+    prc = plot(; legend=false,title="centers - ref",seriestype=:line)
+    for i in 1:k
+        ref = ref1d(c.centers[:,i],data.freqs; eps=data.s.eps,tand=data.s.tand)
+        plot!(prc,data.freqs/1e9,real.(ref); c=colors[i],linestyle=:solid)
+        plot!(prc,data.freqs/1e9,imag.(ref); c=colors[i],linestyle=:dash)
+    end
+    display(prc)
+
+    for i in 1:k
+        idxs = (1:size(data.dist,2))[c.assignments .== i]
+        idxs = idxs[1:min(length(idxs),showmax)]
+
+        pra = plot(data.freqs/1e9,real.(data.ref[:,idxs]);
+            c=colors[i],linestyle=:solid,legend=false)
+        plot!(pra,data.freqs/1e9,imag.(data.ref[:,idxs]); c=colors[i],linestyle=:dash)
+
+        display(pra)
+    end
+
+    return c
+end
+
+function showQuality(data,threshold=nothing)
+    display(histogramB(data.obj; title="objective values"))
+    display(histogramB(data.opttime; title="total travel time"))
+    display(histogramB(data.optdist; title="total travel distance"))
+
+    p1 = histogram2d(data.opttime,-data.obj; legend=false)
+    hline!(p1,[-threshold])
+    display(p1)
+
+    p2 = histogram2d(data.optdist,-data.obj; legend=false)
+    hline!(p2,[-threshold])
+    display(p2)
+
+    p3 = histogram2d(data.optdist,data.opttime; legend=false)
+    display(p3)
+
+    if !isnothing(threshold)
+        sr = round(100*sum((data.obj .<= threshold))/length(data.obj); sigdigits=4)
+        println("success rate: $sr")
     end
 
     return

@@ -14,5 +14,15 @@ linesearch:
 
 
 simulated annealing:
-1 -
-
+1 - 100e-6,
+        TempLinear(100,1001),
+        ObjAnalytical,
+        UnstuckDont;
+        maxiter=Int(1e5),
+        nreset=500,
+        nresetterm=10,
+        showtrace=false,
+        unstuckisiter=true,
+        resettimer=true,
+        traceevery=typemax(Int),
+        returntimes=true

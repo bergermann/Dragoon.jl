@@ -19,6 +19,8 @@ histogramB(data.opttime)
 histogramB(data.runtime)
 
 showDist(data,1000)
-showClusters(data,50,100)
+showClusters(data,50,100);
+
+showQuality(data,-14000)
 
 plot(freqs,boosts[1:10_000,:]'; legend=false,label="")
