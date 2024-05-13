@@ -5,7 +5,7 @@ include("tools.jl")
 path = joinpath(
     "examples",
     "analysis",
-    "data",
+    "optimization data",
     "1.0e-6_100000_2.2025e10_5.0e7_10_20_24.0_0.0",
     "NM1",
     "2024_05_06-08_12_59.jld2"
