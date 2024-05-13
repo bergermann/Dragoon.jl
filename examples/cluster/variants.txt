@@ -6,6 +6,14 @@ neldermead:
         UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
         maxiter=2000
 
+1ref - 1.,1+2/b.ndisk,0.75-1/(2*b.ndisk),1-1/(b.ndisk),1e-6,
+        ObjRefSquare(ref0),
+        InitSimplexRegular(5e-5),
+        DefaultSimplexSampler,
+        UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
+        maxiter=2000
+            
+
 
 
 linesearch:

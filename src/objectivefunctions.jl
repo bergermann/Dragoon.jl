@@ -58,7 +58,7 @@ for the given `freqs` and `booster` state. See[`ref1d`](@ref).
 function getObjRef1d(booster::Booster,freqs::Vector{Float64},
         (ref_goal,scaling)::Tuple{Vector{ComplexF64},Function})
 
-    return sum(scaling.(abs.(getRef1d(booster,freqs) -ref_goal)))
+    return sum(scaling.(abs.(getRef1d(booster,freqs)-ref_goal)))
 end
 
 """

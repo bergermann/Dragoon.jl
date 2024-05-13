@@ -4,6 +4,9 @@ wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/clus
 wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/variants.txt" -O "optimizers/variants.txt"
 
 wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/optimizers/nm1.jl" -O "optimizers/nm1.jl"
+wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/optimizers/nm1ref.jl" -O "optimizers/nm1.jl"
+
+wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/optimizers/sa1.jl" -O "optimizers/nm1.jl"
 
 ### get cluster scheduler scripts
 wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/optimization.sh" -O "optimization.sh"
