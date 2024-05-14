@@ -55,7 +55,7 @@ dist0 = [
     0.0071354746829380430,
 ]
 
-ref0 = ref1d(dist0,freqs; eps=s.eps,tand=eps.tand)
+ref0 = ref1d(dist0,freqs; eps=s.eps,tand=s.tand)
 
 @everywhere using Dragoon, Random 
 
