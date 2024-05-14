@@ -90,7 +90,7 @@ date = getDateString()
 path = joinpath(
         "optimization data",
         "$(sigx)_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
-        "NM1"
+        "SA1"
     )
 
 if !isdir(path)
