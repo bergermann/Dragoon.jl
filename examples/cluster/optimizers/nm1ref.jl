@@ -27,7 +27,7 @@ println("\n")
 
 freqs = genFreqs(s.f0,s.df; n=s.nf)
 
-const initdist = findpeak1d(s.f0,s.ndisk)
+initdist = findpeak1d(s.f0,s.ndisk)
 pos0 = dist2pos(ones(s.ndisk)*initdist);
 
 booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
@@ -60,20 +60,20 @@ ref0 = ref1d(dist0,freqs; eps=s.eps,tand=eps.tand)
 @everywhere using Dragoon, Random 
 
 @everywhere begin
-    const sigx = $sigx
-    const freqs = $freqs
-    const pos0 = $pos0
-    const booster = $booster
+    sigx = $sigx
+    freqs = $freqs
+    pos0 = $pos0
+    booster = $booster
 
     const ref0 = $ref0
 end
 
-const pids = ParallelUtilities.workers_myhost()
+pids = ParallelUtilities.workers_myhost()
 
 data = SharedArray{Float64}((Nsig,s.ndisk+4); pids=pids)
 T = SharedArray{Float64}(Nsig; pids=pids)
 
-const seed = rand(UInt)
+seed = rand(UInt)
 
 println("Total loop time:")
 @time out = @distributed (+) for i in collect(1:Nsig)

@@ -1,11 +1,12 @@
 
 
-To-Do-List (23.04.24):
+To-Do-List (15.06.24):
 Package:
 [t] implement missing unstuckinators
 [t] rework examples
 [ ] fix analyse functions
 [ ] check allocations (e.g. updateHist)
+[ ] add "measurement count"
 
 Computation:
 [ ] move repo to rwth gitlab
