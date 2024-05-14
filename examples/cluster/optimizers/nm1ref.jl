@@ -65,7 +65,7 @@ ref0 = ref1d(dist0,freqs; eps=s.eps,tand=s.tand)
     pos0 = $pos0
     booster = $booster
 
-    const ref0 = $ref0
+    ref0 = $ref0
 end
 
 pids = ParallelUtilities.workers_myhost()
