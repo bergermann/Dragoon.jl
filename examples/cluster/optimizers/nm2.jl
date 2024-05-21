@@ -5,7 +5,7 @@ using Distributed, ParallelUtilities, SharedArrays, JLD2, Dragoon
 println("Available processors: ",nprocs())
 println("Available workers:    ",nworkers(),"\n")
 
-include("standard_settings.jl")
+@everywhere include("standard_settings.jl")
 
 
 
@@ -16,10 +16,13 @@ function main(args)
 
     booster = AnalyticalBooster(1e-3; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
 
+    λ = 299792458.0/s.f0
+
     @everywhere begin
         sigx = $sigx
         freqs = $freqs
         booster = $booster
+        λ = $λ
     end
 
     pids = ParallelUtilities.workers_myhost()
@@ -33,8 +36,6 @@ function main(args)
     @time out = @distributed (+) for i in collect(1:Nsig)
         t = @elapsed begin
             Random.seed!(seed+i)
-
-            λ = 299792458.0/s.f0
 
             p0 = dist2pos(randn(booster.ndisk)*sigx*λ)
 
@@ -70,22 +71,22 @@ function main(args)
 
     printOutput(data,T,booster.ndisk)
 
-    date = getDateString()
-    path = joinpath(
-            "optimization data",
-            "rand_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
-            uppercase(@__FILE__)[1:end-3]
-        )
-
-    if !isdir(path)
-        mkpath(path)
-    end
-
-    println("saving to $(joinpath(path,"$(date).jld2"))")
-
-    @save joinpath(path,"$(date).jld2") data sigx s seed T
-
-    return
+    return data, sigx, Nsig, s, seed, T
 end
 
-main(ARGS)
+data, sigx, Nsig, s, seed, T = main(ARGS)
+
+date = getDateString()
+path = joinpath(
+        "optimization data",
+        "rand_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
+        uppercase(@__FILE__)[1:end-3]
+    )
+
+if !isdir(path)
+    mkpath(path)
+end
+
+println("saving to $(joinpath(path,"$(date).jld2"))")
+
+@save joinpath(path,"$(date).jld2") data sigx s seed T
