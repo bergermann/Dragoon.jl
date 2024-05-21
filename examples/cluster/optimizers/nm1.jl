@@ -88,4 +88,4 @@ function main(args)
     return
 end
 
-main(args)
+main(ARGS)
