@@ -71,22 +71,22 @@ function main(args)
 
     printOutput(data,T,booster.ndisk)
 
-    date = getDateString()
-    path = joinpath(
-            "optimization data",
-            "$(sigx)_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
-            uppercase(@__FILE__)[1:end-3]
-        )
-
-    if !isdir(path)
-        mkpath(path)
-    end
-
-    println("saving to $(joinpath(path,"$(date).jld2"))")
-
-    @save joinpath(path,"$(date).jld2") data sigx s seed T
-
-    return
+    return data, sigx, Nsig, s, seed, T
 end
 
-main(ARGS)
+data, sigx, Nsig, s, seed, T = main(ARGS)
+
+date = getDateString()
+path = joinpath(
+        "optimization data",
+        # "$(sigx)_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
+        # uppercase(@__FILE__)[1:end-3]
+    )
+
+# if !isdir(path)
+#     mkpath(path)
+# end
+
+println("saving to $(joinpath(path,"$(date).jld2"))")
+
+@save joinpath(path,"$(date).jld2") data sigx s seed T
