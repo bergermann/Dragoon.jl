@@ -256,8 +256,9 @@ function showClusters(data,k,showmax=typemax(Int))
         idxs = idxs[1:min(length(idxs),showmax)]
 
         pra = plot(data.freqs/1e9,real.(data.ref[:,idxs]);
-            c=colors[i],linestyle=:solid,legend=false)
-        plot!(pra,data.freqs/1e9,imag.(data.ref[:,idxs]); c=colors[i],linestyle=:dash)
+            c=colors[i],linestyle=:solid,legend=false,title="assignments $i - ref")
+        plot!(pra,data.freqs/1e9,imag.(data.ref[:,idxs]);
+            c=colors[i],linestyle=:dash)
 
         display(pra)
     end
