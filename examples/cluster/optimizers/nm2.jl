@@ -10,20 +10,16 @@ include("standard_settings.jl")
 
 function main(args)
     sigx, Nsig, s, _ = parseArgs(args)
-        
+
     freqs = genFreqs(s.f0,s.df; n=s.nf)
 
-    initdist = findpeak1d(s.f0,s.ndisk)
-    pos0 = dist2pos(ones(s.ndisk)*initdist);
-
-    booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
+    booster = AnalyticalBooster(1e-3; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
 
     @everywhere using Dragoon, Random 
 
     @everywhere begin
         sigx = $sigx
         freqs = $freqs
-        pos0 = $pos0
         booster = $booster
     end
 
@@ -39,7 +35,11 @@ function main(args)
         t = @elapsed begin
             Random.seed!(seed+i)
 
-            move(booster,pos0+randn(booster.ndisk)*sigx; additive=false)
+            λ = 299792458.0/s.f0
+
+            p0 = dist2pos(randn(booster.ndisk)*sigx*λ)
+
+            move(booster,p0; additive=false)
 
             hist = initHist(booster,100,freqs,ObjAnalytical)
             booster.summeddistance = 0.
@@ -74,7 +74,7 @@ function main(args)
     date = getDateString()
     path = joinpath(
             "optimization data",
-            "$(sigx)_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
+            "rand_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
             uppercase(@__FILE__)[1:end-3]
         )
 
@@ -89,4 +89,4 @@ function main(args)
     return
 end
 
-main(args)
+main(ARGS)

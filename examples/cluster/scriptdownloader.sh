@@ -5,6 +5,7 @@ wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/clus
 
 wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/optimizers/nm1.jl" -O "optimizers/nm1.jl"
 wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/optimizers/nm1ref.jl" -O "optimizers/nm1ref.jl"
+wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/optimizers/nm2.jl" -O "optimizers/nm2.jl"
 
 wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/optimizers/sa1.jl" -O "optimizers/sa1.jl"
 
