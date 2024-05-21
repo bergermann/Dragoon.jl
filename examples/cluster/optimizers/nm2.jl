@@ -1,5 +1,6 @@
 
 using Distributed, ParallelUtilities, SharedArrays, JLD2, Dragoon
+@everywhere using Dragoon, Random
 
 println("Available processors: ",nprocs())
 println("Available workers:    ",nworkers(),"\n")
@@ -14,8 +15,6 @@ function main(args)
     freqs = genFreqs(s.f0,s.df; n=s.nf)
 
     booster = AnalyticalBooster(1e-3; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
-
-    @everywhere using Dragoon, Random 
 
     @everywhere begin
         sigx = $sigx

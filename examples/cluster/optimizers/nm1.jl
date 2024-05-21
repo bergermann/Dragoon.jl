@@ -1,5 +1,6 @@
 
 using Distributed, ParallelUtilities, SharedArrays, JLD2, Dragoon
+@everywhere using Dragoon, Random 
 
 println("Available processors: ",nprocs())
 println("Available workers:    ",nworkers(),"\n")
@@ -17,8 +18,6 @@ function main(args)
     pos0 = dist2pos(ones(s.ndisk)*initdist);
 
     booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
-
-    @everywhere using Dragoon, Random 
 
     @everywhere begin
         sigx = $sigx

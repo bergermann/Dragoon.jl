@@ -1,5 +1,6 @@
 
 using Distributed, ParallelUtilities, SharedArrays, JLD2, Dragoon
+@everywhere using Dragoon, Random
 
 println("Available processors: ",nprocs())
 println("Available workers:    ",nworkers(),"\n")
@@ -42,8 +43,6 @@ function main(args)
     ]
 
     ref0 = ref1d(dist0,freqs; eps=s.eps,tand=s.tand)
-
-    @everywhere using Dragoon, Random 
 
     @everywhere begin
         sigx = $sigx

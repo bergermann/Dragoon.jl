@@ -1,39 +1,23 @@
 
 using Distributed, ParallelUtilities, SharedArrays, JLD2, Dragoon
+@everywhere using Dragoon, Random 
 
 println("Available processors: ",nprocs())
 println("Available workers:    ",nworkers(),"\n")
 
 include("standard_settings.jl")
 
-sigx = parse(Float64,ARGS[1])
-Nsig = parse(Int,ARGS[2])
 
-println("σ: ",sigx)
-println("N: ",Nsig,"\n")
-
-@assert length(ARGS[3:end]) <= fieldcount(Settings) 
-
-for (i,arg) in enumerate(ARGS[3:end])
-    if arg == "_" || arg == "*"
-        continue
-    else
-        setfield!(s,i,parse(fieldtype(Settings,i),arg))
-    end
-end
-
-println(s)
-println("\n")
 
 function main(args)
+    sigx, Nsig, s, _ = parseArgs(args)
+
     freqs = genFreqs(s.f0,s.df; n=s.nf)
 
     initdist = findpeak1d(s.f0,s.ndisk)
     pos0 = dist2pos(ones(s.ndisk)*initdist);
 
     booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
-
-    @everywhere using Dragoon, Random 
 
     @everywhere begin
         sigx = $sigx
