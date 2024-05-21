@@ -78,13 +78,13 @@ data, sigx, Nsig, s, seed, T = main(ARGS)
 date = getDateString()
 path = joinpath(
         "optimization data",
-        "$(sigx)_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
-        uppercase(@__FILE__)[1:end-3]
+        # "$(sigx)_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
+        # uppercase(@__FILE__)[1:end-3]
     )
 
-if !isdir(path)
-    mkpath(path)
-end
+# if !isdir(path)
+#     mkpath(path)
+# end
 
 println("saving to $(joinpath(path,"$(date).jld2"))")
 
