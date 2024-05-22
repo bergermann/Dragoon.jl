@@ -25,10 +25,12 @@ abstract type Trace end
 
 Booster type for analytical calculations.
 
-- `AnalyticalBooster(initdist; ndisk=20,τ=1e-3,ϵ=24,tand=0,
+- `AnalyticalBooster(initdist; ndisk=20,ϵ=24,tand=0,τ=1e-3,R=0.15,
         vmotor=0.1e-3,maxlength=2)`
+
+- `AnalyticalBooster(initpos; ϵ=24,tand=0,τ=1e-3,R=0.15,vmotor=0.1e-3,maxlength=2)`
     
-- `AnalyticalBooster(pos,ndisk,thickness,epsilon,tand,
+- `AnalyticalBooster(pos,ndisk,epsilon,tand,thickness,R,
         vmotor,maxlength,timestamp,codetimestamp,summeddistance)`
 """
 mutable struct AnalyticalBooster <: Booster
@@ -59,6 +61,10 @@ mutable struct AnalyticalBooster <: Booster
             vmotor=0.1e-3,maxlength=2)
         new(dist2pos(initdist*ones(ndisk)),ndisk,ϵ,tand,τ,R,
             vmotor,maxlength,DateTime(0),unow(),0.)
+    end
+
+    function AnalyticalBooster(initpos; ϵ=24,tand=0,τ=1e-3,R=0.15,vmotor=0.1e-3,maxlength=2)
+        new(initpos,length(initpos),ϵ,tand,τ,R,vmotor,maxlength,DateTime(0),DateTime(0),0)
     end
 
     function AnalyticalBooster(pos,ndisk,epsilon,tand,thickness,R,
