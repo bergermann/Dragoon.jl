@@ -1,11 +1,11 @@
 
 using Distributed, ParallelUtilities, SharedArrays, JLD2, Dragoon
-@everywhere using Dragoon, Random 
+@everywhere using Dragoon, Random
 
 println("Available processors: ",nprocs())
 println("Available workers:    ",nworkers(),"\n")
 
-include("standard_settings.jl")
+@everywhere include("standard_settings.jl")
 
 
 
@@ -14,16 +14,15 @@ function main(args)
 
     freqs = genFreqs(s.f0,s.df; n=s.nf)
 
-    initdist = findpeak1d(s.f0,s.ndisk)
-    pos0 = dist2pos(ones(s.ndisk)*initdist);
+    booster = AnalyticalBooster(1e-3; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
 
-    booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
+    λ = 299792458.0/s.f0
 
     @everywhere begin
         sigx = $sigx
         freqs = $freqs
-        pos0 = $pos0
         booster = $booster
+        λ = $λ
     end
 
     pids = ParallelUtilities.workers_myhost()
@@ -38,24 +37,25 @@ function main(args)
         t = @elapsed begin
             Random.seed!(seed+i)
 
-            move(booster,pos0+randn(booster.ndisk)*sigx; additive=false)
+            p0 = dist2pos(randn(booster.ndisk)*sigx*λ)
+
+            move(booster,p0; additive=false)
 
             hist = initHist(booster,100,freqs,ObjAnalytical)
             booster.summeddistance = 0.
             
-            trace, term = simulatedAnnealing(booster,hist,freqs,
-                100e-6,
-                TempLinear(100,1001),
+            trace, term = nelderMead(booster,hist,freqs,
+                1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-6,
                 ObjAnalytical,
-                UnstuckDont;
-                maxiter=Int(1e5),
-                nreset=500,
-                nresetterm=10,
+                InitSimplexRegular(5e-5),
+                DefaultSimplexSampler,
+                UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
+                maxiter=2000,
+                traceevery=typemax(Int),
                 showtrace=false,
                 unstuckisiter=true,
                 resettimer=true,
-                traceevery=typemax(Int),
-                returntimes=true);
+                returntimes=true)
 
             data[i,1:booster.ndisk] .= booster.pos
             data[i,booster.ndisk+1] = term[1]
@@ -79,7 +79,7 @@ data, sigx, Nsig, s, seed, T = main(ARGS)
 date = getDateString()
 path = joinpath(
         "optimization data",
-        # "$(sigx)_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
+        # "rand_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
         # uppercase(@__FILE__)[1:end-3]
     )
 

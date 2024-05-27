@@ -7,6 +7,8 @@ Package:
 [ ] fix analyse functions
 [ ] check allocations (e.g. updateHist)
 [ ] add "measurement count"
+[ ] add spacings folder with "search" function to examples
+[ ] put cluster scripts in function for program opt
 
 Computation:
 [ ] move repo to rwth gitlab
@@ -15,6 +17,9 @@ Computation:
 - sophisticated linesearch beforehand, then re-optimization
 [ ] synchronize movement to measurement
 [ ] larger performance trials/tests
+- completely random initial spacings
+- opt by ref from stefans spacings
+- check average shift
 [ ] 3d tests
 [ ] loss tests?
 

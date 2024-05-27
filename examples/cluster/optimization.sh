@@ -2,10 +2,10 @@
 ### if not already present.
 ###
 ### Usage:
-### sh optimization.sh algorithmvariant sigx nsig [fcenter fwidth npoints ndisk eps tand]
+### sh optimization.sh algorithmvariant sigx nsig [fcenter fwidth npoints ndisk eps tand spacings]
 ###
 ### Example:
-### sh optimization.sh nm1 100e-6 1000 20.025e9 50e6 10 20 24.0 0.
+### sh optimization.sh nm1 100e-6 1000 20.025e9 50e6 10 20 24.0 0.0 best
 ###
 ### parameters in brackets are optional and standard parameters (same as in example) are chosen if omitted
 ### parameter order needs to be retained, singe parameters can be omitted with _, e.g.

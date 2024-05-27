@@ -13,7 +13,13 @@ neldermead:
         UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
         maxiter=2000
             
-
+2 - 1.,1+2/b.ndisk,0.75-1/(2*b.ndisk),1-1/(b.ndisk),1e-6,
+        ObjAnalytical,
+        InitSimplexRegular(5e-5),
+        DefaultSimplexSampler,
+        UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
+        maxiter=2000
+        RANDOM INIT
 
 
 linesearch:
