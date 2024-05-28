@@ -47,7 +47,7 @@ Analyse neldermead trace and create plot output using Analytical1d.
 - `div=5`: Amount of intermediate steps.
 - `ylim=[-0.05e4,3e4]`: Manual limit of y-axis.
 """
-function analyse(hist,trace::Vector{NMTrace},freqsplot;
+function analyse(booster,hist,trace::Vector{NMTrace},freqsplot;
         freqs=nothing,plotting=true,div=5,ylim=[-0.05e4,3e4])
     
     tracex = hcat((x->x.x[:,1]).(trace)...)
@@ -69,17 +69,23 @@ function analyse(hist,trace::Vector{NMTrace},freqsplot;
     mag = getMag(maximum(freqsplot)); scale = 10^mag
 
     if plotting
-        plt1 = plot(freqsplot/scale,boost1d(pos2dist(tracex[:,1]),freqsplot);
+        plt1 = plot(freqsplot/scale,
+            boost1d(pos2dist(tracex[:,1]),freqsplot;eps=booster.epsilon,tand=booster.tand,
+                thickness=booster.thickness);
                 ylim=ylim,label="init",lc="blue",lw=2)
 
         if div != 0
             for i in 2:maximum([1,l÷div]):(l-1)
-                plot!(freqsplot/scale,boost1d(pos2dist(tracex[:,i]),freqsplot);
+                plot!(freqsplot/scale,
+                    boost1d(pos2dist(tracex[:,i]),freqsplot;eps=booster.epsilon,
+                        tand=booster.tand,thickness=booster.thickness);
                         ylim=ylim,label="it.: "*string(i))
             end
         end
 
-        plot!(freqsplot/scale,boost1d(pos2dist(tracex[:,l]),freqsplot);
+        plot!(freqsplot/scale,
+            boost1d(pos2dist(tracex[:,l]),freqsplot;eps=booster.epsilon,tand=booster.tand,
+                thickness=booster.thickness);
                 ylim=ylim,label="final",lc="red",lw=2)
 
         if freqs !== nothing
