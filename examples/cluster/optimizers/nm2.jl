@@ -37,7 +37,7 @@ function main(args)
         t = @elapsed begin
             Random.seed!(seed+i)
 
-            p0 = dist2pos(randn(booster.ndisk)*sigx*λ)
+            p0 = dist2pos((0.8*randn(booster.ndisk).+0.2)*sigx*λ)
 
             move(booster,p0; additive=false)
 
