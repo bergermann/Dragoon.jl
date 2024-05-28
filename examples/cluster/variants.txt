@@ -19,7 +19,7 @@ neldermead:
         DefaultSimplexSampler,
         UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
         maxiter=2000
-        RANDOM INIT
+        RANDOM SHIFT IN DISTANCE SPACE
 
 
 linesearch:

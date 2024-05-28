@@ -14,15 +14,17 @@ function main(args)
 
     freqs = genFreqs(s.f0,s.df; n=s.nf)
 
-    booster = AnalyticalBooster(1e-3; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
+    initdist = findpeak1d(s.f0,s.ndisk)
+    dist0 = ones(s.ndisk)*initdist
 
-    λ = 299792458.0/s.f0
+    booster = AnalyticalBooster(1e-3; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
 
     @everywhere begin
         sigx = $sigx
         freqs = $freqs
         booster = $booster
-        λ = $λ
+        dist0 = $dist0
+        initdist = $initdist
     end
 
     pids = ParallelUtilities.workers_myhost()
@@ -37,7 +39,10 @@ function main(args)
         t = @elapsed begin
             Random.seed!(seed+i)
 
-            p0 = dist2pos((sigx*randn(booster.ndisk).+0.5)*λ/2)
+            d0 = dist0+randn(booster.ndisk)*sigx
+            d0 .= max.(d0,0.5*initdist)
+
+            p0 = dist2pos(d0)
 
             move(booster,p0; additive=false)
 

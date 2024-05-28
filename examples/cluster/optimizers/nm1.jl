@@ -15,7 +15,7 @@ function main(args)
     freqs = genFreqs(s.f0,s.df; n=s.nf)
 
     initdist = findpeak1d(s.f0,s.ndisk)
-    pos0 = dist2pos(ones(s.ndisk)*initdist);
+    pos0 = dist2pos(ones(s.ndisk)*initdist)
 
     booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
 

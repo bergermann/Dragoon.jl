@@ -132,45 +132,49 @@ function prepareDataAll1d(path,threshold=Inf64)
     n, r = 0, 0
 
     s = 0
+    pathes = []
 
     for (root, dirs, files) in walkdir(path)
-        p = joinpath.(root,files)
+        for path in joinpath.(root,files)
+            if path in pathes || !occursin(".jld2",path)
+                continue
+            end
 
-        if length(p) != 1 || !occursin(".jld2",p[1])
-            continue
+            push!(pathes,path)
+
+            @load String(path) data sigx s seed T
+            
+            idxs = (data[:,s.ndisk+1] .<= threshold)
+
+            pos = data[idxs,1:s.ndisk]
+            dist = similar(pos)
+
+            for i in axes(pos,1)
+                dist[i,:] = pos2dist(pos[i,:])
+                idxs[i] *= all(dist[i,:] .>= 0)
+            end
+
+            freqs = genFreqs(s.f0,s.df; n=s.nf)
+
+            boost = zeros(Float64,size(dist,1),s.nf)
+            ref = zeros(ComplexF64,size(dist,1),s.nf)
+
+            for i in axes(dist,1)
+                boost[i,:] = boost1d(dist[i,:],freqs; eps=s.eps,tand=s.tand)
+                ref[i,:] = ref1d(dist[i,:],freqs; eps=s.eps,tand=s.tand)
+            end
+
+            push!(pos_,pos[idxs,:]')
+            push!(dist_,dist[idxs,:]')
+            push!(boost_,boost[idxs,:]')
+            push!(ref_,ref[idxs,:]')
+            push!(obj_,data[idxs,s.ndisk+1])
+            push!(T_,T[idxs])
+            push!(opttime_,data[idxs,s.ndisk+2])
+            push!(optdist_,data[idxs,s.ndisk+3])
+
+            r += size(data,1)-sum(idxs); n += size(data,1)
         end
-
-        @load String(p[1]) data sigx s seed T
-        
-        idxs = (data[:,s.ndisk+1] .<= threshold)
-
-        r += size(data,1)-sum(idxs); n += size(data,1)
-
-        pos = data[idxs,1:s.ndisk]
-        dist = similar(pos)
-
-        for i in axes(pos,1)
-            dist[i,:] = pos2dist(pos[i,:])
-        end
-
-        freqs = genFreqs(s.f0,s.df; n=s.nf)
-
-        boost = zeros(Float64,size(dist,1),s.nf)
-        ref = zeros(ComplexF64,size(dist,1),s.nf)
-
-        for i in axes(dist,1)
-            boost[i,:] = boost1d(dist[i,:],freqs; eps=s.eps,tand=s.tand)
-            ref[i,:] = ref1d(dist[i,:],freqs; eps=s.eps,tand=s.tand)
-        end
-
-        push!(pos_,pos')
-        push!(dist_,dist')
-        push!(boost_,boost')
-        push!(ref_,ref')
-        push!(obj_,data[idxs,s.ndisk+1])
-        push!(T_,T)
-        push!(opttime_,data[idxs,s.ndisk+2])
-        push!(optdist_,data[idxs,s.ndisk+3])
     end
 
     println("Data preparation: $r rejected out of $n.")
