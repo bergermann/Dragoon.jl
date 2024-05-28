@@ -37,7 +37,7 @@ function main(args)
         t = @elapsed begin
             Random.seed!(seed+i)
 
-            p0 = dist2pos((0.8*randn(booster.ndisk).+0.2)*sigx*λ)
+            p0 = dist2pos((sigx*randn(booster.ndisk).+0.5)*λ/2)
 
             move(booster,p0; additive=false)
 
@@ -79,13 +79,13 @@ data, sigx, Nsig, s, seed, T = main(ARGS)
 date = getDateString()
 path = joinpath(
         "optimization data",
-        # "rand_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
-        # uppercase(@__FILE__)[1:end-3]
+        "rand_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
+        uppercase(@__FILE__)[1:end-3]
     )
 
-# if !isdir(path)
-#     mkpath(path)
-# end
+if !isdir(path)
+    mkpath(path)
+end
 
 println("saving to $(joinpath(path,"$(date).jld2"))")
 
