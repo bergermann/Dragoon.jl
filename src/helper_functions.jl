@@ -87,11 +87,13 @@ function move(booster::AnalyticalBooster,newpos::Vector{Tuple{Int64,Float64}};
     
     T = zeros(length(newpos))
 
-    for n in newpos
+    for i in eachindex(newpos)
         if additive
-            booster.summeddistance += abs(n[2])
+            newpos[i] = (newpos[i][1],max(newpos[i][2],-booster.pos[newpos[i][1]]))
+            booster.summeddistance += abs(newpos[i][2])
         else
-            booster.summeddistance += abs(booster.pos[n[1]]-n[2])
+            newpos[i] = (newpos[i][1],max(newpos[i][2],0))
+            booster.summeddistance += abs(booster.pos[newpos[i][1]]-newpos[i][2])
         end
     end
 
@@ -128,8 +130,10 @@ function move(booster::AnalyticalBooster,newpos::Array{Float64};
         Δt=0,returntrace=false,tracestep=1e-3,additive=false)
 
     if additive
+        newpos .= max.(newpos,-booster.pos)
         booster.summeddistance += sum(abs.(newpos))
     else
+        newpos .= max.(newpos,0)
         booster.summeddistance += sum(abs.(booster.pos-newpos))
     end
     
