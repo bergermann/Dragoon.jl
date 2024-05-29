@@ -42,7 +42,7 @@ function main(args)
             Random.seed!(seed+i)
 
             d0 = dist0+rande(booster.ndisk)*sigx*initdist
-            d0 .= modp(d0,wl/2,initdist*1.1)
+            d0 .= modp.(d0,wl/2,initdist*1.1)
 
             p0 = dist2pos(d0)
 
