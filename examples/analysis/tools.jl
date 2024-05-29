@@ -145,13 +145,14 @@ function prepareDataAll1d(path,threshold=Inf64)
             @load String(path) data sigx s seed T
             
             idxs = (data[:,s.ndisk+1] .<= threshold)
+            idxs_ = all(data[:,1:s.ndisk-1] .<= data[:,2:s.ndisk],dims=2)
+            idxs .*= reshape(idxs_,(length(idxs_),))
 
             pos = data[idxs,1:s.ndisk]
             dist = similar(pos)
 
             for i in axes(pos,1)
                 dist[i,:] = pos2dist(pos[i,:])
-                idxs[i] *= all(dist[i,:] .>= 0)
             end
 
             freqs = genFreqs(s.f0,s.df; n=s.nf)
@@ -164,10 +165,10 @@ function prepareDataAll1d(path,threshold=Inf64)
                 ref[i,:] = ref1d(dist[i,:],freqs; eps=s.eps,tand=s.tand)
             end
 
-            push!(pos_,pos[idxs,:]')
-            push!(dist_,dist[idxs,:]')
-            push!(boost_,boost[idxs,:]')
-            push!(ref_,ref[idxs,:]')
+            push!(pos_,pos')
+            push!(dist_,dist')
+            push!(boost_,boost')
+            push!(ref_,ref')
             push!(obj_,data[idxs,s.ndisk+1])
             push!(T_,T[idxs])
             push!(opttime_,data[idxs,s.ndisk+2])
@@ -194,6 +195,26 @@ function prepareDataAll1d(path,threshold=Inf64)
         s
     )
 end
+
+
+
+
+function sortData!(data::Data)
+    sp = sortperm(data.obj)
+
+    data.pos .= data.pos[:,sp]
+    data.dist .= data.dist[:,sp]
+    data.boost .= data.boost[:,sp]
+    data.ref .= data.ref[:,sp]
+
+    data.obj .= data.obj[sp]
+    data.runtime .= data.runtime[sp]
+    data.opttime .= data.opttime[sp]
+    data.optdist .= data.optdist[sp]
+
+    return
+end
+
 
 
 

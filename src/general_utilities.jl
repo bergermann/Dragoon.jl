@@ -7,7 +7,9 @@ export spacings_stefan,
     genFreqs, 
     pos2dist, dist2pos,
     pNorm, copy,
-    getDateString
+    getDateString,
+    λ, wavelength,
+    rande
 
 """
     const spacings_stefan
@@ -331,4 +333,25 @@ function getDateString()
     d = unow()
 
     return format(d,"yyyy_mm_dd-HH_MM_SS")
+end
+
+
+"""
+    λ(frequency::Real)
+
+Returns the (vacuum) wavelength of light with `frequency`.
+"""
+function λ(frequency::Real)
+    return 299792458.0/frequency
+end
+
+wavelength(frequency) = λ(frequency)
+
+"""
+    rande(n::Integer)
+
+Returns `n` equally distributed numbers between -1 and 1.
+"""
+function rande(n::Integer)
+    return 2*rand(n).-1
 end
