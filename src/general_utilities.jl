@@ -9,7 +9,7 @@ export spacings_stefan,
     pNorm, copy,
     getDateString,
     λ, wavelength,
-    rande
+    rande, modp
 
 """
     const spacings_stefan
@@ -354,4 +354,16 @@ Returns `n` equally distributed numbers between -1 and 1.
 """
 function rande(n::Integer)
     return 2*rand(n).-1
+end
+
+function modp(x,y,threshold=Inf64)
+    if 0 < x < threshold
+        return x
+    else
+        if 0 < x
+            return mod(x,y)
+        else 
+            return y + rem(x,y)
+        end
+    end
 end

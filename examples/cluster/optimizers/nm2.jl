@@ -16,6 +16,7 @@ function main(args)
 
     initdist = findpeak1d(s.f0,s.ndisk)
     dist0 = ones(s.ndisk)*initdist
+    wl = λ(s.f0)
 
     booster = AnalyticalBooster(1e-3; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
 
@@ -25,6 +26,7 @@ function main(args)
         booster = $booster
         dist0 = $dist0
         initdist = $initdist
+        wl = $wl
     end
 
     pids = ParallelUtilities.workers_myhost()
@@ -39,8 +41,8 @@ function main(args)
         t = @elapsed begin
             Random.seed!(seed+i)
 
-            d0 = dist0+randn(booster.ndisk)*sigx
-            d0 .= max.(d0,0.5*initdist)
+            d0 = dist0+rande(booster.ndisk)*sigx*initdist
+            d0 .= modp(d0,wl/2,initdist*1.1)
 
             p0 = dist2pos(d0)
 
