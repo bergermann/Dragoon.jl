@@ -68,12 +68,15 @@ function prepareData1d(path,threshold=Inf64)
 
     print("Data preparation: ")
 
+    idxs = (data[:,s.ndisk+1] .<= threshold)
+    idxs_ = all(data[:,1:s.ndisk-1] .<= data[:,2:s.ndisk],dims=2)
+    idxs .*= reshape(idxs_,(length(idxs_),))
+
     pos = data[idxs,1:s.ndisk]
     dist = similar(pos)
 
     for i in axes(pos,1)
         dist[i,:] = pos2dist(pos[i,:])
-        idxs[i] *= all(dist[i,:] .>= 0)
     end
 
     freqs = genFreqs(s.f0,s.df; n=s.nf)
@@ -89,10 +92,10 @@ function prepareData1d(path,threshold=Inf64)
     println("$(size(data,1)-sum(idxs)) rejected out of $(size(data,1)).")
 
     return Data(
-        pos[idxs,:]',
-        dist[idxs,:]',
-        boost[idxs,:]',
-        ref[idxs,:]',
+        pos',
+        dist',
+        boost',
+        ref',
         freqs,
         data[idxs,s.ndisk+1],
         T[idxs],
