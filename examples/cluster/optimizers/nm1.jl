@@ -18,6 +18,7 @@ function main(args)
     pos0 = dist2pos(ones(s.ndisk)*initdist)
 
     booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
+    booster.wavelength = λ(s.f0)
 
     @everywhere begin
         sigx = $sigx

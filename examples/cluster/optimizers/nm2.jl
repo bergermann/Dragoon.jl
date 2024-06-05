@@ -19,6 +19,7 @@ function main(args)
     wl = λ(s.f0)
 
     booster = AnalyticalBooster(1e-3; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
+    booster.wavelength = λ(s.f0)
 
     @everywhere begin
         sigx = $sigx
@@ -42,7 +43,7 @@ function main(args)
             Random.seed!(seed+i)
 
             d0 = dist0+rande(booster.ndisk)*sigx*initdist
-            d0 .= modp.(d0,wl/2,initdist*1.1)
+            d0 .= modp.(d0,wl,initdist*1.1)
 
             p0 = dist2pos(d0)
 
