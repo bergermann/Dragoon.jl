@@ -108,12 +108,12 @@ Use `Δt` for additional movement overhead. Return trace of movement [NYI].
 """
 function move(booster::AnalyticalBooster,newpos::Array{Float64};
         Δt=0,tracestep=1e-3,additive=false)
-
-    trace = zeros(length(booster.pos),T/tracestep)
-
+    
     if additive
         newpos .+= booster.pos
     end
+        
+    trace = zeros(length(booster.pos),ceil(Int,maximum(abs.(booster.pos-newpos))/tracestep))
 
     if booster.wavelength != 0
         newpos[newpos .<= 0] .+= booster.wavelength
