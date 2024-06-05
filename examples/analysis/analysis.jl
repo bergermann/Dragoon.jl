@@ -15,8 +15,6 @@ sortData!(data)
 
 mean()
 
-# data = prepareDataAll1d(path,-12_000);
-
 showQuality(data,0)
 
 showDist(data,1000)
@@ -34,19 +32,10 @@ b = best(data);
 plot(data.freqs/1e9,b.boost)
 scatter(b.dist)
 
+scanSingleDiscs(b.dist,data.s.f0,data.s.df,10,3_000,1_000)
 
-for j in 1:20
-    l = λ(data.s.f0); n = 30_000
-    O = zeros(n)
-    d_ = copy(b.dist); d_[j] = 0
-    d = zeros(20); d[j] = 1
 
-    for i in 1:n
-        O[i] = minimum(boost1d(d_+d*l*i/10_000,data.freqs))
-    end
 
-    display(plot((1:n)/10_000,O; xlabel="d_$j/λ",ylabel="minimum boost"))
-end
 
 
 disc = 15

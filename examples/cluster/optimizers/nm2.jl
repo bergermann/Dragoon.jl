@@ -27,7 +27,6 @@ function main(args)
         booster = $booster
         dist0 = $dist0
         initdist = $initdist
-        wl = $wl
     end
 
     pids = ParallelUtilities.workers_myhost()
@@ -43,7 +42,7 @@ function main(args)
             Random.seed!(seed+i)
 
             d0 = dist0+rande(booster.ndisk)*sigx*initdist
-            d0 .= modp.(d0,wl,initdist*1.1)
+            d0 .= modp.(d0,booster.wavelength,2*booster.wavelength)
 
             p0 = dist2pos(d0)
 

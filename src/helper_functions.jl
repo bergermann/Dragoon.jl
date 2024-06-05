@@ -118,7 +118,7 @@ function move(booster::AnalyticalBooster,newpos::Vector{Float64};
     d = pos2dist(newpos)
     if booster.wavelength != 0
         # d[d .<= 0] .+= booster.wavelength
-        @. d = modp(d,booster.wavelength,booster.wavelength)
+        @. d = modp(d,booster.wavelength,2*booster.wavelength)
     else
         d .= max.(d,0)
     end
