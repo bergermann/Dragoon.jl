@@ -73,95 +73,60 @@ end
 
 """
     move(booster::AnalyticalBooster,newpos::Vector{Tuple{Int64,Float64}};
-        Δt=0,returntrace=false,tracestep=1e-3,additive=true)
+        Δt=0,tracestep=1e-3,additive=true)
 
 Set position of analytical `booster` to \"move\" it and update time values.
 Iteratively set positions at `index` for entries `(index,value)` of `newpos`.
 If `additive`, add `value` to recent position, else overwrite it.
-Use `Δt` for additional movement overhead.
-
-[Tracing NYI]
+Use `Δt` for additional movement overhead. Return trace of movement [NYI].
 """
 function move(booster::AnalyticalBooster,newpos::Vector{Tuple{Int64,Float64}};
-        Δt=0,returntrace=false,tracestep=1e-3,additive=true)
+        Δt=0,tracestep=1e-3,additive=true)
     
-    T = zeros(length(newpos))
-
-    for i in eachindex(newpos)
-        if additive
-            newpos[i] = (newpos[i][1],max(newpos[i][2],-booster.pos[newpos[i][1]]))
-            booster.summeddistance += abs(newpos[i][2])
-        else
-            newpos[i] = (newpos[i][1],max(newpos[i][2],0))
-            booster.summeddistance += abs(booster.pos[newpos[i][1]]-newpos[i][2])
-        end
-    end
+    newpos_ = copy(booster.pos)
 
     if additive
-        for i in 1:length(newpos)
-            T[i] = abs(newpos[i][2])/booster.vmotor
-            booster.pos[newpos[i][1]] += newpos[i][2]
+        for i in eachindex(newpos)
+            newpos_[newpos[i][1]] += newpos[i][2]
         end
     else
-        for i in 1:length(newpos)
-            T[i] = abs(p[i][2]-booster.pos[newpos[i][1]])/booster.vmotor
-            booster.pos[newpos[i][1]] = newpos[i][2]
+        for i in eachindex(newpos)
+            newpos_[newpos[i][1]] = newpos[i][2]
         end
     end
 
-    booster.timestamp += (Δt + maximum(T)) *ₜ Second
-
-    if returntrace
-        return 0
-    end
+    return move(booster,newpos_; Δt=Δt,tracestep=tracestep,additive=false)
 end
 
 """
     move(booster::AnalyticalBooster,newpos::Array{Float64};
-        Δt=0,returntrace=false,tracestep=1e-3,additive=false)
+        Δt=0,tracestep=1e-3,additive=false)
 
 Set position of analytical `booster` to \"move\" it and update time values.
 If `additive`, position is set to `booster.pos + newpos`, else to `newpos`.
-Use `Δt` for additional movement overhead.
-
-[Tracing NYI]
+Use `Δt` for additional movement overhead. Return trace of movement [NYI].
 """
 function move(booster::AnalyticalBooster,newpos::Array{Float64};
-        Δt=0,returntrace=false,tracestep=1e-3,additive=false)
+        Δt=0,tracestep=1e-3,additive=false)
+
+    trace = zeros(length(booster.pos),T/tracestep)
 
     if additive
-        newpos .= max.(newpos,-booster.pos)
-        booster.summeddistance += sum(abs.(newpos))
+        newpos .+= booster.pos
+    end
+
+    if booster.wavelength != 0
+        newpos[newpos .<= 0] .+= booster.wavelength
     else
         newpos .= max.(newpos,0)
-        booster.summeddistance += sum(abs.(booster.pos-newpos))
-    end
-    
-    if additive
-        T1 = maximum(abs.(newpos))/booster.vmotor
-        T2 = sum(abs.(newpos))/booster.vmotor
-
-        if returntrace
-            trace = zeros(length(booster.pos),T/tracestep)
-        end
-
-        booster.pos += newpos
-    else
-        T1 = maximum(abs.(booster.pos-newpos))/booster.vmotor
-        T2 = sum(abs.(booster.pos-newpos))/booster.vmotor
-
-        if returntrace
-            trace = zeros(length(booster.pos),T/tracestep)
-        end
-
-        booster.pos = copy(newpos)
     end
 
-    booster.timestamp += (Δt + T1) *ₜ Second
+    booster.summeddistance += sum(abs.(booster.pos-newpos))
+    booster.timestamp = (Δt + maximum(abs.(booster.pos-newpos))/booster.vmotor) *ₜ Second
 
-    if returntrace
-        return trace
-    end
+    booster.pos = copy(newpos)
+
+    return trace
 end
 
 

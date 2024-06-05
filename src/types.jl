@@ -32,7 +32,7 @@ Booster type for analytical calculations.
         vmotor=0.1e-3,maxlength=2)`
     
 - `AnalyticalBooster(pos,ndisk,epsilon,tand,thickness,R,
-        vmotor,maxlength,timestamp,codetimestamp,summeddistance)`
+        vmotor,maxlength,timestamp,codetimestamp,summeddistance,wavelength)`
 """
 mutable struct AnalyticalBooster <: Booster
     "Disc positions."
@@ -57,22 +57,24 @@ mutable struct AnalyticalBooster <: Booster
     codetimestamp::DateTime
     "Summed movement distance of discs."
     summeddistance::AbstractFloat
+    "Wavelength (of center optimization frequency) for reflection at zero."
+    wavelength::AbstractFloat
 
     function AnalyticalBooster(initdist::Real; ndisk=20,ϵ=24,tand=0,τ=1e-3,R=0.15,
             vmotor=0.1e-3,maxlength=2)
         new(dist2pos(initdist*ones(ndisk)),ndisk,ϵ,tand,τ,R,
-            vmotor,maxlength,DateTime(0),unow(),0.)
+            vmotor,maxlength,DateTime(0),unow(),0,0)
     end
 
     function AnalyticalBooster(initpos::Vector; ϵ=24,tand=0,τ=1e-3,R=0.15,
             vmotor=0.1e-3,maxlength=2)
-        new(initpos,length(initpos),ϵ,tand,τ,R,vmotor,maxlength,DateTime(0),DateTime(0),0)
+        new(initpos,length(initpos),ϵ,tand,τ,R,vmotor,maxlength,DateTime(0),DateTime(0),0,0)
     end
 
     function AnalyticalBooster(pos,ndisk,epsilon,tand,thickness,R,
-            vmotor,maxlength,timestamp,codetimestamp,summeddistance)
+            vmotor,maxlength,timestamp,codetimestamp,summeddistance,wavelength)
         new(pos,ndisk,epsilon,tand,thickness,R,
-            vmotor,maxlength,timestamp,codetimestamp,summeddistance)
+            vmotor,maxlength,timestamp,codetimestamp,summeddistance,wavelength)
     end
 end
 
