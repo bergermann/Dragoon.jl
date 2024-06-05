@@ -106,23 +106,25 @@ Set position of analytical `booster` to \"move\" it and update time values.
 If `additive`, position is set to `booster.pos + newpos`, else to `newpos`.
 Use `Δt` for additional movement overhead. Return trace of movement [NYI].
 """
-function move(booster::AnalyticalBooster,newpos::Array{Float64};
+function move(booster::AnalyticalBooster,newpos::Vector{Float64};
         Δt=0,tracestep=1e-3,additive=false)
     
     if additive
         newpos .+= booster.pos
     end
-        
+
     trace = zeros(length(booster.pos),ceil(Int,maximum(abs.(booster.pos-newpos))/tracestep))
 
+    d = pos2dist(newpos)
     if booster.wavelength != 0
-        newpos[newpos .<= 0] .+= booster.wavelength
+        d[d .<= 0] .+= booster.wavelength
     else
-        newpos .= max.(newpos,0)
+        d .= max.(d,0)
     end
+    newpos .= dist2pos(d)
 
     booster.summeddistance += sum(abs.(booster.pos-newpos))
-    booster.timestamp = (Δt + maximum(abs.(booster.pos-newpos))/booster.vmotor) *ₜ Second
+    booster.timestamp += (Δt + maximum(abs.(booster.pos-newpos))/booster.vmotor) *ₜ Second
 
     booster.pos = copy(newpos)
 
