@@ -13,14 +13,14 @@ initdist = findpeak1d(data.s.f0,20)
 d0 = initdist*ones(data.s.ndisk);
 sortData!(data)
 
-mean()
+# mean()
 
 showQuality(data,0)
 
-showDist(data,1000)
-hline!([initdist])
+showDist(data,1000; xlabel="disc index", ylabel="d_i [mm]")
+hline!([initdist]*1e3)
 
-plot(data.freqs/1e9,data.boost)
+plot(data.freqs/1e9,data.boost; xlabel="frequency [GHz]",ylabel="boost factor β^2")
 
 c = showClusters(data,100,200);
 

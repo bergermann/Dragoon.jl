@@ -231,7 +231,7 @@ end
 function showDist(data,n=typemax(Int); kwargs...)
     n = min(n,size(data.dist,2))
 
-    p = scatter(1:size(data.dist,1),data.dist[:,1:n];
+    p = scatter(1:size(data.dist,1),data.dist[:,1:n]*1e3;
         legend=false,c=:blue,markersize=2,kwargs...)
 
     return p

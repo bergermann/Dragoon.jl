@@ -8,7 +8,7 @@ Package:
 [ ] check allocations (e.g. updateHist)
 [ ] add "measurement count"
 [ ] add spacings folder with "search" function to examples
-[ ] put cluster scripts in function for program opt
+[x] put cluster scripts in function for program opt
 
 Computation:
 [ ] move repo to rwth gitlab
