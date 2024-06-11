@@ -30,7 +30,7 @@ TempLinear(τ0,n) = Callback(tempLinear,(τ0,n))
 
 
 
-function tempExponential(τ,(α,τmin)::Tuple{Real,Real})
+function tempExponential(τ,(τ0,α,τmin)::Tuple{Real,Real})
     @assert 0 < α < 1 "α should be between 0 and 1."
 
     return max(α*τ,τmin)
@@ -42,6 +42,6 @@ end
 Callback for exponential temperature manager option in [`simulatedAnnealing`](@ref). See 
 [`tempExponential`](@ref).
 """
-TempExp(α,τmin=0) = Callback(tempExponential,(α,τmin))
+TempExp(τ0,α,τmin=0) = Callback(tempExponential,(τ0,α,τmin))
 
 

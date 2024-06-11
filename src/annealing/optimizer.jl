@@ -57,6 +57,8 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
     resetcounter = 0
     resetcounterterm = 0
 
+    τ = copy(T.args[1])
+
     while iter < maxiter
         τ = T.func(τ,T.args)
 
