@@ -49,6 +49,7 @@ include("neldermead/unstuckinators.jl")
 # Simulated Annealing options
 include("annealing/optimizer.jl")
 include("annealing/functions.jl")
+include("annealing/tempmanagers.jl")
 include("annealing/unstuckinators.jl")
 
 end

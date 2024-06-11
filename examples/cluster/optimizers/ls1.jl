@@ -45,7 +45,8 @@ function main(args)
             hist = initHist(booster,100,freqs,ObjAnalytical)
             booster.summeddistance = 0.
             
-            trace, term = linesearch(booster,hist,freqs,booster.vmotor*1e-3,
+            trace, term = linesearch(booster,hist,freqs,
+                booster.vmotor*1e-3,
                 ObjAnalytical,
                 SolverHybrid("inv",0,1e-9,2),
                 Derivator2(1e-5,1e-6,"double"),
@@ -53,7 +54,6 @@ function main(args)
                 SearchExtendedSteps(2000),
                 UnstuckRandom(1e-6,-10_000);
                 ϵgrad=0.,maxiter=Int(1e2),
-                traceevery=typemax(Int),
                 showtrace=false,
                 unstuckisiter=true,
                 resettimer=true,
