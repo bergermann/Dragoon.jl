@@ -9,6 +9,8 @@ wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/clus
 
 wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/optimizers/sa1.jl" -O "optimizers/sa1.jl"
 
+wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/optimizers/ls1.jl" -O "optimizers/ls1.jl"
+
 ### get cluster scheduler scripts
 wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/optimization.sh" -O "optimization.sh"
 wget "https://raw.githubusercontent.com/bergermann/Dragoon.jl/main/examples/cluster/scheduler.sh" -O "scheduler.sh"

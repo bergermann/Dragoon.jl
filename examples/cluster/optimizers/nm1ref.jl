@@ -19,7 +19,8 @@ function main(args)
 
     booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
     booster.wavelength = λ(s.f0)
-
+    booster.mindist = 1e-3
+    
     dist0 = [
         0.0072448589080291290,
         0.0070711997431429300,

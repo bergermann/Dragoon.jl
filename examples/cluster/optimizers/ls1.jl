@@ -1,32 +1,31 @@
 
 using Distributed, ParallelUtilities, SharedArrays, JLD2, Dragoon
-@everywhere using Dragoon, Random
+@everywhere using Dragoon, Random 
 
 println("Available processors: ",nprocs())
 println("Available workers:    ",nworkers(),"\n")
 
-@everywhere include("standard_settings.jl")
+include("standard_settings.jl")
 
 
 
 function main(args)
     sigx, Nsig, s, _ = parseArgs(args)
-
+        
     freqs = genFreqs(s.f0,s.df; n=s.nf)
 
     initdist = findpeak1d(s.f0,s.ndisk)
-    dist0 = ones(s.ndisk)*initdist
+    pos0 = dist2pos(ones(s.ndisk)*initdist)
 
-    booster = AnalyticalBooster(1e-3; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
+    booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
     booster.wavelength = λ(s.f0)
     booster.mindist = 1e-3
-
+    
     @everywhere begin
         sigx = $sigx
         freqs = $freqs
+        pos0 = $pos0
         booster = $booster
-        dist0 = $dist0
-        initdist = $initdist
     end
 
     pids = ParallelUtilities.workers_myhost()
@@ -41,28 +40,24 @@ function main(args)
         t = @elapsed begin
             Random.seed!(seed+i)
 
-            d0 = dist0+rande(booster.ndisk)*sigx*initdist
-            d0 .= modp.(d0,booster.wavelength,2*booster.wavelength)
-
-            p0 = dist2pos(d0)
-
-            move(booster,p0; additive=false)
+            move(booster,modb(booster,pos0+randn(booster.ndisk)*sigx); additive=false)
 
             hist = initHist(booster,100,freqs,ObjAnalytical)
             booster.summeddistance = 0.
             
-            trace, term = nelderMead(booster,hist,freqs,
-                1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-6,
+            trace, term = linesearch(booster,hist,freqs,booster.vmotor*1e-3,
                 ObjAnalytical,
-                InitSimplexRegular(5e-5),
-                DefaultSimplexSampler,
-                UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
-                maxiter=2000,
+                SolverHybrid("inv",0,1e-9,2),
+                Derivator2(1e-5,1e-6,"double"),
+                StepNorm("unit"),
+                SearchExtendedSteps(2000),
+                UnstuckRandom(1e-6,-10_000);
+                ϵgrad=0.,maxiter=Int(1e2),
                 traceevery=typemax(Int),
                 showtrace=false,
                 unstuckisiter=true,
                 resettimer=true,
-                returntimes=true)
+                returntimes=true);
 
             data[i,1:booster.ndisk] .= booster.pos
             data[i,booster.ndisk+1] = term[1]
@@ -86,8 +81,8 @@ data, sigx, Nsig, s, seed, T = main(ARGS)
 date = getDateString()
 path = joinpath(
         "optimization data",
-        "rand_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
-        "NM2"
+        "$(sigx)_$(Nsig)_$(s.f0)_$(s.df)_$(s.nf)_$(s.ndisk)_$(s.eps)_$(s.tand)",
+        "LS1"
     )
 
 if !isdir(path)

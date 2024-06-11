@@ -115,14 +115,7 @@ function move(booster::AnalyticalBooster,newpos::Vector{Float64};
 
     trace = zeros(length(booster.pos),ceil(Int,maximum(abs.(booster.pos-newpos))/tracestep))
 
-    d = pos2dist(newpos)
-    if booster.wavelength != 0
-        # d[d .<= 0] .+= booster.wavelength
-        @. d = modp(d,booster.wavelength,2*booster.wavelength)
-    else
-        d .= max.(d,0)
-    end
-    newpos .= dist2pos(d)
+    newpos .= modb(booster,newpos)
 
     booster.summeddistance += sum(abs.(booster.pos-newpos))
     booster.timestamp += (Δt + maximum(abs.(booster.pos-newpos))/booster.vmotor) *ₜ Second

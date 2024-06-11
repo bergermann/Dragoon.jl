@@ -19,6 +19,7 @@ function main(args)
 
     booster = AnalyticalBooster(initdist; ndisk=s.ndisk,ϵ=s.eps,tand=s.tand)
     booster.wavelength = λ(s.f0)
+    booster.mindist = 1e-3
 
     @everywhere begin
         sigx = $sigx
@@ -39,7 +40,7 @@ function main(args)
         t = @elapsed begin
             Random.seed!(seed+i)
 
-            move(booster,pos0+randn(booster.ndisk)*sigx; additive=false)
+            move(booster,modb(booster,pos0+randn(booster.ndisk)*sigx); additive=false)
 
             hist = initHist(booster,100,freqs,ObjAnalytical)
             booster.summeddistance = 0.
