@@ -1,5 +1,6 @@
 
-
+export tempLinear, TempLinear,
+    tempExponential, TempExp
 
 
 
