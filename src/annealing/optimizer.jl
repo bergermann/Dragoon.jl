@@ -115,7 +115,7 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
 
     updateTimeStamp!(booster,:codetimestamp,resettimer,t0)
 
-    term = printTermination(booster,hist,i,maxiter,showtrace)
+    term = printTermination(booster,hist,iter,maxiter,showtrace)
 
     return returntimes ? (trace[1:min(round(Int,iter/traceevery)+1,length(trace))], term) : 
         trace[1:min(round(Int,iter/traceevery)+1,length(trace))]
