@@ -47,7 +47,7 @@ function main(args)
             
             trace, term = simulatedAnnealing(booster,hist,freqs,
                 100e-6,
-                TempLinear(100,1001),
+                TempLinear(100,Int(1e5)),
                 ObjAnalytical,
                 UnstuckDont;
                 maxiter=Int(1e5),
