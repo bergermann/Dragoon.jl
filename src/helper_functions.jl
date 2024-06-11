@@ -1,6 +1,6 @@
 ###     backbone functions for all optimizers
 
-export getState, initHist, updateHist!, move
+export getState, initHist, updateHist!, move, modb
 
 """
     getState(booster::Booster,
@@ -130,6 +130,19 @@ function move(booster::AnalyticalBooster,newpos::Vector{Float64};
     booster.pos = copy(newpos)
 
     return trace
+end
+
+function modb(booster::Booster,newpos::Vector{Float64})
+    d = pos2dist(newpos)
+
+    if booster.wavelength != 0
+        # d[d .<= 0] .+= booster.wavelength
+        @. d = modp(d,booster.wavelength,2*booster.wavelength)
+    end
+
+    d[d .<= booster.mindist] .+= booster.wavelength
+
+    return dist2pos(d)
 end
 
 

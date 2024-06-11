@@ -82,6 +82,11 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
         xoc = x_ + γ * (xr - x_)
         xe = x_ + β * (xr - x_)
 
+        xr = modb(booster,xr)
+        xic = modb(booster,xic)
+        xoc = modb(booster,xoc)
+        xe = modb(booster,xe)
+
         move(booster, xic; additive=false)
         fic = updateHist!(booster, hist, freqs, objFunction)
 

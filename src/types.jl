@@ -59,22 +59,25 @@ mutable struct AnalyticalBooster <: Booster
     summeddistance::AbstractFloat
     "Wavelength (of center optimization frequency) for reflection at zero."
     wavelength::AbstractFloat
+    "Minimum allowed distance between two neighbouring discs in meter."
+    mindist::AbstractFloat
 
     function AnalyticalBooster(initdist::Real; ndisk=20,ϵ=24,tand=0,τ=1e-3,R=0.15,
             vmotor=0.1e-3,maxlength=2)
         new(dist2pos(initdist*ones(ndisk)),ndisk,ϵ,tand,τ,R,
-            vmotor,maxlength,DateTime(0),unow(),0,0)
+            vmotor,maxlength,DateTime(0),unow(),0,0,0)
     end
 
     function AnalyticalBooster(initpos::Vector; ϵ=24,tand=0,τ=1e-3,R=0.15,
             vmotor=0.1e-3,maxlength=2)
-        new(initpos,length(initpos),ϵ,tand,τ,R,vmotor,maxlength,DateTime(0),DateTime(0),0,0)
+        new(initpos,length(initpos),ϵ,tand,τ,R,
+            vmotor,maxlength,DateTime(0),DateTime(0),0,0,0)
     end
 
     function AnalyticalBooster(pos,ndisk,epsilon,tand,thickness,R,
-            vmotor,maxlength,timestamp,codetimestamp,summeddistance,wavelength)
+            vmotor,maxlength,timestamp,codetimestamp,summeddistance,wavelength,mindist)
         new(pos,ndisk,epsilon,tand,thickness,R,
-            vmotor,maxlength,timestamp,codetimestamp,summeddistance,wavelength)
+            vmotor,maxlength,timestamp,codetimestamp,summeddistance,wavelength,mindist)
     end
 end
 
