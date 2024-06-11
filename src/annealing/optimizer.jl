@@ -107,7 +107,7 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
             end
         end
     
-        showtrace && i%showevery == 0 && printSAIter(booster,objx,objsol,τ,iter)
+        showtrace && iter%showevery == 0 && printSAIter(booster,objx,objsol,τ,iter)
     end
 
     move(booster,xsol; additive=false)
