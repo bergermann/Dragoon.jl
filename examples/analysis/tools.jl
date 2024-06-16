@@ -25,7 +25,6 @@ struct Entry
     s::Settings
 end
 
-
 function getPath(sigx,Nsig,f0,df,nf,ndisk,eps,tand,algorithm="",time="")
     p = joinpath(
         "examples",
@@ -40,6 +39,8 @@ function getPath(sigx,Nsig,f0,df,nf,ndisk,eps,tand,algorithm="",time="")
 
     return p
 end
+
+getPath() = joinpath("examples","analysis","optimization data")
 
 
 
@@ -145,6 +146,7 @@ function prepareDataAll1d(path,threshold=Inf64)
 
             push!(pathes,path)
 
+            println("opening ",String(path))
             @load String(path) data sigx s seed T
             
             idxs = (data[:,s.ndisk+1] .<= threshold)
@@ -307,12 +309,16 @@ function showQuality(data,threshold=nothing)
 
     p1 = histogram2d(data.opttime,-data.obj; legend=false,
         xlabel="travel time [s]",ylabel="objective value")
-    hline!(p1,[-threshold])
+    if !isnothing(threshold)
+        hline!(p1,[-threshold])
+    end
     display(p1)
 
     p2 = histogram2d(data.optdist,-data.obj; legend=false,
         xlabel="travel distance [m]",ylabel="objective value")
-    hline!(p2,[-threshold])
+    if !isnothing(threshold)
+        hline!(p2,[-threshold])
+    end
     display(p2)
 
     p3 = histogram2d(data.optdist,data.opttime; legend=false,
@@ -347,6 +353,32 @@ function scanSingleDiscs(d0::Vector{Float64},f0::Float64,df::Float64,nfreqs::Int
 
         display(plot((1:n1)/n2,O; xlabel="d_$j/λ",ylabel="minimum boost"))
     end
+
+    return
+end
+
+
+
+
+function showDistribution(data)
+    dd = data.dist .- d0;
+    for i in 1:20
+        display(histogram(dd[i,:]/1e-3; xlabel="Δd_$i [mm]",xlim=[-1,1],ylim=[-500,40_000],
+            bins=-1:0.01:1))
+    end
+
+    md = reshape(mean(dd; dims=1),(size(dd,2)));
+    display(histogram(md/1e-3; xlabel="μ(Δd) [mm]",bins=-0.1:0.001:0.1))
+
+
+    dp = data.pos .- p0;
+    for i in 1:20
+        display(histogram(dp[i,:]/1e-3; xlabel="Δp_$i [mm]",xlim=[-1,1],ylim=[-500,40_000],
+            bins=-1:0.01:1))
+    end
+
+    mp = reshape(mean(dp; dims=1),(size(dd,2)));
+    display(histogram(mp/1e-3; xlabel="μ(Δp) [mm]",bins=-0.1:0.001:0.1))
 
     return
 end
