@@ -21,6 +21,7 @@ SQLite = "0aa819cd-b072-5ff4-a722-6bc24af294d9"
 
 [compat]
 Plots = "1"
+SQLite = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
