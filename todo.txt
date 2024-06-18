@@ -1,6 +1,6 @@
 
 
-To-Do-List (15.06.24):
+To-Do-List (18.06.24):
 Package:
 [t] implement missing unstuckinators
 [t] rework examples
@@ -24,8 +24,12 @@ Computation:
 [ ] loss tests?
 
 Analysis:
-[ ] plot obj value vs movement time
-[ ] try clustering results
+[x] try clustering results
+[ ] visualize optimized states, differences (i.e. electrical fields) -> direct comparison of e.g. 3 different optimized states
+[t] visualize stability of optimized (jensen shannon?)
+[ ] check systematics of optimized states by algorithm
+
+
 
 Main:
 [ ] show redundancy in optimized states

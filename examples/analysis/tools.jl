@@ -123,7 +123,7 @@ function best(data::Data)
 end
 
 
-function prepareDataAll1d(path,threshold=Inf64)
+function prepareDataAll1d(path,threshold=Inf64; f0=22.025e9,df=50e6,nf=10,ndisk=20,eps=24.0,tand=0.0)
     pos_ = []
     dist_ = []
     boost_ = []
@@ -137,10 +137,11 @@ function prepareDataAll1d(path,threshold=Inf64)
 
     s = 0
     pathes = []
+    p = "$(f0)_$(df)_$(nf)_$(ndisk)_$(eps)_$(tand)"
 
     for (root, dirs, files) in walkdir(path)
         for path in joinpath.(root,files)
-            if path in pathes || !occursin(".jld2",path)
+            if path in pathes || !occursin(".jld2",path) || !occursin(p,path)
                 continue
             end
 
@@ -187,16 +188,25 @@ function prepareDataAll1d(path,threshold=Inf64)
     
     freqs = genFreqs(s.f0,s.df; n=s.nf)
 
+    _pos =      cat(pos_...; dims=2)
+    _dist =     cat(dist_...; dims=2)
+    _boost =    cat(boost_...; dims=2)
+    _ref =      cat(ref_...; dims=2)
+    _obj =      cat(obj_...; dims=1)
+    _T =        cat(T_...; dims=1)
+    _opttime =  cat(opttime_...; dims=1)
+    _optdist =  cat(optdist_...; dims=1)
+
     return Data(
-        cat(pos_...; dims=2),
-        cat(dist_...; dims=2),
-        cat(boost_...; dims=2),
-        cat(ref_...; dims=2),
+        _pos,
+        _dist,
+        _boost,
+        _ref,
         freqs,
-        cat(obj_...; dims=1),
-        cat(T_...; dims=1),
-        cat(opttime_...; dims=1),
-        cat(optdist_...; dims=1),
+        _obj,
+        _T,
+        _opttime,
+        _optdist,
         s
     )
 end
