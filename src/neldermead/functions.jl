@@ -70,7 +70,7 @@ function analyse(booster,hist,trace::Vector{NMTrace},freqsplot;
 
     if plotting
         plt1 = plot(freqsplot/scale,
-            boost1d(pos2dist(tracex[:,1]),freqsplot;eps=booster.epsilon,tand=booster.tand,
+            boost1d(pos2dist(tracex[:,1]),freqsplot; eps=booster.epsilon,tand=booster.tand,
                 thickness=booster.thickness);
                 ylim=ylim,label="init",lc="blue",lw=2)
 
@@ -129,13 +129,11 @@ function analyse(booster,hist,trace::Vector{NMTrace},freqsplot;
         display(plt4)
         display(plt5)
         display(plt6)
-    end
 
-    if !plotting
-        return tracex, tracex_, traced, traced_, tracef, tracef_,
-                                                            histx, histf, histd
-    else
         return plt1, plt2, plt3, plt4, plt5, plt6
+    else
+        return tracex, tracex_, traced, traced_, tracef, tracef_,
+            histx, histf, histd
     end
 end
 

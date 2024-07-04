@@ -163,13 +163,11 @@ function analyse(hist, trace::Vector{NMTrace}, freqsplot;
         display(plt4)
         display(plt5)
         display(plt6)
-    end
 
-    if !plotting
-        return tracex, tracex_, traced, traced_, tracef, tracef_,
-        histx, histf, histd
-    else
         return plt1, plt2, plt3, plt4, plt5, plt6
+    else
+        return tracex, tracex_, traced, traced_, tracef, tracef_,
+            histx, histf, histd
     end
 end
 
@@ -275,12 +273,10 @@ function analyse(hist,trace::Vector{SATrace},freqsplot;
         display(plt5)
         display(plt6)
         display(plt7)
-    end
 
-    if !plotting
-        return tracex, traced, tracexsol, tracedsol, traceobj, traceobjsol, tracet
-    else
         return plt1, plt2, plt3, plt4, plt5, plt6, plt7
+    else
+        return tracex, traced, tracexsol, tracedsol, traceobj, traceobjsol, tracet
     end
 end
 
@@ -368,11 +364,9 @@ function analyse(hist, trace::Vector{LSTrace}, freqsplot;
         display(plt4)
         display(plt5)
         display(plt6)
-    end
 
-    if !plotting
-        return tracex, traced, tracef, traceg, traceh
-    else
         return plt1, plt2, plt3, plt4, plt5, plt6
+    else
+        return tracex, traced, tracef, traceg, traceh
     end
 end

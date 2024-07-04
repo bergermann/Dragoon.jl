@@ -61,7 +61,12 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
 
     t0 = setTimes!(booster, resettimer)
 
-    trace = Vector{NMTrace}(undef, floor(Int, maxiter / traceevery) + 1)
+    trace = Vector{NMTrace}(undef, floor(Int, maxiter / traceevery) + 2)
+
+    trace[1] = NMTrace(copy(x),copy(f),zeros(booster.ndisk),0.0,
+                booster.timestamp, booster.summeddistance)
+            trace[Int(i / traceevery)].x_ = copy(x_)
+            trace[Int(i / traceevery)].obj_ = f_
 
     x = initSimplex.func(booster.pos, initSimplex.args)
     f = simplexObj.func(x, collect(1:booster.ndisk+1), booster, hist, freqs,
