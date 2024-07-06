@@ -5,11 +5,11 @@ using JLD2, HDF5, DataFrames
 include("tools.jl");
 
 # path = getPath(1e-3,100_000,22.025e9,50e6,10,20,24.0,0.0);
-# path = getPath("rand",100_000,22.025e9,50e6,10,20,24.0,0.0,"NM2","2024_05_29-15_05_16");
+path = getPath("rand",100_000,22.025e9,50e6,10,20,24.0,0.0,"NM2","2024_05_29-15_05_16");
 
 # data = prepareDataAll1d(path,-10_000);
 data = prepareDataAll1d(getPath(),-14_000);
-# data = prepareData1d(path,-14_000);
+data = prepareData1d(path,-14_000);
 
 
 
@@ -63,89 +63,138 @@ hline!([initdist]*1e3)
 showDistribution(data)
 
 
-function wiggle(pos::Vector{Float64},sigx::Real,n::Int,
-                freqsplot::Vector{Float64},bounds::Tuple{Float64,Float64}; showplots::Bool=true,ndiv::Int=10)
 
-    b0 = boost1d(pos2dist(pos),freqsplot)
-    obj0 = minimum(b0[@.(bounds[1] < freqsplot < bounds[2])])
+function showFields(pos::Vector{Float64},frequency::Float64;
+        R::Float64=0.1,eps::Float64=24.,tand::Float64=0.,thickness::Float64=1e-3)
+    
+    ndisk = length(pos)
 
-    db = zeros(Float64,length(freqsplot),n)
-    obj = zeros(Float64,n)
-    dsum = zeros(Float64,n)
-    dsumabs = zeros(Float64,n)
-    dmax = zeros(Float64,n)
+    # eps_ = ComplexF64[!iseven(i) ? 1 : 24 for i in 1:2*ndisk+1]
+    # prepend!(eps_,NaN)
 
-    R = Vector{Float64}[]
+    epsilon = 24
+    eps_ = Array{Complex{Float64}}([NaN, 1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1])
+    
 
-    for i in 1:n
-        r = sigx*randn(length(pos))
-        dsum[i] = sum(r)
-        dsumabs[i] = sum(abs.(r))
-        dmax[i] = maximum(abs.(r))
+    # d = pos2dist(pos; disk_thickness=thickness)
+    # distance = Float64[0]
+    # for i in 1:ndisk; append!(distance,d[i],thickness); end
+    # append!(distance,0)
+    distance = [0, 1.00334, 1.0,
+                    6.94754, 1.0,
+                    7.17660, 1.0,
+                    7.22788, 1.0,
+                    7.19717, 1.0,
+                    7.23776, 1.0,
+                    7.07746, 1.0,
+                    7.57173, 1.0,
+                    7.08019, 1.0,
+                    7.24657, 1.0,
+                    7.21708, 1.0,
+                    7.18317, 1.0,
+                    7.13025, 1.0,
+                    7.21980, 1.0,
+                    7.45585, 1.0,
+                    7.39873, 1.0,
+                    7.15403, 1.0,
+                    7.14252, 1.0,
+                    6.83105, 1.0,
+                    7.42282, 1.0,
+                    0.0]*1e-3
 
-        db[:,i] = boost1d(pos2dist(pos+r),freqsplot)
-        obj[i] = minimum(db[@.(bounds[1] < freqsplot < bounds[2]),i])
+    coords = SeedCoordinateSystem(X = [1e-9], Y = [1e-9])
+    
+    sbdry = SeedSetupBoundaries(coords; diskno=ndisk,distance=distance,epsilon=eps_)
+    
+    modes = SeedModes(coords, ThreeDim=false, Mmax=1, Lmax=0, diskR=R)
+    m_reflect = Float64[1.0]
 
-        if obj[i] < obj0
-            push!(R,pos2dist(pos+r))
-        end
-    end
+    boost, refl = transformer(sbdry,coords,modes;
+        reflect=m_reflect,prop=propagator1D,diskR=R,f=frequency)
+    Eout = transpose([boost refl])
 
-    db .-= b0
+    full_fields = BoostFractor.transformer_trace_back(refl,m_reflect, sbdry, coords,modes;
+        prop=propagator1D,f=frequency)
 
-    q = collect(0:1/ndiv:1)
-    Q = zeros(length(q),length(freqsplot))
-    for i in axes(Q,2)
-        Q[:,i] = quantile(db[i,:],q)
-    end
+    # return full_fields[:,:,1]
 
-    if showplots
-        p1 = plot(; xlabel="Frequency [GHz]",ylabel="Boostfactor β²")
+    plot_1d_field_pattern(-autorotate(full_fields[:,:,1]), sbdry, frequency)
 
-        for i in 1:div(length(q)-1,2)
-            plot!(p1,freqsplot/1e9,b0+Q[i,:]; linewidth=0,
-                fillrange=b0+Q[end-i+1,:],fillalpha=0.3,fillcolor=1,label=""
-                )
-        end
-
-        plot!(p1,freqsplot/1e9,b0; label="original")
-        plot!(p1,freqsplot/1e9,b0+Q[div(length(q)-1,2),:],label="50% quant")
-
-        p2 = histogram(obj)
-        vline!(p2,[obj0])
-
-        p3 = histogram2d(obj,dsum/1e-6; bins=20,xlabel="objective value",ylabel="∑Δp_i [mm]")
-        p4 = histogram2d(obj,dsumabs/1e-6; bins=20,xlabel="objective value",ylabel="∑|Δp_i| [mm]")
-        p5 = histogram2d(obj,dmax/1e-6; bins=20,xlabel="objective value",ylabel="max(Δp_i) [mm]")
-
-        display(p1)
-        display(p2)
-        display(p3)
-        display(p4)
-        display(p5)
-    end
-
-    return Q, R, obj
+    
+    # full_fields = BoostFractor.transformer_trace_back(EoutModes0[1,:,freq_idx],
+    #     zeros(length(m_reflect)), sbdry, coords,modes;
+    #     prop=propagator1D,f=frequencies[freq_idx], inlcudes_axion=true)
+    # plot_1d_field_pattern(-(full_fields[:,:,1]), sbdry, frequencies[freq_idx],
+    #     add_ea=true, overallphase=exp(-1im*pi/2*0.95))
 end
 
-function wigglewiggle(pos::Vector{Float64},sigxs::Vector{<:Real},n::Int,
-        freqsplot::Vector{Float64},bounds::Tuple{Float64,Float64}; ndiv::Int=10)
+
+function plot_1d_field_pattern(full_solution_regions, bdry::SetupBoundaries, f; fill=false,
+        add_ea=false, overallphase=1)
     
-    q = collect(0:1/ndiv:1)
-    Q = zeros(Float64,length(sigxs),length(q))
+    ztot = 0 # Each region needs to know where it starts, so iteratively add up the lengths of regions
+    Nregions = length(bdry.eps) 
+    c = 299792458.
 
-    for i in eachindex(sigxs)
-        println("Step $i/$(length(sigxs))")
-        _, _, obj = wiggle(pos,sigxs[i],n,freqsplot,bounds; showplots=false,ndiv=ndiv)
-
-        Q[i,:] = quantile(obj,q)
+    p = plot()
+    for s in 1:Nregions
+        # Propagation constant in that region
+        kreg = 2pi/c*f
+        kreg *= sqrt(bdry.eps[s])
+        
+        # Define the color of that region according to mirror / disk / free space / ...
+        fillcolor = nothing
+        if abs.(bdry.eps[s]) > 100 || bdry.eps[s] == NaN
+            fillcolor = "darkorange"
+        elseif abs.(bdry.eps[s]) != 1
+            fillcolor = "lightgray"
+        end
+        
+        # Plot that region        
+        plotRegion1d!(p,full_solution_regions[s,1].*overallphase,
+                        full_solution_regions[s,2].*overallphase,
+                        ztot, ztot+bdry.distance[s],
+                        kreg,
+                        Ea=(add_ea ? (1/bdry.eps[s]).*overallphase : 0),
+                        maxE=2.2*maximum(abs.(full_solution_regions[:,:])),
+                        bgcolor=fillcolor, extraspace=(s == Nregions),fill=fill,)
+        
+        ztot += bdry.distance[s]
     end
 
-    labels = reshape(collect(string.(round.(Int,q*100)).*"%"),(1,ndiv+1))
+    return p
+end
 
-    p1 = plot(sigxs/1e-6,Q; xlabel="σ_Δp [μm]",ylabel="Boostfactor β²",label=labels)
+function plotRegion1d!(p,R,L,z0,z1,k; 
+        bgcolor=nothing,extraspace=false,fill=false,Ea=0,maxE=10)    
 
-    display(p1)
+    # Construct the relative coordinate system for that region
+    z1 += 1e-9
+    maximum = (z1+(extraspace ? 10e-3 : 0))
+    z = vcat(z0:2e-4:maximum, maximum)
+    dz = z .- z0
+    dz2 = .-(z .- z1)
+    
+    # Calculate the functional solution for the region
+    Rf = L*exp.(+1im.*k.*dz2)
+    Lf = R*exp.(-1im.*k.*dz2)
+    
+    #Plot ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    # Mark the Region as Disk / Mirror / Air / etc.
+    # if !isnothing(bgcolor)
+    #     fill_between([z0 == 0 ? -0.0025 : z0,z1], -maxE, maxE, color=bgcolor, linewidth=0)
+    # end
+    
+    # Plot the real and imaginary part of the solution
+    plot!(p,z, real.(Rf.+Lf.+ Ea), c=:blue, label=(extraspace ? "Re(E)" : ""))
+    plot!(p,z, imag.(Rf.+Lf.+ Ea), c=:red, label=(extraspace ? "Im(E)" : ""))
 
     return
+end
+
+function autorotate(full_solution_regions)
+    ang = angle.(full_solution_regions[2,1].+full_solution_regions[2,2])
+    #sgn = real.((full_solution_regions[2,1].+full_solution_regions[2,2]).*exp(-1im*ang)) .> 0
+    return full_solution_regions.*exp(-1im*ang)
 end
