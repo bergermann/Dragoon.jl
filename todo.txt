@@ -16,16 +16,16 @@ Computation:
 - direct re-optimization
 - sophisticated linesearch beforehand, then re-optimization
 [ ] synchronize movement to measurement
-[ ] larger performance trials/tests
-- completely random initial spacings
-- opt by ref from stefans spacings
-- check average shift
+[x] larger performance trials/tests
+x completely random initial spacings
+x opt by ref from stefans spacings
+x check average shift
 [ ] 3d tests
 [ ] loss tests?
 
 Analysis:
 [x] try clustering results
-[ ] visualize optimized states, differences (i.e. electrical fields) -> direct comparison of e.g. 3 different optimized states
+[x] visualize optimized states, differences (i.e. electrical fields) -> direct comparison of e.g. 3 different optimized states
 [t] visualize stability of optimized (jensen shannon?)
 [ ] check systematics of optimized states by algorithm
 [ ] recheck unconverged states for anton

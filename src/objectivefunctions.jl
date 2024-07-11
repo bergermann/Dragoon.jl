@@ -110,3 +110,23 @@ See [`getObj3d`](@ref).
 """
 Obj3d(M,L,gridwidth,dx) = Callback(getObj3d,(M,L,gridwidth,dx))
 
+
+
+"""
+    getObjRef1dTest(booster::Booster,freqs::Vector{Float64},args::Tuple{})
+
+Return objective value by minimum analytical1d reflectivity for the given `freqs` and
+`booster` state. See[`boost1d`](@ref).
+"""
+function  getObjRef1dTest(booster::Booster,freqs::Vector{Float64},args::Tuple{})
+    return -minimum(abs.(getRef1d(booster,freqs)))
+end
+
+
+"""
+    ObjRef1dTest()
+
+Callback for calculating objective value with analytical 1d reflectivity.
+See [`getObjRef1dTest`](@ref).
+"""
+ObjRef1dTest() = Callback(getObjRef1dTest,())
