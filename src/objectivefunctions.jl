@@ -3,6 +3,7 @@
 export getObjAna1d, getObjRef1d
 export ObjAnalytical
 export ObjRef, ObjRefLin, ObjRefSquare, ObjRefSquare, ObjRefExp
+export ObjRef1dTest
 
 
 
