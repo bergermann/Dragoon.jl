@@ -120,7 +120,7 @@ Return objective value by minimum analytical1d reflectivity for the given `freqs
 `booster` state. See[`boost1d`](@ref).
 """
 function  getObjRef1dTest(booster::Booster,freqs::Vector{Float64},args::Tuple{})
-    return -minimum(abs.(getRef1d(booster,freqs)))
+    return minimum(abs.(getRef1d(booster,freqs)))
 end
 
 
