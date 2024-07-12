@@ -60,17 +60,19 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
         returntimes::Bool=false)
 
     t0 = setTimes!(booster, resettimer)
+    x0 = copy(booster.pos)
+    f0 = updateHist!(booster, hist, freqs, objFunction)
 
     trace = Vector{NMTrace}(undef, floor(Int, maxiter / traceevery) + 2)
-
-    trace[1] = NMTrace(copy(x),copy(f),zeros(booster.ndisk),0.0,
-                booster.timestamp, booster.summeddistance)
-            trace[Int(i / traceevery)].x_ = copy(x_)
-            trace[Int(i / traceevery)].obj_ = f_
 
     x = initSimplex.func(booster.pos, initSimplex.args)
     f = simplexObj.func(x, collect(1:booster.ndisk+1), booster, hist, freqs,
         objFunction, simplexObj.args)
+
+    trace[1] = NMTrace(copy(x),copy(f),zeros(booster.ndisk),0.0,
+                booster.timestamp, booster.summeddistance)
+    trace[1].x .= x0; trace[1].obj .= f0
+    trace[1].x_ = x0; trace[1].obj_ = f0
 
     i = 0
 
@@ -178,12 +180,13 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
     x[:, :] = x[:, sp]
     f[:] = f[sp]
 
-    trace[end] = NMTrace(x, f, zeros(booster.ndisk), 0.0, booster.timestamp,
+    idx = min(findlast(i->isassigned(trace,i),eachindex(trace))+1,length(trace))
+    trace[idx] = NMTrace(x, f, zeros(booster.ndisk), 0.0, booster.timestamp,
         booster.summeddistance)
 
-    trace[end].x_ = reshape(sum(x[:, 1:end-1]; dims=2), :) / booster.ndisk
-    move(booster, trace[end].x_; additive=false)
-    trace[end].obj_ = updateHist!(booster, hist, freqs, objFunction)
+    trace[idx].x_ = reshape(sum(x[:, 1:end-1]; dims=2), :) / booster.ndisk
+    move(booster, trace[idx].x_; additive=false)
+    trace[idx].obj_ = updateHist!(booster, hist, freqs, objFunction)
     
     move(booster, x[:, argmin(f)]; additive=false)  # move to optimal point
     updateHist!(booster, hist, freqs, objFunction)
@@ -191,7 +194,6 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
     updateTimeStamp!(booster, :codetimestamp, resettimer, t0)
 
     term = printTermination(booster, hist, i, maxiter, showtrace)
-
     
     return returntimes ? (trace[1:floor(Int, i/traceevery)+1], term) :
         trace[1:floor(Int, i/traceevery)+1]
@@ -200,7 +202,7 @@ end
 
 
 """
-    nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
+    nelderMeadLinesearch(booster::Booster,hist::Vector{State},freqs::Array{Float64},
         α::Float64,β::Float64,γ::Float64,δ::Float64,Δmin::Real,αls::Real,
         objFunction::Callback,
         initSimplex::Callback,
