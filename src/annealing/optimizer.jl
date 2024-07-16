@@ -63,7 +63,7 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
         τ = T.func(τ,T.args)
 
         if Int(iter%traceevery)==0
-            trace[Int(iter/traceevery)+1] = SATrace(x,objx,xsol,objsol,τ,iter,
+            trace[Int(iter/traceevery)+2] = SATrace(x,objx,xsol,objsol,τ,iter,
                                     booster.timestamp,booster.summeddistance)
         end
 
@@ -112,6 +112,9 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
 
     move(booster,xsol; additive=false)
     updateHist!(booster,hist,freqs,objFunction)
+    
+    idx = min(findlast(i->isassigned(trace,i),eachindex(trace))+1,length(trace))
+    trace[idx] = SATrace(x,objx,xsol,objsol,τ,iter,booster.timestamp,booster.summeddistance)
 
     updateTimeStamp!(booster,:codetimestamp,resettimer,t0)
 
