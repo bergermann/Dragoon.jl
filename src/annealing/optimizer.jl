@@ -120,6 +120,5 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
 
     term = printTermination(booster,hist,iter,maxiter,showtrace)
 
-    return returntimes ? (trace[1:min(round(Int,iter/traceevery)+1,length(trace))], term) : 
-        trace[1:min(round(Int,iter/traceevery)+1,length(trace))]
+    return returntimes ? (trace[1:idx],term) : trace[1:idx]
 end

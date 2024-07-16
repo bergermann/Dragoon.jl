@@ -58,11 +58,11 @@ function linesearch(booster::Booster, hist::Vector{State}, freqs::Array{Float64}
 
     t0 = setTimes!(booster,resettimer)
 
-    trace = Vector{LSTrace}(undef, maxiter + 1)
+    trace = Vector{LSTrace}(undef,maxiter+1)
 
     p = zeros(booster.ndisk)
     g = zeros(booster.ndisk)
-    h = zeros(booster.ndisk, booster.ndisk)
+    h = zeros(booster.ndisk,booster.ndisk)
 
     i = 0
     while i < maxiter
@@ -113,12 +113,12 @@ function linesearch(booster::Booster, hist::Vector{State}, freqs::Array{Float64}
 
     updateTimeStamp!(booster,:codetimestamp,resettimer,t0)
 
-    trace[i+1] = LSTrace(booster.pos, hist[1].objvalue, g, h,
-        booster.timestamp, booster.summeddistance)
+    idx = min(findlast(i->isassigned(trace,i),eachindex(trace))+1,length(trace))
+    trace[idx] = LSTrace(booster.pos,hist[1].objvalue,g,h,booster.timestamp, booster.summeddistance)
 
-    term = printTermination(booster, hist, i, maxiter, showtrace)
+    term = printTermination(booster,hist,i,maxiter,showtrace)
 
-    return returntimes ? (trace[1:i+1], term) : trace[1:i+1]
+    return returntimes ? (trace[1:idx], term) : trace[1:idx]
 end
 
 
