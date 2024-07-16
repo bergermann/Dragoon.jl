@@ -63,6 +63,37 @@ mutable struct Data
     s::Settings
 end
 
+import Base: getindex
+function Base.getindex(data::Data,inds::Vector{Int64})
+    return Data(
+        data.pos[:,inds],
+        data.dist[:,inds],
+        data.boost[:,inds],
+        data.ref[:,inds],
+        data.freqs,
+        data.obj[inds],
+        data.runtime[inds],
+        data.opttime[inds],
+        data.optdist[inds],
+        data.s
+    )
+end
+
+function Base.getindex(data::Data,idx::Integer)
+    return Data(
+        data.pos[:,[idx]],
+        data.dist[:,[idx]],
+        data.boost[:,[idx]],
+        data.ref[:,[idx]],
+        data.freqs,
+        data.obj[[idx]],
+        data.runtime[[idx]],
+        data.opttime[[idx]],
+        data.optdist[[idx]],
+        data.s
+    )
+end
+
 function prepareData1d(path,threshold=Inf64)
     @load String(path) data sigx s seed T
     
@@ -631,13 +662,42 @@ function showFields(pos::Vector{Float64},frequencies::Vector{Float64};
 
     for p in P; display(p[1]); end
 
-    p_ = plot(; layout=(2,1),size=(800,600),ylabel="∑E/E0",titlelocation=:left,)
+    p_ = plot(; layout=(2,1),size=(800,600),ylabel="∑E/E0",titlelocation=:left,legend=false)
     title!(p_[1],"Reflection")
     title!(p_[2],"Axion Induced")
-    plot!(p_[1],frequencies/1e9,[p[2][1] for p in P]; legend=false,xformatter=_->"",xlabel="")
-    plot!(p_[2],frequencies/1e9,[p[2][2] for p in P]; legend=:bottomright,xlabel="Frequency [GHz]")
+    plot!(p_[1],frequencies/1e9,[p[2][1] for p in P]; xformatter=_->"",xlabel="")
+    plot!(p_[2],frequencies/1e9,[p[2][2] for p in P]; xlabel="Frequency [GHz]")
     
     display(p_)
 
     return
 end
+
+
+
+
+
+
+
+
+
+# function saveData(data)
+#     if is
+#         df = DataFrame()
+
+#         for i in 1:data.s.ndisk
+#             df[!,"d$i"] = data.dist[i,:]
+#         end
+#         df[!,"obj"] = data.obj
+#     end
+
+#     sort!(df,[:obj])
+#     unique!(df)
+
+#     h5write("test.h5","data",df)
+
+#     return
+# end
+
+
+
