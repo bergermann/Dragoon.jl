@@ -29,7 +29,7 @@ Analysis:
 [t] visualize stability of optimized (jensen shannon?)
 [ ] check systematics of optimized states by algorithm
 [ ] recheck unconverged states for anton
-[ ] try optimizing by minimizing reflectivity in lossy case
+[x] try optimizing by minimizing reflectivity in lossy case
 
 
 

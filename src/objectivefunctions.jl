@@ -2,7 +2,7 @@
 
 export getObjAna1d, getObjRef1d
 export ObjAnalytical
-export ObjRef, ObjRefLin, ObjRefSquare, ObjRefSquare, ObjRefExp
+export ObjRef1d, ObjRef1dLin, ObjRef1dSquare, ObjRef1dExp
 export ObjRef1dTest
 
 
@@ -40,12 +40,12 @@ function getObjRef1d(booster::Booster,freqs::Vector{Float64},
 end
 
 """
-    ObjRefLin(ref0)
+    ObjRef1dLin(ref0)
 
 Callback for calculating objective value with analytical1d reflectivity and
 linear scaling. See [`getObjRef1d`](@ref).
 """
-ObjRefLin(ref0) = Callback(getObjRef1d,(ref0,))
+ObjRef1dLin(ref0) = Callback(getObjRef1d,(ref0,))
 
 
 
@@ -63,28 +63,28 @@ function getObjRef1d(booster::Booster,freqs::Vector{Float64},
 end
 
 """
-    ObjRef(ref0,f)
+    ObjRef1d(ref0,f)
 
 Callback for calculating objective value with analytical1d reflectivity and
 linear scaling. See [`getObjRef1d`](@ref).
 """
-ObjRef(ref0,f) = Callback(getObjRef1d,(ref0,f))
+ObjRef1d(ref0,f) = Callback(getObjRef1d,(ref0,f))
 
 """
-    ObjRefSquare(ref0)
+    ObjRef1dSquare(ref0)
 
 Callback for calculating objective value with analytical1d reflectivity and
 quadratic scaling. See [`getObjRef1d`](@ref).
 """
-ObjRefSquare(ref0) = Callback(getObjRef1d,(ref0,x->x^2))
+ObjRef1dSquare(ref0) = Callback(getObjRef1d,(ref0,x->x^2))
 
 """
-    ObjRefExp(ref0)
+    ObjRef1dExp(ref0)
 
 Callback for calculating objective value with analytical1d reflectivity and
 exponential scaling. See [`getObjRef1d`](@ref).
 """
-ObjRefExp(ref0) = Callback(getObjRef1d,(ref0,exp))
+ObjRef1dExp(ref0) = Callback(getObjRef1d,(ref0,exp))
 
 
 
