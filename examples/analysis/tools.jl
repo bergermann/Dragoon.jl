@@ -1,5 +1,6 @@
 
 using Plots, ColorSchemes, Clustering, BoostFractor, Statistics, Peaks, Printf
+using JLD2
 
 mutable struct Settings
     f0::Float64
@@ -63,7 +64,8 @@ mutable struct Data
     s::Settings
 end
 
-import Base: getindex
+import Base: getindex, length, eachindex, append!
+
 function Base.getindex(data::Data,inds::Vector{Int64})
     return Data(
         data.pos[:,inds],
@@ -92,6 +94,24 @@ function Base.getindex(data::Data,idx::Integer)
         data.optdist[[idx]],
         data.s
     )
+end
+
+Base.length(data::Data) = length(data.obj)
+Base.eachindex(data::Data) = eachindex(data.obj)
+
+function append!(database::Data,dataappend::Data)
+    @assert database.s == dataappend.s
+
+    database.pos = hcat(database.pos,dataappend.pos)
+    database.dist = hcat(database.dist,dataappend.dist)
+    database.boost = hcat(database.boost,dataappend.boost)
+    database.ref = hcat(database.ref,dataappend.ref)
+    append!(database.obj,dataappend.obj)
+    append!(database.runtime,dataappend.runtime)
+    append!(database.opttime,dataappend.opttime)
+    append!(database.optdist,dataappend.optdist)
+    
+    return database
 end
 
 function prepareData1d(path,threshold=Inf64)
@@ -124,7 +144,7 @@ function prepareData1d(path,threshold=Inf64)
 
     println("$(size(data,1)-sum(idxs)) rejected out of $(size(data,1)).")
 
-    return Data(
+    data = Data(
         pos',
         dist',
         boost',
@@ -136,6 +156,8 @@ function prepareData1d(path,threshold=Inf64)
         data[idxs,s.ndisk+3],
         s
     )
+
+    return data[unique(i -> data.obj[i], 1:length(data))]
 end
 
 function best(data::Data)
@@ -229,7 +251,7 @@ function prepareDataAll1d(path,threshold=Inf64; f0=22.025e9,df=50e6,nf=10,ndisk=
     _opttime =  cat(opttime_...; dims=1)
     _optdist =  cat(optdist_...; dims=1)
 
-    return Data(
+    data = Data(
         _pos,
         _dist,
         _boost,
@@ -241,6 +263,8 @@ function prepareDataAll1d(path,threshold=Inf64; f0=22.025e9,df=50e6,nf=10,ndisk=
         _optdist,
         s
     )
+
+    return data[unique(i -> data.obj[i], 1:length(data))]
 end
 
 
@@ -524,8 +548,9 @@ end
 
 
 
-function showFields(pos::Vector{Float64},frequency::Float64;
-        R::Float64=0.1,eps::Float64=24.,tand::Float64=0.,thickness::Float64=1e-3)
+function showFields(pos::Vector{Float64},frequency::Float64,freqsplot=nothing;
+        R::Float64=0.1,eps::Float64=24.,tand::Float64=0.,thickness::Float64=1e-3,
+        obj::Float64=Inf64)
 
     ndisk = 20#length(pos)
 
@@ -548,7 +573,12 @@ function showFields(pos::Vector{Float64},frequency::Float64;
         reflect=m_reflect,prop=propagator1D,diskR=R,f=frequency)
     Eout = transpose([boost refl])
 
-    p = plot(; layout=(2,1),size=(800,600),ylabel="E/E0",titlelocation=:left,)
+    if isnothing(freqsplot)
+        p = plot(; layout=(2,1),size=(800,600),ylabel="E/E0",titlelocation=:left,)
+    else
+        p = plot(; layout=(3,1),size=(800,900),ylabel="E/E0",titlelocation=:left,)
+    end
+
     annotate!(p[1],(0.75, -0.125),text(@sprintf("%.3f GHz",frequency/1e9),:left))
     title!(p[1],"Reflection")
     title!(p[2],"Axion Induced")
@@ -570,6 +600,18 @@ function showFields(pos::Vector{Float64},frequency::Float64;
     #     add_ea=true, overallphase=exp(-1im*pi/2*0.95))
     sa = plot_1d_field_pattern!(p[2],full_fields_a[:,:,1], sbdry, frequency,
         add_ea=true, overallphase=exp(-1im*pi/2*0.95))
+
+    if !isnothing(freqsplot)
+        plot!(p[3],freqsplot/1e9,
+            boost1d(d,freqsplot; eps=eps,tand=tand,thickness=thickness)/1e3,
+            xlabel="Frequency [GHz]",ylabel="Boost β² ×10³",label="",legend=false)
+        vline!(p[3],[frequency/1e9],label="")
+        
+        if !isequal(obj,Inf64)
+            annotate!(p[3],(0.8, 1.0),
+                text(@sprintf("Obj. value:\n%.1f",obj),:left))
+        end
+    end
 
     return p, (sr, sa)
 end
@@ -644,11 +686,19 @@ function autorotate(full_solution_regions)
     return full_solution_regions.*exp(-1im*ang)
 end
 
-function showFields(pos::Vector{Float64},frequencies::Vector{Float64};
+function showFields(pos::Vector{Float64},frequencies::Vector{Float64},freqsplot=nothing;
         R::Float64=0.1,eps::Float64=24.,tand::Float64=0.,thickness::Float64=1e-3,
-        yscaling::Bool=true)
+        yscaling::Bool=true,obj::Float64=Inf64)
 
-    P = [showFields(pos,f;R=R,eps=eps,tand=tand,thickness=thickness) for f in frequencies]
+    P = [showFields(pos,f,freqsplot;R=R,eps=eps,tand=tand,thickness=thickness,obj=obj)
+            for f in frequencies]
+    
+    xlim1 =  maximum([xlims(p[1][1])[2] for p in P])
+    
+    for i in eachindex(P)
+        xlims!(P[i][1][1],(-0.002,xlim1))
+        xlims!(P[i][1][2],(-0.002,xlim1))
+    end
 
     if yscaling
         ylim1 = maximum([ylims(p[1][1])[2] for p in P])
@@ -674,8 +724,73 @@ function showFields(pos::Vector{Float64},frequencies::Vector{Float64};
 end
 
 
+function showFields(data::Data,frequencies::Vector{Float64},freqsplot=nothing)
+    if isnothing(freqsplot)
+        freqsplot = data.freqs
+    end
+
+    P = Plots.Plot[]
+
+    for i in eachindex(data)
+        append!(P,[showFields(reshape(data[i].pos,size(data[i].pos,1)),f,freqsplot;
+                eps=data.s.eps,tand=data.s.tand,obj=data.obj[i])[1]
+                for f in frequencies])
+    end
+
+    xlim1 = maximum([xlims(p[1])[2] for p in P])
+    ylim1 = maximum([ylims(p[1])[2] for p in P])
+    ylim2 = maximum([ylims(p[2])[2] for p in P])
+    ylim3 = maximum([ylims(p[3])[2] for p in P])
+    
+    for i in eachindex(P)
+        xlims!(P[i][1],(-0.002,xlim1))
+        xlims!(P[i][2],(-0.002,xlim1))
+        ylims!(P[i][1],(-ylim1,ylim1))
+        ylims!(P[i][2],(-ylim2,ylim2))
+        ylims!(P[i][3],(-0.1,ylim3))
+
+        display(P[i])
+    end
+
+    return
+end
 
 
+
+
+
+function findOutliers(data::Data,threshold::Float64;
+        showdistribution::Bool=false,bymax::Bool=false)
+
+    M = reshape(sum(data.dist,dims=2),size(data.dist,1))/size(data.dist,2)
+    D = data.dist .- M
+
+    if bymax
+        d = reshape(maximum(abs.(D),dims=1),size(data.dist,2))
+    else
+        d = reshape(sum(abs.(D),dims=1),size(data.dist,2))
+    end
+
+    idxs = findall(x->x>threshold,t); push!(idxs,argmin(data.obj))
+
+    if showdistribution
+        lim = 20*round(log(10,length(idxs)))
+        p1 = scatter(1:size(data.dist,1),M/1e-3;
+            xlabel="Disc Index",ylabel="Distances [mm]",title="Average Position",legend=false)
+
+        p2 = histogram(d/1e-3; ylims=(0,lim),bins=100,
+            xlabel=bymax ? "Max. distance from average [mm]" :
+                "Abs. distance from average [mm]",
+            ylabel="Counts",title="Distribution",
+            legend=false)
+        vline!(p2,[threshold/1e-3])
+
+        display(p1)
+        display(p2)
+    end
+
+    return data[idxs]
+end
 
 
 

@@ -1,6 +1,7 @@
 
+using Pkg; Pkg.update()
 using Dragoon, BoostFractor
-using JLD2, HDF5, DataFrames
+using HDF5, DataFrames
 
 include("tools.jl");
 
@@ -17,10 +18,10 @@ data = prepareDataAll1d(getPath(),-14_000);
 
 initdist = findpeak1d(data.s.f0,20)
 d0 = initdist*ones(data.s.ndisk); p0 = dist2pos(d0);
-freqsplot = genFreqs(22.025e9,150e6; n=50);
+freqsplot = genFreqs(22.025e9,150e6; n=1000);
 
 sortData!(data)
-b = best(data)
+b = best(data);
 
 # showQuality(data)
 
@@ -36,23 +37,30 @@ bc = [best(data[findall(isequal(i),c.assignments)]) for i in axes(c.centers,2)]
 # showDistribution(data)
 
 
-showFields(b.pos,freqsplot)
-showFields(b.pos,[data.freqs[2],sum(data.freqs[[2,8]])/2,data.freqs[8]])
+# showFields(b.pos,freqsplot)
+# showFields(b.pos,[data.freqs[2],sum(data.freqs[[2,8]])/2,data.freqs[8]])
 
 
 # display(showFields(bc[i].pos,data.freqs[2])[1])
 
 
 
-P = [showFields(bc[i].pos,data.freqs[2]) for i in eachindex(bc)]
+# P = [showFields(bc[i].pos,data.freqs[2]) for i in eachindex(bc)]
 
-ylim1 = maximum([ylims(p[1][1])[2] for p in P])
-ylim2 = maximum([ylims(p[1][2])[2] for p in P])
+# ylim1 = maximum([ylims(p[1][1])[2] for p in P])
+# ylim2 = maximum([ylims(p[1][2])[2] for p in P])
 
-for i in eachindex(P)
-    ylims!(P[i][1][1],(-ylim1,ylim1))
-    ylims!(P[i][1][2],(-ylim2,ylim2))
-end
+# for i in eachindex(P)
+#     ylims!(P[i][1][1],(-ylim1,ylim1))
+#     ylims!(P[i][1][2],(-ylim2,ylim2))
+# end
 
-for p in P; display(p[1]); end
+# for p in P; display(p[1]); end
 
+
+out = findOutliers(data,7e-3; showdistribution=true)
+
+# f = data.freqs[5]
+f = 22.0e9+1e6
+
+showFields(out,data.freqs,freqsplot)

@@ -43,7 +43,7 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
 
     t0 = setTimes!(booster,resettimer)
 
-    trace = Vector{SATrace}(undef,round(Int,maxiter/traceevery)+1)
+    trace = Vector{SATrace}(undef,round(Int,maxiter/traceevery)+2)
 
     updateHist!(booster,hist,freqs,objFunction)
     
@@ -53,21 +53,16 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
     xsol = copy(booster.pos)
     objsol = hist[1].objvalue
 
-    iter = 0
+    iter = 1
     resetcounter = 0
     resetcounterterm = 0
 
     τ = copy(T.args[1])
 
+    trace[1] = SATrace(x,objx,xsol,objsol,τ,iter,booster.timestamp,booster.summeddistance)
+
     while iter < maxiter
         τ = T.func(τ,T.args)
-
-        if Int(iter%traceevery)==0
-            trace[Int(iter/traceevery)+2] = SATrace(x,objx,xsol,objsol,τ,iter,
-                                    booster.timestamp,booster.summeddistance)
-        end
-
-        iter += 1
 
         # updateHist!(booster,hist,freqs,objFunction; force=true)
         move(booster,x+findNeighbour(booster,rmax); additive=false)
@@ -108,6 +103,13 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
         end
     
         showtrace && iter%showevery == 0 && printSAIter(booster,objx,objsol,τ,iter)
+
+        if Int(iter%traceevery)==0
+            trace[Int(iter/traceevery)+1] = SATrace(x,objx,xsol,objsol,τ,iter,
+                                    booster.timestamp,booster.summeddistance)
+        end
+
+        iter += 1
     end
 
     move(booster,xsol; additive=false)
