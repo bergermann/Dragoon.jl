@@ -24,6 +24,8 @@ struct Entry
     opttime::Float64
     optdist::Float64
 
+    tag::Symbol
+
     s::Settings
 end
 
@@ -44,6 +46,17 @@ end
 
 getPath() = joinpath("examples","analysis","optimization data")
 
+function getTag(path)
+    if occursin("NM",path)
+        return :nm
+    elseif occursin("SA",path)
+        return :sa
+    elseif occursin("LS",path)
+        return :ls
+    else
+        return Symbol()
+    end
+end
 
 
 mutable struct Data
@@ -60,6 +73,8 @@ mutable struct Data
     runtime::Vector{Float64}
     opttime::Vector{Float64}
     optdist::Vector{Float64}
+    
+    tags::Vector{Symbol}
 
     s::Settings
 end
@@ -77,6 +92,7 @@ function Base.getindex(data::Data,inds::Vector{Int64})
         data.runtime[inds],
         data.opttime[inds],
         data.optdist[inds],
+        data.tags[inds],
         data.s
     )
 end
@@ -92,6 +108,7 @@ function Base.getindex(data::Data,idx::Integer)
         data.runtime[[idx]],
         data.opttime[[idx]],
         data.optdist[[idx]],
+        data.tags[[idx]],
         data.s
     )
 end
@@ -110,6 +127,7 @@ function append!(database::Data,dataappend::Data)
     append!(database.runtime,dataappend.runtime)
     append!(database.opttime,dataappend.opttime)
     append!(database.optdist,dataappend.optdist)
+    append!(database.tags,dataappend.tags)
     
     return database
 end
@@ -142,6 +160,8 @@ function prepareData1d(path,threshold=Inf64)
         ref[i,:] = ref1d(dist[i,:],freqs; eps=s.eps,tand=s.tand)
     end
 
+    tags = fill(getTag(path),size(data,1))
+
     println("$(size(data,1)-sum(idxs)) rejected out of $(size(data,1)).")
 
     data = Data(
@@ -154,6 +174,7 @@ function prepareData1d(path,threshold=Inf64)
         T[idxs],
         data[idxs,s.ndisk+2],
         data[idxs,s.ndisk+3],
+        tags,
         s
     )
 
@@ -172,6 +193,7 @@ function best(data::Data)
         data.runtime[idx],
         data.opttime[idx],
         data.optdist[idx],
+        data.tags[idx],
         data.s
     )
 end
@@ -186,6 +208,7 @@ function prepareDataAll1d(path,threshold=Inf64; f0=22.025e9,df=50e6,nf=10,ndisk=
     T_ = []
     opttime_ = []
     optdist_ = []
+    tags_ = []
 
     n, r = 0, 0
 
@@ -224,6 +247,8 @@ function prepareDataAll1d(path,threshold=Inf64; f0=22.025e9,df=50e6,nf=10,ndisk=
                 boost[i,:] = boost1d(dist[i,:],freqs; eps=s.eps,tand=s.tand)
                 ref[i,:] = ref1d(dist[i,:],freqs; eps=s.eps,tand=s.tand)
             end
+            
+            tags = fill(getTag(path),size(data,1))
 
             push!(pos_,pos')
             push!(dist_,dist')
@@ -233,12 +258,14 @@ function prepareDataAll1d(path,threshold=Inf64; f0=22.025e9,df=50e6,nf=10,ndisk=
             push!(T_,T[idxs])
             push!(opttime_,data[idxs,s.ndisk+2])
             push!(optdist_,data[idxs,s.ndisk+3])
+            push!(tags_,tags)
 
             r += size(data,1)-sum(idxs); n += size(data,1)
         end
     end
 
     println("Data preparation: $r rejected out of $n.")
+    println("Data preparation: $(n-r) accepted.")
     
     freqs = genFreqs(s.f0,s.df; n=s.nf)
 
@@ -250,6 +277,7 @@ function prepareDataAll1d(path,threshold=Inf64; f0=22.025e9,df=50e6,nf=10,ndisk=
     _T =        cat(T_...; dims=1)
     _opttime =  cat(opttime_...; dims=1)
     _optdist =  cat(optdist_...; dims=1)
+    _tags =     cat(tags_...; dims=1)
 
     data = Data(
         _pos,
@@ -261,6 +289,7 @@ function prepareDataAll1d(path,threshold=Inf64; f0=22.025e9,df=50e6,nf=10,ndisk=
         _T,
         _opttime,
         _optdist,
+        _tags,
         s
     )
 
@@ -282,6 +311,7 @@ function sortData!(data::Data)
     data.runtime .= data.runtime[sp]
     data.opttime .= data.opttime[sp]
     data.optdist .= data.optdist[sp]
+    data.tags .= data.tags[sp]
 
     return
 end
@@ -771,7 +801,7 @@ function findOutliers(data::Data,threshold::Float64;
         d = reshape(sum(abs.(D),dims=1),size(data.dist,2))
     end
 
-    idxs = findall(x->x>threshold,t); push!(idxs,argmin(data.obj))
+    idxs = findall(x->x>threshold,d); push!(idxs,argmin(data.obj))
 
     if showdistribution
         lim = 20*round(log(10,length(idxs)))

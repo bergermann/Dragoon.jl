@@ -36,6 +36,13 @@ bc = [best(data[findall(isequal(i),c.assignments)]) for i in axes(c.centers,2)]
 
 # showDistribution(data)
 
+datanm = data[findall(isequal(:nm),data.tags)]; sortData!(datanm)
+datasa = data[findall(isequal(:sa),data.tags)]; sortData!(datasa)
+datals = data[findall(isequal(:ls),data.tags)]; sortData!(datals)
+
+showDist(datanm,1000)
+showDist(datasa,1000)
+showDist(datals,1000)
 
 # showFields(b.pos,freqsplot)
 # showFields(b.pos,[data.freqs[2],sum(data.freqs[[2,8]])/2,data.freqs[8]])

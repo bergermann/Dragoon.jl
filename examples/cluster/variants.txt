@@ -21,6 +21,14 @@ neldermead:
         maxiter=2000
         RANDOM SHIFT IN DISTANCE SPACE
 
+3 - 1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-6,
+        ObjAnalytical,
+        InitSimplexRegular(5e-4),
+        DefaultSimplexSampler,
+        UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
+        maxiter=10000
+        TEN TIMES LARGER INIT, FIVE TIMES MORE ITER
+
 
 linesearch:
 1 -
