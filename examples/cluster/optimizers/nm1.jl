@@ -46,12 +46,12 @@ function main(args)
             booster.summeddistance = 0.
             
             trace, term = nelderMead(booster,hist,freqs,
-                1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-6,
+                1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-8,
                 ObjAnalytical,
                 InitSimplexRegular(5e-5),
                 DefaultSimplexSampler,
-                UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
-                maxiter=2000,
+                UnstuckNew(InitSimplexRegular(1e-5),true,-14000);
+                maxiter=5000,
                 traceevery=typemax(Int),
                 showtrace=false,
                 unstuckisiter=true,

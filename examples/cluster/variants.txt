@@ -1,10 +1,10 @@
 neldermead:
-1 - 1.,1+2/b.ndisk,0.75-1/(2*b.ndisk),1-1/(b.ndisk),1e-6,
+1 - 1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-8,
         ObjAnalytical,
         InitSimplexRegular(5e-5),
         DefaultSimplexSampler,
-        UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
-        maxiter=2000
+        UnstuckNew(InitSimplexRegular(1e-5),true,-14000);
+        maxiter=5000
 
 1ref - 1.,1+2/b.ndisk,0.75-1/(2*b.ndisk),1-1/(b.ndisk),1e-6,
         ObjRefSquare(ref0),
@@ -21,13 +21,13 @@ neldermead:
         maxiter=2000
         RANDOM SHIFT IN DISTANCE SPACE
 
-3 - 1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-6,
+3 - 1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-8,
         ObjAnalytical,
         InitSimplexRegular(5e-4),
         DefaultSimplexSampler,
-        UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
-        maxiter=10000
-        TEN TIMES LARGER INIT, FIVE TIMES MORE ITER
+        UnstuckNew(InitSimplexRegular(5e-5),true,-14000);
+        maxiter=10000,
+        LARGER INIT, MORE ITER
 
 
 linesearch:

@@ -27,9 +27,9 @@ Analysis:
 [x] try clustering results
 [x] visualize optimized states, differences (i.e. electrical fields) -> direct comparison of e.g. 3 different optimized states
 [t] visualize stability of optimized (jensen shannon?)
-[ ] check systematics of optimized states by algorithm
+[x] check systematics of optimized states by algorithm
 [ ] recheck unconverged states for anton
-[ ] try optimizing by minimizing reflectivity in lossy case, check phase
+[x] try optimizing by minimizing reflectivity in lossy case, check phase
 
 
 
