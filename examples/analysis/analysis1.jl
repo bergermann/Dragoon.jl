@@ -9,7 +9,7 @@ include("tools.jl");
 # path = getPath("rand",100_000,22.025e9,50e6,10,20,24.0,0.0,"NM2","2024_05_29-15_05_16");
 
 # data = prepareDataAll1d(path,-10_000);
-data = prepareDataAll1d(getPath(),-14_000);
+data = prepareDataAll1d(getPath(),-14_500);
 # data = prepareData1d(path,-14_000);
 
 
@@ -22,6 +22,8 @@ freqsplot = genFreqs(22.025e9,150e6; n=1000);
 
 sortData!(data)
 b = best(data);
+# showFields(data,data.freqs,freqsplot)
+# showDist(data[2])
 
 # showQuality(data)
 
@@ -34,40 +36,31 @@ c = showClusters(data,50,200);
 bc = [best(data[findall(isequal(i),c.assignments)]) for i in axes(c.centers,2)]
 # scanSingleDiscs(best(data).dist,22.025e9,50e6,50,250,100)
 
-# showDistribution(data)
+showDistribution(data,d0)
 
 datanm = data[findall(isequal(:nm),data.tags)]; sortData!(datanm)
 datasa = data[findall(isequal(:sa),data.tags)]; sortData!(datasa)
 datals = data[findall(isequal(:ls),data.tags)]; sortData!(datals)
 
-showDist(datanm,1000)
-showDist(datasa,1000)
-showDist(datals,1000)
-
-# showFields(b.pos,freqsplot)
-# showFields(b.pos,[data.freqs[2],sum(data.freqs[[2,8]])/2,data.freqs[8]])
-
-
-# display(showFields(bc[i].pos,data.freqs[2])[1])
+showDistribution(datanm,d0)
+showDistribution(datasa,d0)
+showDistribution(datals,d0)
 
 
 
-# P = [showFields(bc[i].pos,data.freqs[2]) for i in eachindex(bc)]
-
-# ylim1 = maximum([ylims(p[1][1])[2] for p in P])
-# ylim2 = maximum([ylims(p[1][2])[2] for p in P])
-
-# for i in eachindex(P)
-#     ylims!(P[i][1][1],(-ylim1,ylim1))
-#     ylims!(P[i][1][2],(-ylim2,ylim2))
-# end
-
-# for p in P; display(p[1]); end
-
-
-out = findOutliers(data,7e-3; showdistribution=true)
-
-# f = data.freqs[5]
-f = 22.0e9+1e6
-
+out = findOutliers(data,4.5e-3; showdistribution=true); length(out)
+showDist(out)
 showFields(out,data.freqs,freqsplot)
+
+
+
+wiggle(data[1].pos[:,1],1e-6,10000,freqsplot,(22e9,22.05e9))
+wiggle(data[2].pos[:,1],1e-6,10000,freqsplot,(22e9,22.05e9))
+
+wigglewiggle(data[1].pos[:,1],collect(1:10)*1e-6,10000,freqsplot,(22e9,22.05e9))
+wigglewiggle(data[2].pos[:,1],collect(1:10)*1e-6,10000,freqsplot,(22e9,22.05e9))
+
+
+wiggle(data[1].pos[:,1],5e-6,10000,freqsplot,(22e9,22.05e9))
+wiggle(data[2].pos[:,1],5e-6,10000,freqsplot,(22e9,22.05e9))
+

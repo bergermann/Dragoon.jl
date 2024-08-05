@@ -1,5 +1,6 @@
 
-using Plots, ColorSchemes, Clustering, BoostFractor, Statistics, Peaks, Printf
+using Plots, ColorSchemes, Clustering, BoostFractor, Statistics, Peaks, Printf, StatsBase
+using LinearAlgebra 
 using JLD2
 
 mutable struct Settings
@@ -455,26 +456,73 @@ end
 
 
 
+function ridge(x,y,z=nothing; yscale=1,normalize=false,kwargs...)
+    c = RGB{Float64}(0.0,0.6056031611752245,0.9786801175696073)
+    a = 1
 
-function showDistribution(data)
-    dd = data.dist .- d0;
-    for i in 1:20
-        display(histogram(dd[i,:]/1e-3; xlabel="Δd_$i [mm]",xlim=[-1,1],ylim=[-500,40_000],
-            bins=-1:0.01:1))
+    if normalize
+        m = maximum(maximum.(y))
+        for i in eachindex(y)
+            y[i] /= m
+        end
     end
+
+    p = plot(; size=(600,40*length(y)),legend=false,kwargs...)
+
+    yticks!(p,1:length(y))
+
+    if eltype(x) <: Number
+        for i in reverse(eachindex(y))
+            plot!(p,x,yscale*y[i].+i; fillrange=i*ones(length(y[i])),label="",c=:black,
+                fillalpha=a,fillcolor=c)
+            # plot!(p,x,i*ones(length(y[i])),label="";c=:black)
+        end
+    else
+        @assert length(x) == length(y) "Arrays for x and y need same amount of entries."
+
+        for i in reverse(eachindex(y))
+            plot!(p,x[i],yscale*y[i].+i; fillrange=i*ones(length(y[i])),label="",c=:black,
+                fillalpha=a,fillcolor=c)
+        end
+    end
+
+    return p
+end
+
+
+
+function showDistribution(data,d0)
+    dd = data.dist .- d0
+    Hdx = []; Hdy = []
+
+    for i in 1:data.s.ndisk
+        f = fit(Histogram,dd[i,:]/1e-3,-1:0.01:1)
+        e = collect(f.edges[1])
+        push!(Hdx,(e[2:end]+e[1:end-1])/2)
+        push!(Hdy,f.weights)
+    end
+
+    ridge(Hdx,Hdy; normalize=true,yscale=1.5,xlabel="Δd [mm]",ylabel="Disk index i")
+    display(vline!([0]; c=:black,linestyle=:dash,linewidth=0.5))
 
     md = reshape(mean(dd; dims=1),(size(dd,2)));
-    display(histogram(md/1e-3; xlabel="μ(Δd) [mm]",bins=-0.1:0.001:0.1))
-
+    display(histogram(md/1e-3; xlabel="μ(Δd) [mm]",bins=-0.1:0.001:0.1,label=""))
 
     dp = data.pos .- p0;
-    for i in 1:20
-        display(histogram(dp[i,:]/1e-3; xlabel="Δp_$i [mm]",xlim=[-1,1],ylim=[-500,40_000],
-            bins=-1:0.01:1))
+    Hpx = []; Hpy = []
+
+    for i in 1:data.s.ndisk
+        f = fit(Histogram,dp[i,:]/1e-3,-1:0.01:1)
+        e = collect(f.edges[1])
+        push!(Hpx,(e[2:end]+e[1:end-1])/2)
+        push!(Hpy,f.weights)
     end
+    
+    ridge(Hpx,Hpy; normalize=true,yscale=1.5,xlabel="Δp [mm]",ylabel="Disk index i")
+    display(vline!([0]; c=:black,linestyle=:dash,linewidth=0.5))
 
     mp = reshape(mean(dp; dims=1),(size(dd,2)));
-    display(histogram(mp/1e-3; xlabel="μ(Δp) [mm]",bins=-0.1:0.001:0.1))
+    display(histogram(mp/1e-3; xlabel="μ(Δp) [mm]",bins=-0.1:0.001:0.1,label=""))
 
     return
 end
@@ -801,7 +849,7 @@ function findOutliers(data::Data,threshold::Float64;
         d = reshape(sum(abs.(D),dims=1),size(data.dist,2))
     end
 
-    idxs = findall(x->x>threshold,d); push!(idxs,argmin(data.obj))
+    idxs = findall(x->x>threshold,d)#; push!(idxs,argmin(data.obj))
 
     if showdistribution
         lim = 20*round(log(10,length(idxs)))
