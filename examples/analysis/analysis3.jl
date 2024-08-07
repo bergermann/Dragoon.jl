@@ -5,7 +5,7 @@ using HDF5, DataFrames
 
 include("tools.jl");
 
-data = prepareDataAll1d(getPath(),-14_500);
+data = prepareDataAll1d(getPath(),-15_000);
 
 initdist = findpeak1d(data.s.f0,20)
 d0 = initdist*ones(data.s.ndisk); p0 = dist2pos(d0);
@@ -67,3 +67,24 @@ function wigglewiggle(pos::Vector{Float64},sigxs::Vector{<:Real},n::Int,
     return
 end
 
+r1 = ref1d(data[1].dist[:],freqsplot; tand=1e-4);
+r2 = ref1d(data[2].dist[:],freqsplot; tand=1e-4);
+
+b1_ = boost1d(data[1].dist[:],freqsplot; tand=0.);
+b2_ = boost1d(data[2].dist[:],freqsplot; tand=0.);
+b1 = boost1d(data[1].dist[:],freqsplot; tand=1e-5);
+b2 = boost1d(data[2].dist[:],freqsplot; tand=1e-5);
+
+plot(freqsplot/1e9,b1)
+plot!(freqsplot/1e9,b2)
+plot!(freqsplot/1e9,b1_)
+plot!(freqsplot/1e9,b2_)
+
+plot(freqsplot/1e9,abs.(r1))
+plot!(freqsplot/1e9,abs.(r2))
+
+plot(data.freqs/1e9,real.(data[1].ref))
+plot!(data.freqs/1e9,imag.(data[1].ref))
+
+plot(data.freqs/1e9,real.(data[2].ref))
+plot!(data.freqs/1e9,imag.(data[2].ref))
