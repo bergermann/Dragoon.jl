@@ -74,7 +74,7 @@ function main(args)
             
             trace, term = nelderMead(booster,hist,freqs,
                 1.,1+2/booster.ndisk,0.75-1/(2*booster.ndisk),1-1/(booster.ndisk),1e-6,
-                ObjRefSquare(ref0),
+                ObjRef1dSquare(ref0),
                 InitSimplexRegular(5e-5),
                 DefaultSimplexSampler,
                 UnstuckNew(InitSimplexRegular(5e-5),true,-10000);
