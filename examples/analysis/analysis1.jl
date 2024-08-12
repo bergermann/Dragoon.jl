@@ -5,23 +5,13 @@ using HDF5, DataFrames
 
 include("tools.jl");
 
-# path = getPath(1e-3,100_000,22.025e9,50e6,10,20,24.0,0.0);
-# path = getPath("rand",100_000,22.025e9,50e6,10,20,24.0,0.0,"NM2","2024_05_29-15_05_16");
-
-# data = prepareDataAll1d(path,-10_000);
-# data = prepareDataAll1d(getPath(),-14_000);
-data = prepareDataAll1d(getPath(),0.4; filterin="REF");
-# data = prepareData1d(path,-14_000);
-
-
-
-
+data = prepareDataAll1d(getPath(),-14_000);
+sortData!(data)
 
 initdist = findpeak1d(data.s.f0,20)
 d0 = initdist*ones(data.s.ndisk); p0 = dist2pos(d0);
 freqsplot = genFreqs(22.025e9,150e6; n=1000);
 
-sortData!(data)
 b = best(data);
 # histogram(-data.obj; xlabel="Minimum Boostfactor β²",title="Distribution of Converged States (20 Discs, ε=24)",
 #     label=false,xlims=(floor(minimum(-data.obj)),ceil(maximum(-data.obj))))
@@ -63,14 +53,14 @@ showFields(out,data.freqs,freqsplot)
 showFields(data[2],data.freqs,freqsplot)
 
 freqsplot1 = genFreqs(22.025e9,150e6; n=201);
-wiggle(data[1].pos[:,1],1e-6,10000,freqsplot,(22e9,22.05e9));
-wiggle(data[2].pos[:,1],1e-6,10000,freqsplot,(22e9,22.05e9));
+wiggle(data[1].pos[:,1],1e-6,100,freqsplot,(22e9,22.05e9));
+wiggle(data[2].pos[:,1],1e-6,100,freqsplot,(22e9,22.05e9));
 
-wigglewiggle(data[1].pos[:,1],collect(1:10)*1e-6,10000,freqsplot,(22e9,22.05e9))
-wigglewiggle(data[2].pos[:,1],collect(1:10)*1e-6,10000,freqsplot,(22e9,22.05e9))
+wigglewiggle(data[1].pos[:,1],collect(1:10)*1e-6,100,freqsplot,(22e9,22.05e9))
+wigglewiggle(data[2].pos[:,1],collect(1:10)*1e-6,100,freqsplot,(22e9,22.05e9))
 
 wigglewiggle(data[2].pos[:,1],collect(1:10)*1e-6,100,freqsplot,(22e9,22.05e9))
 
-wiggle(data[1].pos[:,1],5e-6,10000,freqsplot,(22e9,22.05e9));
-wiggle(data[2].pos[:,1],5e-6,10000,freqsplot,(22e9,22.05e9));
+wiggle(data[1].pos[:,1],5e-6,100,freqsplot,(22e9,22.05e9));
+wiggle(data[2].pos[:,1],5e-6,100,freqsplot,(22e9,22.05e9));
 
