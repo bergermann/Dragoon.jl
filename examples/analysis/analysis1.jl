@@ -9,7 +9,8 @@ include("tools.jl");
 # path = getPath("rand",100_000,22.025e9,50e6,10,20,24.0,0.0,"NM2","2024_05_29-15_05_16");
 
 # data = prepareDataAll1d(path,-10_000);
-data = prepareDataAll1d(getPath(),-14_000);
+# data = prepareDataAll1d(getPath(),-14_000);
+data = prepareDataAll1d(getPath(),0.4; filterin="REF");
 # data = prepareData1d(path,-14_000);
 
 
@@ -22,8 +23,10 @@ freqsplot = genFreqs(22.025e9,150e6; n=1000);
 
 sortData!(data)
 b = best(data);
-histogram(-data.obj; xlabel="Minimum Boostfactor β²",title="Distribution of Converged States (20 Discs, ε=24)",
-    label=false,xlims=(floor(minimum(-data.obj)),ceil(maximum(-data.obj))))
+# histogram(-data.obj; xlabel="Minimum Boostfactor β²",title="Distribution of Converged States (20 Discs, ε=24)",
+#     label=false,xlims=(floor(minimum(-data.obj)),ceil(maximum(-data.obj))))
+histogram(data.obj; xlabel="Minimum Boostfactor β²",title="Distribution of Converged States (20 Discs, ε=24)",
+    label=false,xlims=(floor(minimum(data.obj)),ceil(maximum(data.obj))))
 # showFields(data,data.freqs,freqsplot)
 # showDist(data[2])
 

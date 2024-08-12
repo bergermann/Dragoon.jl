@@ -41,31 +41,6 @@ wigglewiggle(data[2].pos[:],collect(1:10)*1e-6,10000,freqsplot,(22e9,22.05e9))
 
 
 
-function wigglewiggle(pos::Vector{Float64},sigxs::Vector{<:Real},n::Int,
-    freqsplot::Vector{Float64},bounds::Tuple{Float64,Float64}; ndiv::Int=10)
-
-    q = collect(0:1/ndiv:1)
-    Q = zeros(Float64,length(sigxs),length(q))
-
-    for i in eachindex(sigxs)
-        println("Step $i/$(length(sigxs))")
-        _, _, obj = wiggle(pos,sigxs[i],n,freqsplot,bounds; showplots=false,ndiv=ndiv)
-
-        Q[i,:] = quantile(obj,q)
-    end
-
-    p1 = plot(; xlabel="σ_Δp [μm]",ylabel="Boostfactor β²",legend=false,
-        title="Boostfactor Deteration on Positional Uncertainty")
-
-    for i in axes(Q,2)
-        plot!(p1,sigxs/1e-6,Q[:,i]; c=1,
-            lw=0.5,fillrange=Q[:,end],fillcolor=1,fillalpha=0.2)
-    end
-
-    display(p1)
-
-    return
-end
 
 r1 = ref1d(data[1].dist[:],freqsplot; tand=1e-4);
 r2 = ref1d(data[2].dist[:],freqsplot; tand=1e-4);
