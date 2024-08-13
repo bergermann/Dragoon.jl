@@ -3,7 +3,7 @@ using Pkg; Pkg.update()
 using Dragoon, BoostFractor
 using HDF5, DataFrames
 
-include("tools.jl");
+include("tools/tools.jl");
 
 data = prepareDataAll1d(getPath(),-14_000);
 sortData!(data)
@@ -13,10 +13,8 @@ d0 = initdist*ones(data.s.ndisk); p0 = dist2pos(d0);
 freqsplot = genFreqs(22.025e9,150e6; n=1000);
 
 b = best(data);
-# histogram(-data.obj; xlabel="Minimum Boostfactor β²",title="Distribution of Converged States (20 Discs, ε=24)",
-#     label=false,xlims=(floor(minimum(-data.obj)),ceil(maximum(-data.obj))))
-histogram(data.obj; xlabel="Minimum Boostfactor β²",title="Distribution of Converged States (20 Discs, ε=24)",
-    label=false,xlims=(floor(minimum(data.obj)),ceil(maximum(data.obj))))
+histogram(-data.obj; xlabel="Minimum Boostfactor β²",title="Distribution of Converged States (20 Discs, ε=24)",
+    label=false,xlims=(floor(minimum(-data.obj)),ceil(maximum(-data.obj))))
 # showFields(data,data.freqs,freqsplot)
 # showDist(data[2])
 
