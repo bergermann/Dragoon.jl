@@ -1,7 +1,8 @@
 
-using Plots, ColorSchemes, Clustering, BoostFractor, Statistics, Peaks, Printf, StatsBase
+using Plots, ColorSchemes, Clustering, BoostFractor, Statistics, Peaks, StatsBase
+using Printf, ProgressBars
 using LinearAlgebra 
 using JLD2
 
-include("plotting/plotting.jl")
 include("processing.jl")
+include("plotting/plotting.jl")

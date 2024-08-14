@@ -337,10 +337,9 @@ function findOutliers(data::Data,threshold::Float64;
             xlabel="Disc Index",ylabel="Distances [mm]",title="Average Position",legend=false)
 
         p2 = histogram(d/1e-3; ylims=(0,lim),bins=100,
-            xlabel=bymax ? "Max. distance from average [mm]" :
-                "Abs. distance from average [mm]",
-            ylabel="Counts",title="Distribution",
-            legend=false)
+            xlabel=bymax ? "Max. Distance From Average [mm]" :
+                "Summed Abs. Distance From Average [mm]",
+            ylabel="Counts",legend=false)
         vline!(p2,[threshold/1e-3])
 
         display(p1)

@@ -1,28 +1,28 @@
 
 function showQuality(data,threshold=nothing)
-    display(histogramB(data.obj; title="objective values",
-        xlabel="objective value"))
-    display(histogramB(data.opttime; title="total travel time",
-        xlabel="travel time [s]"))
-    display(histogramB(data.optdist; title="total travel distance",
-        xlabel="trave distance [m]"))
+    display(histogramB(data.obj; title="Objective Values",
+        xlabel="Objective Value"))
+    display(histogramB(data.opttime; title="Total Travel Time",
+        xlabel="Travel Time [s]"))
+    display(histogramB(data.optdist; title="Total Travel Distance",
+        xlabel="Travel Distance [m]"))
 
-    p1 = histogram2d(data.opttime,-data.obj; legend=false,
-        xlabel="travel time [s]",ylabel="objective value")
+    p1 = histogram2d(data.opttime,-data.obj; label="",
+        xlabel="Travel Time [s]",ylabel="Objective Value")
     if !isnothing(threshold)
         hline!(p1,[-threshold])
     end
     display(p1)
 
-    p2 = histogram2d(data.optdist,-data.obj; legend=false,
-        xlabel="travel distance [m]",ylabel="objective value")
+    p2 = histogram2d(data.optdist,-data.obj; label="",
+        xlabel="Travel Distance [m]",ylabel="Objective Value")
     if !isnothing(threshold)
         hline!(p2,[-threshold])
     end
     display(p2)
 
     p3 = histogram2d(data.optdist,data.opttime; legend=false,
-        xlabel="travel distance [m]",ylabel="travel time [m]")
+        xlabel="Travel Distance [m]",ylabel="Travel Time [m]")
     display(p3)
 
     if !isnothing(threshold)
