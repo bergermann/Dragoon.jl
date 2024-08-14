@@ -34,6 +34,11 @@ showDist(datals,100)
 showDistribution(datals,d0)
 
 
+idxs = [2,100,1_000,10_000,100_000,300_000,690_000];
+
+showFields(data[idxs],data.freqs,freqsplot)
+
+
 
 out = findOutliers(data,6e-3; showdistribution=true); length(out)
 ins = data[findall(i->!(data.obj[i] in out.obj),eachindex(data))]
@@ -41,11 +46,7 @@ showDist(ins)
 showDist(out)
 showFields(out,data.freqs,freqsplot)
 
-idxs = [2,100,1_000,10_000,100_000,300_000,690_000];
-
-showFields(data[idxs],data.freqs,freqsplot)
-
-
+showDistribution(out,d0)
 
 
 freqsplot1 = genFreqs(22.025e9,150e6; n=201);
@@ -69,5 +70,3 @@ for i in eachindex(idxs)
     wiggle(data.pos[:,idxs[i]],1e-6,10_000,freqsplot1,(22e9,22.05e9));
     wigglewiggle(data.pos[:,idxs[i]],collect(1:10)*1e-6,1_000,freqsplot1,(22e9,22.05e9))
 end
-
-wigglewiggle(data.pos[:,1],collect(1:10)*1e-6,1_000,freqsplot1,(22e9,22.05e9); nh=50)
