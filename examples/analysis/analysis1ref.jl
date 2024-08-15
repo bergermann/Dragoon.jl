@@ -3,7 +3,7 @@ using Pkg; Pkg.update()
 using Dragoon, BoostFractor
 using HDF5, DataFrames
 
-include("tools.jl");
+include("tools/tools.jl");
 
 data = prepareDataAll1d(getPath(),0.4; filterin="REF");
 sortData!(data)

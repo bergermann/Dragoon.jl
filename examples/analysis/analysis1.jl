@@ -70,3 +70,9 @@ for i in eachindex(idxs)
     wiggle(data.pos[:,idxs[i]],1e-6,10_000,freqsplot1,(22e9,22.05e9));
     wigglewiggle(data.pos[:,idxs[i]],collect(1:10)*1e-6,1_000,freqsplot1,(22e9,22.05e9))
 end
+
+
+longs = data[findall(i->data.optdist[i]>5,eachindex(data))]; length(longs)
+# histogram(longs.optdist; xlabel="Travel Distance [m]")
+histogram(data.optdist; xlabel="Travel Distance [m]",legend=false,ylim=[0,10_000],bins=200); vline!([5,])
+showDistribution(longs,d0)
