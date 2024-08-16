@@ -18,8 +18,6 @@ function showDist(data,n=1000; ndiv=10)
         Q[i,:] = quantile(data.dist[i,:],q)/1e-3
     end
 
-    display(Q)
-
     m = mean(data.dist,dims=2)/1e-3
 
     p2 = plot(; xlabel="Disc Index",ylabel="Disc Distance [mm]",

@@ -197,7 +197,10 @@ function best(data::Data)
 end
 
 
-function prepareDataAll1d(path,threshold=Inf64; f0=22.025e9,df=50e6,nf=10,ndisk=20,eps=24.0,tand=0.0)
+function prepareDataAll1d(path,threshold=Inf64;
+        f0=22.025e9,df=50e6,nf=10,ndisk=20,eps=24.0,tand=0.0,
+        filterin="",filterout="",filterany=false)
+
     pos_ = []
     dist_ = []
     boost_ = []
@@ -217,6 +220,34 @@ function prepareDataAll1d(path,threshold=Inf64; f0=22.025e9,df=50e6,nf=10,ndisk=
     for (root, dirs, files) in walkdir(path)
         for path in joinpath.(root,files)
             if path in pathes || !occursin(".jld2",path) || !occursin(p,path)
+                continue
+            end
+
+            if filterin isa AbstractArray
+                if filterany
+                    if !any(occursin.(filterin,path))
+                        continue
+                    end
+                else
+                    if !all(occursin.(filterin,path))
+                        continue
+                    end
+                end
+            elseif !occursin(filterin,path)
+                continue
+            end
+
+            if filterout isa AbstractArray
+                if filterany
+                    if any(occursin.(filterout,path))
+                        continue
+                    end
+                else
+                    if all(occursin.(filterout,path))
+                        continue
+                    end
+                end
+            elseif filterout != "" && occursin(filterout,path)
                 continue
             end
 
