@@ -51,14 +51,13 @@ showDistribution(out,d0)
 
 freqsplot1 = genFreqs(22.025e9,150e6; n=201);
 wiggle(data.pos[:,1],1e-6,10_000,freqsplot1,(22e9,22.05e9));
-wigglewiggle(data.pos[:,1],collect(1:10)*1e-6,1_000,freqsplot1,(22e9,22.05e9))
-
 wiggle(data.pos[:,2],1e-6,10_000,freqsplot1,(22e9,22.05e9));
-wigglewiggle(data.pos[:,2],collect(1:10)*1e-6,1_000,freqsplot1,(22e9,22.05e9))
 
 wiggle(data[1].pos[:,1],5e-6,10_000,freqsplot1,(22e9,22.05e9));
 wiggle(data[2].pos[:,1],5e-6,10_000,freqsplot1,(22e9,22.05e9));
 
+wigglewiggle(data.pos[:,1],collect(1:10)*1e-6,1_000,freqsplot1,(22e9,22.05e9))
+wigglewiggle(data.pos[:,2],collect(1:10)*1e-6,1_000,freqsplot1,(22e9,22.05e9))
 
 
 for i in eachindex(out)
