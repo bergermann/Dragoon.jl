@@ -367,3 +367,14 @@ function modp(x,y,threshold=Inf64)
         end
     end
 end
+
+
+
+
+function lerp(a::Number,b::Number,α::Number)
+    return a+(b-a)*α
+end
+
+function lerp(range::Tuple{Number,Number},α::Number)
+    return range[1]+(range[2]-range[1])*α
+end
