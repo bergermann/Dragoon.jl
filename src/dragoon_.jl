@@ -43,7 +43,7 @@ function dragoon(booster::Booster,bandwidth::Float64,overlap::Real,
     return
 end
 
-function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float},obj::Callback,
+function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obj::Callback,
         scale::Float64,scalerange::Tuple{Float64,Float64},scalesteps::Int)
 
     p0 = copy(booster.pos)
