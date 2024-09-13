@@ -1,6 +1,6 @@
 export dragoon
 
-function dragoon(booster::Booster,bandwidth::Float64,overlap::Real,
+function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap::Real,
         objective::Callback,unstuckinator::Callback;
         fmin::Float64=10e9,fmax::Float64=100e9,nfreqs::Int=10,
         scalerange::NTuple{2,Int}=(0.7,1.3),scalesteps::Int=100)
@@ -14,8 +14,6 @@ function dragoon(booster::Booster,bandwidth::Float64,overlap::Real,
     freqs = range(fmin,fmin+bandwidth,nfreqs)
 
     i = 1
-
-    hist = initHist(booster,2*(booster.ndisk^2),freqs,objective)
 
     while freqs[1] < fmax
         trace = nelderMead(booster,hist,freqs,
