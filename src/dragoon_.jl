@@ -1,4 +1,4 @@
-export dragoon
+export dragoon, rescale
 
 function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap::Real,
         objective::Callback,unstuckinator::Callback;
@@ -11,7 +11,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
     @assert scalesteps > 1
     @assert scalerange[2] > scalerange[1] > 0
 
-    freqs = range(fmin,fmin+bandwidth,nfreqs)
+    freqs = collect(range(fmin,fmin+bandwidth,nfreqs))
 
     i = 1
 
