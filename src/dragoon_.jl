@@ -3,7 +3,7 @@ export dragoon, rescale
 function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap::Real,
         objective::Callback,unstuckinator::Callback;
         fmin::Float64=10e9,fmax::Float64=100e9,nfreqs::Int=10,
-        scalerange::NTuple{2,Int}=(0.7,1.3),scalesteps::Int=100)
+        scalerange::NTuple{2,Float64}=(1,0,1.3),scalesteps::Int=100)
 
     @assert fmax > fmin "Maximum frequency needs to be higher than minimum frequency."
     @assert nfreqs > 1 "Need at least 2 frequency points nfreqs."
