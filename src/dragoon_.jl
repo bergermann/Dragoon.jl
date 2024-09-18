@@ -34,7 +34,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
         scale = freqs[1]/(freqs[1]-(bandwidth-overlap))
 
-        rescale(booster,hist,freqs,obj,scale,scalerange,scalesteps)
+        rescale(booster,hist,freqs,objective,scale,scalerange,scalesteps)
 
     end
 
