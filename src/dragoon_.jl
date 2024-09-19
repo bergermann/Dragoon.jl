@@ -82,14 +82,14 @@ end
 function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obj::Callback,
         scale::Float64,scalerange::Tuple{Float64,Float64},scalesteps::Int)
 
-    p0 = copy(booster.pos)
+    p_ = copy(booster.pos)
     dd = (scale-1)*pos2dist(booster.pos; disk_thickness=booster.thickness)
 
     b_ = 0; B = zeros(Float64,scalesteps+1)
     i_ = 0
 
     for i in 0:scalesteps
-        move(booster,dist2pos(pos2dist(p0)+dd*Dragoon.lerp(scalerange,i/scalesteps)))
+        move(booster,dist2pos(pos2dist(p_)+dd*Dragoon.lerp(scalerange,i/scalesteps)))
         updateHist!(booster,hist,freqs,obj)
         
         b = sum(getBoost1d(booster,freqs))
@@ -104,7 +104,7 @@ function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obj:
     display(plot(lerp.(scalerange[1],scalerange[2],(0:scalesteps)./scalesteps),B,
         title="rescaling, $(lerp(scalerange,i_/scalesteps))"))
 
-    move(booster,p0+dd*Dragoon.lerp(scalerange,i_/scalesteps))
+    move(booster,dist2pos(pos2dist(p_)+dd*Dragoon.lerp(scalerange,i_/scalesteps)))
 
     return lerp(scalerange,i_/scalesteps)
 end

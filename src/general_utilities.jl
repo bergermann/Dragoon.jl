@@ -221,7 +221,7 @@ Return `n` equally spaced frequencies from `fcenter-fwidth/2` to
 `fcenter+fwidth/2`.
 """
 function genFreqs(fcenter::Real,fwidth::Real; n::Int=100)
-    return Array(range(fcenter-fwidth/2; stop=fcenter+fwidth/2,length=n))
+    return collect(range(fcenter-fwidth/2; stop=fcenter+fwidth/2,length=n))
 end
 
 """
@@ -230,7 +230,7 @@ end
 Return `n` equally spaced frequencies from `bounds[1]` to `bounds[2]`.
 """
 function genFreqs(bounds; n::Int=100)
-    return Array(range(bounds[1]; stop=bounds[2],length=n))
+    return collect(range(bounds[1]; stop=bounds[2],length=n))
 end
 
 """

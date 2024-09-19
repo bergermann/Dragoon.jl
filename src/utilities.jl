@@ -35,14 +35,6 @@ function findpeak(f0,n; eps=24.,tand=0.,thickness=1e-3,gran=1000,dev=0.1)
     return D[findmax(B)[2]]
 end
 
-function genFreqs(fcenter,fwidth; length=100)
-    return Array(range(fcenter-fwidth/2; stop=fcenter+fwidth/2,length=length))
-end
-
-function genFreqs(bounds; length=100)
-    return Array(range(bounds[1]; stop=bounds[2],length=length))
-end
-
 function pos2dist(pos::Array{Float64}; thickness=1e-3)
     pos = [0; pos]
     d = (pos[2:end]-pos[1:end-1])
