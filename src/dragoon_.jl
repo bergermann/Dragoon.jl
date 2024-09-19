@@ -25,11 +25,11 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
                     DefaultSimplexSampler,
                     unstuckinator;
                     maxiter=Int(1e3),
-                    showtrace=true,
+                    showtrace=false,
                     showevery=100,
                     unstuckisiter=true,)
 
-        display(plot(freqs/1e9,getBoost1d(booster,freqs)))
+        display(plot(freqs/1e9,getBoost1d(booster,freqs),title="new boost"))
         
         freqs = collect(range(fmin+(bandwidth-overlap)*i,fmin+bandwidth*(i+1)-overlap*i,nfreqs))
         i += 1
@@ -99,8 +99,8 @@ function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obj:
         end
     end
 
-    println(lerp(scalerange,i_/scalesteps))
-    display(plot(lerp.(scalerange[1],scalerange[2],(0:scalesteps)./scalesteps),B))
+    display(plot(lerp.(scalerange[1],scalerange[2],(0:scalesteps)./scalesteps),B,
+        title="rescaling, $(lerp(scalerange,i_/scalesteps))"))
 
     move(booster,p0+dd*Dragoon.lerp(scalerange,i_/scalesteps))
 
