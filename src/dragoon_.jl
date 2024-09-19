@@ -60,7 +60,7 @@ function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obje
     i_ = 0
 
     for i in 0:scalesteps
-        move(booster,dist2pos(pos2dist(p_)+dd*Dragoon.lerp(scalerange,i/scalesteps)))
+        move(booster,dist2pos(pos2dist(p_)+dd*lerp(scalerange,i/scalesteps)); additive=false)
         updateHist!(booster,hist,freqs,objective)
         
         b = sum(getBoost1d(booster,freqs))
@@ -75,7 +75,7 @@ function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obje
     # display(plot(lerp.(scalerange[1],scalerange[2],(0:scalesteps)./scalesteps),B,
     #     title="rescaling, $(lerp(scalerange,i_/scalesteps))"))
 
-    move(booster,dist2pos(pos2dist(p_)+dd*Dragoon.lerp(scalerange,i_/scalesteps)))
+    move(booster,dist2pos(pos2dist(p_)+dd*lerp(scalerange,i_/scalesteps)); additive=false)
 
     return lerp(scalerange,i_/scalesteps)
 end
