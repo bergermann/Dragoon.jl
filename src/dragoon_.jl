@@ -38,45 +38,13 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
         s = rescale(booster,hist,freqs,objective,scale,scalerange,scalesteps)
 
-        println("new fmin: $(freqs[1]), new fmax: $(freqs[2]), scale = $scale, s = $s")
+        # println("new fmin: $(freqs[1]), new fmax: $(freqs[2]), scale = $scale, s = $s")
 
         push!(Scale,scale); push!(S,s)
     end
 
     return Scale, S
 end
-
-# function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obj::Callback,
-#         scale::Float64,scalerange::Tuple{Float64,Float64},scalesteps::Int)
-
-#     p0 = copy(booster.pos)
-#     dd = (scale-1)*pos2dist(booster.pos; disk_thickness=booster.τ)
-
-#     b_ = 0; B = zeros(Float64,scalesteps+1)
-#     i_ = 0
-
-#     freqsplot = range(2*freqs[1]-freqs[end],2*freqs[2]-freqs[1],100)
-
-#     p = plot(freqsplot/1e9,getBoost1d(booster,freqsplot))
-
-#     for i in 0:scalesteps
-#         move(booster,p0+dd*lerp(scalerange,i/scalesteps))
-#         updateHist!(booster,hist,freqs,obj)
-#         b = sum(getBoost1d(booster,freqs))
-
-#         if b > b_
-#             b_ = b
-#             i_ = i
-#         end
-
-#         println("step:  ",i,"/",scalesteps)
-#         println("scale: ",lerp(scalerange,i/scalesteps))
-#     end
-
-#     move(booster,p0+dd*lerp(scalerange,i_/scalesteps))
-
-#     return
-# end
 
 
 function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obj::Callback,
@@ -101,8 +69,8 @@ function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obj:
         end
     end
 
-    display(plot(lerp.(scalerange[1],scalerange[2],(0:scalesteps)./scalesteps),B,
-        title="rescaling, $(lerp(scalerange,i_/scalesteps))"))
+    # display(plot(lerp.(scalerange[1],scalerange[2],(0:scalesteps)./scalesteps),B,
+    #     title="rescaling, $(lerp(scalerange,i_/scalesteps))"))
 
     move(booster,dist2pos(pos2dist(p_)+dd*Dragoon.lerp(scalerange,i_/scalesteps)))
 
