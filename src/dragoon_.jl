@@ -30,13 +30,15 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
                     unstuckisiter=true,)
 
         display(plot(freqs/1e9,getBoost1d(booster,freqs),title="new boost"))
+
+        scale = freqs[1]/(freqs[1]+(bandwidth-overlap))
         
         freqs = collect(range(fmin+(bandwidth-overlap)*i,fmin+bandwidth*(i+1)-overlap*i,nfreqs))
         i += 1
 
-        scale = freqs[1]/(freqs[1]-(bandwidth-overlap))
-
         s = rescale(booster,hist,freqs,objective,scale,scalerange,scalesteps)
+
+        println("new fmin: $(freqs[1]), new fmax: $(freqs[2]), scale = $scale, s = $s")
 
         push!(Scale,scale); push!(S,s)
     end
