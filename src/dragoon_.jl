@@ -15,7 +15,8 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
     i = 1
 
-    Scale = []; S = []
+    Obj = []
+    Scale = []; S = []; 
 
     while freqs[1] < fmax
         trace = nelderMead(booster,hist,freqs,
@@ -29,7 +30,9 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
                     showevery=100,
                     unstuckisiter=true,)
 
-        display(plot(freqs/1e9,getBoost1d(booster,freqs),title="new boost"))
+        # display(plot(freqs/1e9,getBoost1d(booster,freqs),title="new boost"))
+
+        push!(Obj,updateHist!(booster,hist,freqs,objective))
 
         scale = freqs[1]/(freqs[1]+(bandwidth-overlap))
         
@@ -43,11 +46,11 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
         push!(Scale,scale); push!(S,s)
     end
 
-    return Scale, S
+    return Obj, Scale, S
 end
 
 
-function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obj::Callback,
+function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},objective::Callback,
         scale::Float64,scalerange::Tuple{Float64,Float64},scalesteps::Int)
 
     p_ = copy(booster.pos)
@@ -58,7 +61,7 @@ function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obj:
 
     for i in 0:scalesteps
         move(booster,dist2pos(pos2dist(p_)+dd*Dragoon.lerp(scalerange,i/scalesteps)))
-        updateHist!(booster,hist,freqs,obj)
+        updateHist!(booster,hist,freqs,objective)
         
         b = sum(getBoost1d(booster,freqs))
         B[i+1] = b
