@@ -29,7 +29,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
         display(plot(freqs/1e9,getBoost1d(booster,freqs)))
         
-        freqs = range(fmin+(bandwidth-overlap)*i,fmin+bandwidth*(i+1)-overlap*i,nfreqs)
+        freqs = collect(range(fmin+(bandwidth-overlap)*i,fmin+bandwidth*(i+1)-overlap*i,nfreqs))
         i += 1
 
         scale = freqs[1]/(freqs[1]-(bandwidth-overlap))
