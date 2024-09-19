@@ -15,6 +15,8 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
     i = 1
 
+    Scale = []; S = []
+
     while freqs[1] < fmax
         trace = nelderMead(booster,hist,freqs,
                     1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-9,
@@ -34,11 +36,12 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
         scale = freqs[1]/(freqs[1]-(bandwidth-overlap))
 
-        rescale(booster,hist,freqs,objective,scale,scalerange,scalesteps)
+        s = rescale(booster,hist,freqs,objective,scale,scalerange,scalesteps)
 
+        push!(Scale,scale); push!(S,s)
     end
 
-    return
+    return Scale, S
 end
 
 # function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obj::Callback,
@@ -101,5 +104,5 @@ function rescale(booster::Booster,hist::Vector{State},freqs::Array{Float64},obj:
 
     move(booster,p0+dd*Dragoon.lerp(scalerange,i_/scalesteps))
 
-    return
+    return lerp(scalerange,i_/scalesteps)
 end
