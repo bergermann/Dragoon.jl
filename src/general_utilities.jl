@@ -221,7 +221,7 @@ Return `n` equally spaced frequencies from `fcenter-fwidth/2` to
 `fcenter+fwidth/2`.
 """
 function genFreqs(fcenter::Real,fwidth::Real; n::Int=100)
-    return Array(range(fcenter-fwidth/2; stop=fcenter+fwidth/2,length=n))
+    return collect(range(fcenter-fwidth/2; stop=fcenter+fwidth/2,length=n))
 end
 
 """
@@ -230,7 +230,7 @@ end
 Return `n` equally spaced frequencies from `bounds[1]` to `bounds[2]`.
 """
 function genFreqs(bounds; n::Int=100)
-    return Array(range(bounds[1]; stop=bounds[2],length=n))
+    return collect(range(bounds[1]; stop=bounds[2],length=n))
 end
 
 """
@@ -366,4 +366,15 @@ function modp(x,y,threshold=Inf64)
             return y + rem(x,y)
         end
     end
+end
+
+
+
+
+function lerp(a::Number,b::Number,α::Number)
+    return a+(b-a)*α
+end
+
+function lerp(range::Tuple{Number,Number},α::Number)
+    return range[1]+(range[2]-range[1])*α
 end
