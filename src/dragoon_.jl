@@ -6,13 +6,17 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
         scalerange::NTuple{2,Float64}=(1,0,1.3),scalesteps::Int=100,
         preoptimize::Bool=true,reverse::Bool=false)
 
-    @assert fmax > fmin "Maximum frequency needs to be higher than minimum frequency."
+    @assert fmin < fmax "Maximum frequency needs to be higher than minimum frequency."
     @assert nfreqs > 1 "Need at least 2 frequency points nfreqs."
     @assert bandwidth > overlap "Overlap needs to be smaller than bandwidth."
     @assert scalesteps > 1
     @assert scalerange[2] > scalerange[1] > 0
 
-    freqs = collect(range(fmin,fmin+bandwidth,nfreqs))
+    if reverse
+        freqs = collect(range(fmax-bandwidth,fmax,nfreqs))
+    else
+        freqs = collect(range(fmin,fmin+bandwidth,nfreqs))
+    end
 
     if preoptimize
         trace = nelderMead(booster,hist,freqs,
@@ -25,15 +29,19 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
                     showtrace=false,
                     unstuckisiter=true,)
 
-        println("Preoptimization complete with objective value $()")
+        obj_pre = updateHist!(booster,hist,freqs,objective; force=true)
+
+        println("Preoptimization complete with objective value $(round(obj_pre; digits=2))")
     end
 
     i = 1
 
-    Obj = []
-    Scale = []; S = []; 
+    Obj = Float64[]; Pos = Vector{Float64}[]; Freqs = Vector{Float64}[]
+    Scale = Float64[]; S = Float64[];
 
-    while freqs[1] < fmax
+    cont = true
+
+    while cont
         trace = nelderMead(booster,hist,freqs,
                     1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-9,
                     objective,
@@ -51,7 +59,15 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
         scale = freqs[1]/(freqs[1]+(bandwidth-overlap))
         
-        freqs = collect(range(fmin+(bandwidth-overlap)*i,fmin+bandwidth*(i+1)-overlap*i,nfreqs))
+        
+        
+        if reverse
+            cont = freqs[end] > fmin
+            freqs = collect(range(fmax-bandwidth*(i+1)+overlap*i,fmax-(bandwidth-overlap)*i,nfreqs))
+        else
+            freqs = collect(range(fmin+(bandwidth-overlap)*i,fmin+bandwidth*(i+1)-overlap*i,nfreqs))
+            cont = freqs[1] < fmax
+        end
         i += 1
 
         s = rescale(booster,hist,freqs,objective,scale,scalerange,scalesteps)
