@@ -52,14 +52,12 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
                     showtrace=false,
                     showevery=100,
                     unstuckisiter=true,)
-
-        # display(plot(freqs/1e9,getBoost1d(booster,freqs),title="new boost"))
-
+        
         push!(Obj,updateHist!(booster,hist,freqs,objective))
-
+        push!(Pos,copy(booster.pos),)
+        push!(Freqs,copy(freqs))
+        
         scale = freqs[1]/(freqs[1]+(bandwidth-overlap))
-        
-        
         
         if reverse
             cont = freqs[end] > fmin
@@ -72,12 +70,10 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
         s = rescale(booster,hist,freqs,objective,scale,scalerange,scalesteps)
 
-        # println("new fmin: $(freqs[1]), new fmax: $(freqs[2]), scale = $scale, s = $s")
-
         push!(Scale,scale); push!(S,s)
     end
 
-    return Obj, Scale, S
+    return Obj, Pos, Freqs, Scale, S
 end
 
 
