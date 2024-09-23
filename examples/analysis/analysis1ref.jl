@@ -88,7 +88,7 @@ for i in eachindex(match)
 end
 obj_ = zeros(length(data));
 for i in eachindex(obj_); obj_[i] = -minimum(data.boost[:,i]); end
-data = data[findall(x->x<-14_000,obj_)]
+# data = data[findall(x->x<-14_000,obj_)]
 
 initdist = findpeak1d(data.s.f0,20)
 d0 = initdist*ones(data.s.ndisk); p0 = dist2pos(d0);
@@ -100,7 +100,6 @@ histogram(data.obj; xlabel="Reference Match ∑|R-R_ref|",title="Distribution of
 
 showDist(data,1000; xlabel="Disc Index", ylabel="d_i [mm]")
 # hline!([initdist]*1e3)
-
 
 showDistribution(data,d0)
 
