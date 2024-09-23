@@ -14,6 +14,20 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
     freqs = collect(range(fmin,fmin+bandwidth,nfreqs))
 
+    if preoptimize
+        trace = nelderMead(booster,hist,freqs,
+                    1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
+                    objective,
+                    InitSimplexRegular(1e-4),
+                    DefaultSimplexSampler,
+                    UnstuckDont;
+                    maxiter=Int(1e5),
+                    showtrace=false,
+                    unstuckisiter=true,)
+
+        println("Preoptimization complete with objective value $()")
+    end
+
     i = 1
 
     Obj = []
