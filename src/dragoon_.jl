@@ -19,6 +19,10 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
     end
 
     if preoptimize
+        initdist = findpeak1d(22.025e9,n)
+
+        move(booster,dist2pos(ones(booster.ndisk)*initdist); additive=false)
+
         trace = nelderMead(booster,hist,freqs,
                     1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
                     objective,
@@ -34,7 +38,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
         println("Preoptimization complete with objective value $(round(obj_pre; digits=2))")
     end
 
-    i = 1
+    i = 1; t1 = copy(booster.timestamp)
 
     Obj = Float64[]; Pos = Vector{Float64}[]; Freqs = Vector{Float64}[]
     Scale = Float64[]; S = Float64[];
@@ -43,7 +47,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
     while cont
         trace = nelderMead(booster,hist,freqs,
-                    1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-9,
+                    1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
                     objective,
                     InitSimplexRegular(1e-5),
                     DefaultSimplexSampler,
@@ -51,7 +55,8 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
                     maxiter=Int(1e3),
                     showtrace=false,
                     showevery=100,
-                    unstuckisiter=true,)
+                    unstuckisiter=true,
+                    resettimer=false)
         
         push!(Obj,updateHist!(booster,hist,freqs,objective))
         push!(Pos,copy(booster.pos),)
@@ -72,6 +77,10 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
         push!(Scale,scale); push!(S,s)
     end
+
+    t2 = copy(booster.timestamp)
+
+    println("")
 
     return Obj, Pos, Freqs, Scale, S
 end

@@ -83,15 +83,15 @@ end
 
 mutable struct PhysicalBooster <: Booster
     devices::DevicesType
-    pos::Array{<:Real}
+    pos::Array{<:AbstractFloat}
     # bounds::Array{BoundariesType}
     ndisk::Int
-    thickness::Real
-    epsilon::Real
-    maxlength::Real
+    thickness::AbstractFloat
+    epsilon::AbstractFloat
+    maxlength::AbstractFloat
     timestamp::DateTime
     startingtime::DateTime
-    summeddistance::Float64
+    summeddistance::AbstractFloat
 
     function PhysicalBooster(devices,initdist; ndisk=20,τ=1e-3,ϵ=24,maxlength=2)
         new(devices,dist2pos(initdist*ones(ndisk)),ndisk,τ,ϵ,maxlength,
@@ -122,7 +122,7 @@ mutable struct State
     "Disc positions."
     pos::Array{Float64}
     "Objective value at current position."
-    objvalue::Float64
+    objvalue::AbstractFloat
     "Booster timestamp."
     timestamp::DateTime
 
