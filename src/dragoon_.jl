@@ -80,7 +80,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
     t2 = copy(booster.timestamp)
 
-    println("")
+    println("Elapsed movement time: ",canonicalize(t2-t1))
 
     return Obj, Pos, Freqs, Scale, S
 end

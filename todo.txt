@@ -1,6 +1,6 @@
 
 
-To-Do-List (05.08.24):
+To-Do-List (27.09.24):
 Package:
 [t] implement missing unstuckinators
 [ ] fix analyse functions
@@ -18,20 +18,19 @@ Computation:
 [ ] loss tests?
 
 Analysis:
-[x] try clustering results
-[x] visualize optimized states, differences (i.e. electrical fields) -> direct comparison of e.g. 3 different optimized states
-[t] visualize stability of optimized (jensen shannon?)
-[x] check systematics of optimized states by algorithm
-[ ] recheck unconverged states for anton
-[x] try optimizing by minimizing reflectivity in lossy case, check phase
 [ ] check stability on more samples
 [ ] optimize more from reflectivity
 [ ] check stability on reflectivity
+[ ] check stability with loss
+
+Literature:
+[ ] Jacob Master Thesis (reflectivity spectrum mainly)
+
 
 
 
 Main:
-[ ] show redundancy in optimized states
+[x] show redundancy in optimized states
 [ ] write paper i guess
 
 New/Cross features:
