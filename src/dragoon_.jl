@@ -19,7 +19,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
     end
 
     if preoptimize
-        initdist = findpeak1d(22.025e9,n)
+        initdist = findpeak1d(22.025e9,booster.ndisk)
 
         move(booster,dist2pos(ones(booster.ndisk)*initdist); additive=false)
 
