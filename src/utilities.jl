@@ -1,7 +1,7 @@
 ###     convenient convenience functions for convenience
 
 export init, boost1d, ref1d, findpeak, genFreqs, pos2dist, dist2pos, pNorm,
-        copy, getBoost1d, getRef1d
+        copy, getBoost1d, getRef1d, groupdelay
 
 init = [1.00334, 6.94754, 7.1766, 7.22788, 7.19717,
         7.23776, 7.07746, 7.57173, 7.08019, 7.24657,
@@ -65,8 +65,18 @@ function getRef1d(booster::Booster,freqs::Array{Float64})
 end
 
 
+
 function shiftdown!(x::Vector)
     @inbounds for i in length(x)-1:-1:1
         x[i+1] = x[i]
     end
+end
+
+function groupdelay(x::Vector{ComplexF64},freqs::Vector{Float64})
+    ϕ = angle.(x)
+    dϕ = ϕ[2:end]-ϕ[1:end-1]
+
+    gd = dϕ ./ (freqs[2:end]-freqs[1:end-1])
+
+    return gd
 end

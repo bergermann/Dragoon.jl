@@ -131,3 +131,73 @@ Callback for calculating objective value with analytical 1d reflectivity.
 See [`getObjRef1dTest`](@ref).
 """
 ObjRef1dTest() = Callback(getObjRef1dTest,())
+
+
+
+"""
+    getObjRef1dS(booster::Booster,freqs::Vector{Float64},
+        (ref_goal,scaling)::Tuple{Vector{ComplexF64},Function})
+
+Return objective value by analytical1d reflectivity ``∑ scaling(||ref|-|ref_goal||)``
+for the given `freqs` and `booster` state, where ref and ref_goal get scaled to their negative peak heights.
+See[`ref1d`](@ref).
+"""
+function getObjRef1dS(booster::Booster,freqs::Vector{Float64},(ref_goal,scaling)::Tuple{Vector{ComplexF64},Function})
+    ref1 = abs.(getRef1d(booster,freqs))
+    ref1 /= minimum(ref1)
+    ref2 = abs.(ref_goal)
+    ref2 /= minimum(ref)
+
+    return sum(@. scaling(abs(ref1-ref2)))
+end
+
+"""
+    ObjRef1dS(ref,scaling)
+
+Callback for calculating objective value with scaled analytical 1d reflectivity.
+See [`getObjRef1dS`](@ref).
+"""
+ObjRef1dS(ref,scaling) = Callback(getObjRef1dS,(ref,scaling))
+
+
+
+"""
+    getObjRef1dSGD(booster::Booster,freqs::Vector{Float64},
+        (ref_goal,scaling,scaling_gd)::Tuple{Vector{ComplexF64},Function,Function})
+
+Return objective value by analytical1d reflectivity ``(∑ scaling(||ref|-ref_goal||))*(∑ scaling_gd(||gd|-gd_goal||))``
+for the given `freqs` and `booster` state, where ref and ref_goal get scaled to their negative peak heights.
+Takes difference in groupdelay into account.
+See[`ref1d`](@ref).
+"""
+function getObjRef1dSGD(booster::Booster,freqs::Vector{Float64},
+        (ref_goal,scaling,scaling_gd)::Tuple{Vector{ComplexF64},Function,Function})
+    
+    ref = getRef1d(booster,freqs)
+    ref1 = abs.(ref)
+    ref1 /= minimum(ref1)
+    ref2 = abs.(ref_goal)
+    ref2 /= minimum(ref)
+
+    gd1 = groupdelay(ref,freqs)
+    gd2 = groupdelay(ref_goal,freqs)
+
+    return sum(scaling.(abs.(ref1-ref2)))*sum(scaling_gd.(abs.(gd1-gd2)))
+end
+
+"""
+    ObjRef1dSGD(ref,scaling,scaling_gd)
+
+Callback for calculating objective value with scaled analytical 1d reflectivity.
+See [`getObjRef1dS`](@ref).
+"""
+ObjRef1dSGD(ref,scaling,scaling_gd) = Callback(getObjRef1dS,(ref,scaling,scaling_gd))
+
+
+"""
+    ObjRef1dSGD(ref,scaling)
+
+Callback for calculating objective value with scaled analytical 1d reflectivity.
+See [`getObjRef1dS`](@ref).
+"""
+ObjRef1dSGD(ref,scaling) = Callback(getObjRef1dS,(ref,scaling,scaling))
