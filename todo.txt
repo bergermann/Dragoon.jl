@@ -10,12 +10,14 @@ Package:
 
 Computation:
 [ ] move repo to rwth gitlab
-[ ] frequency shift, optimization from optimized state
+[t] frequency shift, optimization from optimized state
 - direct re-optimization
 - sophisticated linesearch beforehand, then re-optimization
 [ ] synchronize movement to measurement
 [ ] 3d tests
 [ ] loss tests?
+[ ] lossy reflectivity objective function: normalize to account for unknown loss
+[ ] group delay
 
 Analysis:
 [ ] check stability on more samples
