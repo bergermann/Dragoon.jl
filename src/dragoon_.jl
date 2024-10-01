@@ -4,7 +4,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
         objective::Callback,unstuckinator::Callback;
         fmin::Float64=10e9,fmax::Float64=100e9,nfreqs::Int=10,
         scalerange::NTuple{2,Float64}=(1,0,1.3),scalesteps::Int=100,
-        preoptimize::Bool=true,reverse::Bool=false)
+        preoptimize::Bool=true,reset::Bool=false,reverse::Bool=false)
 
     @assert fmin < fmax "Maximum frequency needs to be higher than minimum frequency."
     @assert nfreqs > 1 "Need at least 2 frequency points nfreqs."
@@ -19,9 +19,11 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
     end
 
     if preoptimize
-        initdist = findpeak1d(22.025e9,booster.ndisk)
+        if reset
+            initdist = findpeak1d(22.025e9,booster.ndisk)
 
-        move(booster,dist2pos(ones(booster.ndisk)*initdist); additive=false)
+            move(booster,dist2pos(ones(booster.ndisk)*initdist); additive=false)
+        end
 
         trace = nelderMead(booster,hist,freqs,
                     1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
@@ -62,14 +64,17 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
         push!(Pos,copy(booster.pos),)
         push!(Freqs,copy(freqs))
         
-        scale = freqs[1]/(freqs[1]+(bandwidth-overlap))
-        
         if reverse
             cont = freqs[end] > fmin
             freqs = collect(range(fmax-bandwidth*(i+1)+overlap*i,fmax-(bandwidth-overlap)*i,nfreqs))
+
+            cf = (freqs[1]+freqs[end])/2
+            scale = cf/(cf-(bandwidth-overlap))
         else
             freqs = collect(range(fmin+(bandwidth-overlap)*i,fmin+bandwidth*(i+1)-overlap*i,nfreqs))
-            cont = freqs[1] < fmax
+
+            cf = (freqs[1]+freqs[end])/2
+            scale = cf/(cf+(bandwidth-overlap))
         end
         i += 1
 
