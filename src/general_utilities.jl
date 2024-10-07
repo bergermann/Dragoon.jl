@@ -6,7 +6,7 @@ export spacings_stefan,
     findpeak1d, findpeak3d,
     genFreqs, 
     pos2dist, dist2pos,
-    pNorm, copy,
+    pNorm, normalize_range, copy,
     getDateString,
     λ, wavelength,
     rande, modp
@@ -267,6 +267,23 @@ Return `(∑ x^p)^(1/p)`.
 function pNorm(x,p=2)
     return sum(@. abs(x)^p)^(1/p)
 end
+
+
+"""
+    normalize_range(x::Array{<:Real})
+
+Normalize `x` to the range (0,1). ´x´ must contain at least 2 differing values.
+"""
+function normalize_range(x::Array{<:Real})
+    a = minimum(x); b = maximum(x)
+
+    @assert a != b "x must contain at least two differing values."
+
+    c = b-a; d = a/(b-a)
+
+    return x/c .- d
+end
+
 
 
 Base.copy(x::T) where T = T([getfield(x, k) for k ∈ fieldnames(T)]...)

@@ -48,12 +48,18 @@ plot(s1)
 plotRescale(booster,P0[22],22.025e9,50e6,200e6,1.175,-5,5)
 
 
+p6 = plot(; legend=false); p7 = plot(; legend=false)
 
-
-for i in 10:100
-    f = genFreqs(i*1e9+0.025,150e6; n=100)
+# for i in cat(10:27,33:57; dims=1)
+for i in 35:55
+    f = genFreqs(i*1e9+0.025e6,150e6; n=100)
     move(booster,P0[i])
-    ref = abs.(f*1e9,getRef1d(booster))
+    # ref = abs.(getRef1d(booster,f))
+    boost = normalize_range(getBoost1d(booster,f))
+    ref = normalize_range(abs.(getRef1d(booster,f)))
 
-    plot(ref/minimum(ref))
+    plot!(p6,boost)
+    plot!(p7,ref)
 end
+
+display(p6); display(p7)

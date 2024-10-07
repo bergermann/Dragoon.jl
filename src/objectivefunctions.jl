@@ -144,10 +144,8 @@ for the given `freqs` and `booster` state, where ref and ref_goal get scaled to 
 See[`ref1d`](@ref).
 """
 function getObjRef1dS(booster::Booster,freqs::Vector{Float64},(ref_goal,scaling)::Tuple{Vector{ComplexF64},Function})
-    ref1 = abs.(getRef1d(booster,freqs))
-    ref1 /= minimum(ref1)
-    ref2 = abs.(ref_goal)
-    ref2 /= minimum(ref)
+    ref1 = normalize_range(abs.(getRef1d(booster,freqs)))
+    ref2 = normalize_range(abs.(ref_goal))
 
     return sum(@. scaling(abs(ref1-ref2)))
 end
@@ -174,14 +172,11 @@ See[`ref1d`](@ref).
 function getObjRef1dSGD(booster::Booster,freqs::Vector{Float64},
         (ref_goal,scaling,scaling_gd)::Tuple{Vector{ComplexF64},Function,Function})
     
-    ref = getRef1d(booster,freqs)
-    ref1 = abs.(ref)
-    ref1 /= minimum(ref1)
-    ref2 = abs.(ref_goal)
-    ref2 /= minimum(ref)
+    ref1 = normalize_range(abs.(getRef1d(booster,freqs)))
+    ref2 = normalize_range(abs.(ref_goal))
 
-    gd1 = groupdelay(ref,freqs)
-    gd2 = groupdelay(ref_goal,freqs)
+    gd1 = groupdelay(ref1,freqs)
+    gd2 = groupdelay(ref2,freqs)
 
     return sum(scaling.(abs.(ref1-ref2)))*sum(scaling_gd.(abs.(gd1-gd2)))
 end
