@@ -40,7 +40,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
         println("Preoptimization complete with objective value $(round(obj_pre; digits=2))")
     end
 
-    i = 1; i_ = ceil((fmax-fmin)/(bandwidth-overlap)); t1 = copy(booster.timestamp)
+    i = 1; i_ = ceil(Int,(fmax-fmin)/(bandwidth-overlap)); t1 = copy(booster.timestamp)
 
     Obj = Float64[]; Pos = Vector{Float64}[]; Freqs = Vector{Float64}[]
     S = Float64[];
@@ -71,6 +71,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
             cf = (freqs[1]+freqs[end])/2
             scale = (cf+(bandwidth-overlap))/cf
         else
+            cont = freqs[1] > fmax
             freqs = collect(range(fmin+(bandwidth-overlap)*i,fmin+bandwidth*(i+1)-overlap*i,nfreqs))
 
             cf = (freqs[1]+freqs[end])/2

@@ -25,10 +25,10 @@ minimum(getBoost1d(booster,freqs))
 
 
 
-move(booster,P0[22]; additive=false);
+move(booster,P0[25]; additive=false);
 O1,P1,F1,s1 = dragoon(booster,hist,50e6,5e6,
         obj,UnstuckDont;
-        fmin=22.0e9,fmax=25.05e9,nfreqs=10,
+        fmin=25.0e9,fmax=28.05e9,nfreqs=10,
         scalerange=(1.1,1.3),scalesteps=1000,
         preoptimize=false,reverse=false)
 f1 = [(f[1]+f[end])/2 for f in F1];
