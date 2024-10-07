@@ -213,7 +213,7 @@ function prepareDataAll1d(path,threshold=Inf64;
 
     n, r = 0, 0
 
-    s = 0
+    s = Settings(f0,df,nf,ndisk,eps,tand)
     pathes = []
     p = "$(f0)_$(df)_$(nf)_$(ndisk)_$(eps)_$(tand)"
 
@@ -403,4 +403,43 @@ end
 # end
 
 
+
+
+
+# P0 = Dict{Int,Vector{Float64}}()
+# B0 = Vector{Float64}([])
+# fails = []
+
+# for i in 10:100
+#     try
+#         data = prepareDataAll1d(getPath();f0=i*1e9+25e6,tand=6e-5,)
+#         if length(data) == 0
+#             error("No data found for $i GHz.")
+#         end
+#         b = best(data)
+#         P0[i] = b.pos[:]
+#         push!(B0,b.obj[1])
+#     catch e
+#         println("No data found for ",i," GHz.\n")
+#         P0[i] = zeros(20)
+#         push!(B0,0)
+#         push!(fails,i)
+#     end
+# end
+
+# for i in fails
+#     try
+#         data = prepareDataAll1d(getPath();f0=i*1e9+25e6,tand=6e-5,)
+#         if length(data) == 0
+#             error("No data found for $i GHz.")
+#         end
+#         b = best(data)
+#         P0[i] = b.pos[:]
+#         B0[i-9] = b.obj[1]
+#     catch e
+#         println(e)
+#     end
+# end
+
+# @save "examples/full_20_24.0_6.0e-5.jld2" P0 B0
 

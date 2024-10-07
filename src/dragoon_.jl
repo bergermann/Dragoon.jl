@@ -2,7 +2,7 @@ export dragoon, rescale
 
 function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap::Real,
         objective::Callback,unstuckinator::Callback;
-        fmin::Float64=10e9,fmax::Float64=100e9,nfreqs::Int=10,
+        fmin::Float64=10e9,fmax::Float64=100e9,nfreqs::Int=10,niters::Int=1_000,
         scalerange::NTuple{2,Float64}=(1,0,1.3),scalesteps::Int=100,
         preoptimize::Bool=true,reset::Bool=false,reverse::Bool=false)
 
@@ -40,10 +40,10 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
         println("Preoptimization complete with objective value $(round(obj_pre; digits=2))")
     end
 
-    i = 1; t1 = copy(booster.timestamp)
+    i = 1; i_ = ceil((fmax-fmin)/(bandwidth-overlap)); t1 = copy(booster.timestamp)
 
     Obj = Float64[]; Pos = Vector{Float64}[]; Freqs = Vector{Float64}[]
-    Scale = Float64[]; S = Float64[];
+    S = Float64[];
 
     cont = true
 
@@ -54,7 +54,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
                     InitSimplexRegular(1e-5),
                     DefaultSimplexSampler,
                     unstuckinator;
-                    maxiter=Int(1e3),
+                    maxiter=niters,
                     showtrace=false,
                     showevery=100,
                     unstuckisiter=true,
@@ -69,25 +69,27 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
             freqs = collect(range(fmax-bandwidth*(i+1)+overlap*i,fmax-(bandwidth-overlap)*i,nfreqs))
 
             cf = (freqs[1]+freqs[end])/2
-            scale = cf/(cf-(bandwidth-overlap))
+            scale = (cf+(bandwidth-overlap))/cf
         else
             freqs = collect(range(fmin+(bandwidth-overlap)*i,fmin+bandwidth*(i+1)-overlap*i,nfreqs))
 
             cf = (freqs[1]+freqs[end])/2
-            scale = cf/(cf+(bandwidth-overlap))
+            scale = (cf-(bandwidth-overlap))/cf
         end
         i += 1
 
         s = rescale(booster,hist,freqs,objective,scale,scalerange,scalesteps)
 
-        push!(Scale,scale); push!(S,s)
+        push!(S,s)
+
+        println("finished iteration $i/$i_")
     end
 
     t2 = copy(booster.timestamp)
 
     println("Elapsed movement time: ",canonicalize(t2-t1))
 
-    return Obj, Pos, Freqs, Scale, S
+    return Obj, Pos, Freqs, S
 end
 
 

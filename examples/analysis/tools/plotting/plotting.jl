@@ -1,7 +1,9 @@
+
 include("clusters.jl")
 include("distribution.jl")
 include("fields.jl")
 include("quality.jl")
+include("rescaling.jl")
 include("scan.jl")
 include("wiggle.jl")
 
