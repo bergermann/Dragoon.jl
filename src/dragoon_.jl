@@ -71,7 +71,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
             cf = (freqs[1]+freqs[end])/2
             scale = (cf+(bandwidth-overlap))/cf
         else
-            cont = freqs[1] > fmax
+            cont = freqs[1] < fmax
             freqs = collect(range(fmin+(bandwidth-overlap)*i,fmin+bandwidth*(i+1)-overlap*i,nfreqs))
 
             cf = (freqs[1]+freqs[end])/2
