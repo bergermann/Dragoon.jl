@@ -2,7 +2,21 @@
 export simulatedAnnealing
 
 """
-
+simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
+        rmax::Real,
+        T::Callback,
+        objFunction::Callback,
+        unstuckinator::Callback;
+        maxiter::Integer=Int(1e2),
+        nreset::Int64=0,
+        nresetterm::Int64=0,
+        showtrace::Bool=false,
+        showevery::Integer=1,
+        unstuckisiter::Bool=true,
+        traceevery::Int=1,
+        resettimer::Bool=true,
+        returntimes::Bool=false)
+        
 Perform simulated annealing optimization on a physical or analytical booster, returns
 process trace.
 [`Simulated Annealing`](https://en.wikipedia.org/wiki/Simulated_annealing)
@@ -45,13 +59,11 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
 
     trace = Vector{SATrace}(undef,round(Int,maxiter/traceevery)+2)
 
-    updateHist!(booster,hist,freqs,objFunction)
-    
     x = copy(booster.pos)
-    objx = hist[1].objvalue
+    objx = updateHist!(booster,hist,freqs,objFunction)
     
     xsol = copy(booster.pos)
-    objsol = hist[1].objvalue
+    objsol = copy(objx)
 
     iter = 1
     resetcounter = 0

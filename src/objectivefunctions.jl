@@ -185,15 +185,56 @@ end
     ObjRef1dSGD(ref,scaling,scaling_gd)
 
 Callback for calculating objective value with scaled analytical 1d reflectivity.
-See [`getObjRef1dS`](@ref).
+See [`getObjRef1dSDG`](@ref).
 """
-ObjRef1dSGD(ref,scaling,scaling_gd) = Callback(getObjRef1dS,(ref,scaling,scaling_gd))
+ObjRef1dSGD(ref,scaling,scaling_gd) = Callback(getObjRef1dSDG,(ref,scaling,scaling_gd))
 
 
 """
     ObjRef1dSGD(ref,scaling)
 
 Callback for calculating objective value with scaled analytical 1d reflectivity.
-See [`getObjRef1dS`](@ref).
+See [`getObjRef1dSDG`](@ref).
 """
-ObjRef1dSGD(ref,scaling) = Callback(getObjRef1dS,(ref,scaling,scaling))
+ObjRef1dSGD(ref,scaling) = Callback(getObjRef1dSDG,(ref,scaling,scaling))
+
+
+
+"""
+    getObjRef1dSP(booster::Booster,freqs::Vector{Float64},
+        (ref_goal,scaling,scaling_gd)::Tuple{Vector{ComplexF64},Function,Function})
+
+Return objective value by analytical1d reflectivity ``(∑ scaling(||ref|-ref_goal||))*(∑ scaling_p(||p|-p_goal||))``
+for the given `freqs` and `booster` state, where ref and ref_goal get scaled to their negative peak heights.
+Takes difference in phase into account.
+See[`ref1d`](@ref).
+"""
+function getObjRef1dSP(booster::Booster,freqs::Vector{Float64},
+        (ref_goal,scaling,scaling_p)::Tuple{Vector{ComplexF64},Function,Function})
+    
+    ref = getRef1d(booster,freqs)
+    ref1 = normalize_range(abs.(ref))
+    ref2 = normalize_range(abs.(ref_goal))
+
+    ϕ1 = angle.(ref,freqs)
+    ϕ2 = angle.(ref_goal,freqs)
+
+    return sum(scaling.(abs.(ref1-ref2)))*sum(scaling_gd.(abs.(ϕ1-ϕ2)))
+end
+
+"""
+    ObjRef1dSP(ref,scaling,scaling_p)
+
+Callback for calculating objective value with scaled analytical 1d reflectivity.
+See [`getObjRef1dSP`](@ref).
+"""
+ObjRef1dSP(ref,scaling,scaling_p) = Callback(getObjRef1dSP,(ref,scaling,scaling_p))
+
+
+"""
+    ObjRef1dSP(ref,scaling)
+
+Callback for calculating objective value with scaled analytical 1d reflectivity.
+See [`getObjRef1dSP`](@ref).
+"""
+ObjRef1dSP(ref,scaling) = Callback(getObjRef1dSP,(ref,scaling,scaling))
