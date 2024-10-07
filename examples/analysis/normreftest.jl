@@ -35,14 +35,35 @@ plot(freqsplot/1e9,getBoost1d(booster,freqsplot)/1e3)
 plot(freqsplot/1e9,abs.(getRef1d(booster,freqsplot)))
 
 
-
+move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false)
 nelderMead(booster,hist,freqs,
-            1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
+            1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-5,
             ObjRef1dS(ref0,x->x),
             InitSimplexRegular(1e-4),
             DefaultSimplexSampler,
-            UnstuckDont;
-            maxiter=Int(1e4),
+            UnstuckNew(InitSimplexRegular(1e-4),true,5);
+            maxiter=Int(5e1),
             showtrace=true,
-            showevery=Int(1e3),
-            unstuckisiter=true,)
+            showevery=Int(1e0),
+            unstuckisiter=true,);
+
+            
+plot(freqsplot/1e9,getBoost1d(booster,freqsplot))
+
+
+
+move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false)
+trace = simulatedAnnealing(booster,hist,freqs,
+            100e-6,
+            ObjRef1dS(ref0,x->x),
+            ObjAnalytical,
+            UnstuckDont;
+            maxiter=Int(10001),
+            nreset=500,
+            nresetterm=10,
+            showtrace=true,
+            showevery=1000,
+            unstuckisiter=true,
+            traceevery=100);
+            
+plot(freqsplot/1e9,getBoost1d(booster,freqsplot))

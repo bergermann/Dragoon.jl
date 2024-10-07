@@ -164,6 +164,8 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
                 objFunction, simplexObj.args)
         end
 
+        showtrace && i % showevery == 0 && println(getSimplexSize(x, f))
+
         if getSimplexSize(x, f) < Δmin
             showtrace && println("Minimum simplex size reached.")
 
