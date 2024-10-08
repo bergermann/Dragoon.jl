@@ -216,10 +216,11 @@ function getObjRef1dSP(booster::Booster,freqs::Vector{Float64},
     ref1 = normalize_range(abs.(ref))
     ref2 = normalize_range(abs.(ref_goal))
 
-    ϕ1 = angle.(ref,freqs)
-    ϕ2 = angle.(ref_goal,freqs)
+    ϕ1 = angle.(ref).-angle(ref)
+    ϕ2 = angle.(ref_goal).-angle(ref_goal)
 
-    return sum(scaling.(abs.(ref1-ref2)))*sum(scaling_gd.(abs.(ϕ1-ϕ2)))
+
+    return sum(scaling.(abs.(ref1-ref2)))*sum(scaling_p.(abs.(ϕ1-ϕ2)))
 end
 
 """
