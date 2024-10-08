@@ -114,6 +114,7 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
         end
 
         if f[1] <= fr < f[end-1]
+            println("performing reflection")
             x[:, end] = xr
             f[end] = fr
         elseif fr < f[1]    # expansion
@@ -121,42 +122,51 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
             fe = updateHist!(booster, hist, freqs, objFunction)
 
             if fe < fr
+                println("performing expansion")
                 x[:, end] = xe
                 f[end] = fe
             else
+                println("performing reflection")
                 x[:, end] = xr
                 f[end] = fr
             end
         else # if fr >= f[end-1] # contraction
             if f[end-1] <= fr < f[end] # outside contraction
                 if foc <= fr
+                    println("performing outside contraction")
                     x[:, end] = xoc
                     f[end] = foc
                 else # shrink
-                    for j in 2:booster.ndisk+1
-                        v = x[:, 1] + δ * (x[:, j] - x[:, 1])
-                        x[:, j] = v
-                    end
-
-                    f[2:end] = simplexObj.func(x, Vector(2:booster.ndisk+1),
-                        booster, hist, freqs, objFunction, simplexObj.args)
-                end
-            else # inside contraction
-                if fic < fr
-                    x[:, end] = xic
-                    f[end] = fic
-                else # shrink
-                    println("performing shrink step")
+                    println("performing shrink step a")
                     println(getSimplexSize(x, f))
 
                     for j in 2:booster.ndisk+1
                         v = x[:, 1] + δ * (x[:, j] - x[:, 1])
                         x[:, j] = v
                     end
-                    println(getSimplexSize(x, f))
 
                     f[2:end] = simplexObj.func(x, collect(2:booster.ndisk+1),
                         booster, hist, freqs, objFunction, simplexObj.args)
+
+                    println(getSimplexSize(x, f))
+                end
+            else # inside contraction
+                if fic < fr
+                    println("performing inside contraction")
+                    x[:, end] = xic
+                    f[end] = fic
+                else # shrink
+                    println("performing shrink step b")
+                    println(getSimplexSize(x, f))
+
+                    for j in 2:booster.ndisk+1
+                        v = x[:, 1] + δ * (x[:, j] - x[:, 1])
+                        x[:, j] = v
+                    end
+                    f[2:end] = simplexObj.func(x, collect(2:booster.ndisk+1),
+                        booster, hist, freqs, objFunction, simplexObj.args)
+                    
+                    println(getSimplexSize(x, f))
                 end
             end
         end

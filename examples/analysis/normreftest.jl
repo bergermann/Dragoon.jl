@@ -82,7 +82,7 @@ plot(freqs/1e9,real.(ref0); c=:blue,label="real"); plot!(freqs/1e9,imag.(ref0); 
 plot(freqs/1e9,abs.(ref0))
 obj1 = ObjRef1dSquare(ref0);
 obj2 = ObjRef1dS(ref0,x->x);
-obj3 = 
+obj3 = Dragoon.ObjRef1dSP(ref0,x->x)
 
 
 d0 = findpeak1d((freqs[1]+freqs[end])/2,booster.ndisk;
@@ -97,7 +97,7 @@ trace = nelderMead(booster,hist,freqs,
             1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
             obj2,
             # ObjAnalytical,
-            InitSimplexRegular(1e-4),
+            InitSimplexRegular(5e-4),
             DefaultSimplexSampler,
             # UnstuckNew(InitSimplexRegular(1e-4),true,5);
             UnstuckDont;
