@@ -92,18 +92,20 @@ move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
 plot(freqsplot/1e9,getBoost1d(booster,freqsplot)/1e3; xlabel="Frequency [GHz]",ylabel="Boostfactor β² × 10³",label="")
 plot!(twinx(),freqsplot/1e9,abs.(getRef1d(booster,freqsplot)); ylabel="|S_11|",c=:red,label="")
 
+
+
 move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
 trace = nelderMead(booster,hist,freqs,
-            1.01,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
+            1.01,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-9,1e-9,
             obj2,
             # ObjAnalytical,
             InitSimplexRegular(1e-4),
             DefaultSimplexSampler,
-            # UnstuckNew(InitSimplexRegular(1e-4),true,5);
-            UnstuckDont;
-            maxiter=Int(4e2),
+            UnstuckNew(InitSimplexRegular(1e-5),true,5);
+            # UnstuckDont;
+            maxiter=Int(1e4),
             showtrace=true,
-            showevery=Int(1e0),
+            showevery=Int(1e3),
             unstuckisiter=true,);
 
             

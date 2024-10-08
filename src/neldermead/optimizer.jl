@@ -115,7 +115,7 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
         end
 
         if f[1] <= fr < f[end-1]
-            println("performing reflection")
+            # println("performing reflection")
             x[:, end] = xr
             f[end] = fr
         elseif fr < f[1]    # expansion
@@ -123,22 +123,22 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
             fe = updateHist!(booster, hist, freqs, objFunction)
 
             if fe < fr
-                println("performing expansion")
+                # println("performing expansion")
                 x[:, end] = xe
                 f[end] = fe
             else
-                println("performing reflection")
+                # println("performing reflection")
                 x[:, end] = xr
                 f[end] = fr
             end
         else # if fr >= f[end-1] # contraction
             if f[end-1] <= fr < f[end] # outside contraction
                 if foc <= fr
-                    println("performing outside contraction")
+                    # println("performing outside contraction")
                     x[:, end] = xoc
                     f[end] = foc
                 else # shrink
-                    println("performing shrink step a")
+                    # println("performing shrink step a")
                     for j in 2:booster.ndisk+1
                         v = x[:, 1] + δ * (x[:, j] - x[:, 1])
                         x[:, j] = v
@@ -149,11 +149,11 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
                 end
             else # inside contraction
                 if fic < fr
-                    println("performing inside contraction")
+                    # println("performing inside contraction")
                     x[:, end] = xic
                     f[end] = fic
                 else # shrink
-                    println("performing shrink step b")
+                    # println("performing shrink step b")
                     for j in 2:booster.ndisk+1
                         v = x[:, 1] + δ * (x[:, j] - x[:, 1])
                         x[:, j] = v
@@ -173,6 +173,7 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
         end
 
         showtrace && i % showevery == 0 && println(getSimplexSize(x, f))
+        showtrace && i % showevery == 0 && println(getSimplexInnerSize(x, f))
 
         if getSimplexSize(x, f) < Δmin1 || getSimplexInnerSize(x) < Δmin2
             showtrace && println("Minimum simplex size reached.")
