@@ -146,10 +146,14 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
                     x[:, end] = xic
                     f[end] = fic
                 else # shrink
+                    println("performing shrink step")
+                    println(getSimplexSize(x, f))
+
                     for j in 2:booster.ndisk+1
                         v = x[:, 1] + δ * (x[:, j] - x[:, 1])
                         x[:, j] = v
                     end
+                    println(getSimplexSize(x, f))
 
                     f[2:end] = simplexObj.func(x, collect(2:booster.ndisk+1),
                         booster, hist, freqs, objFunction, simplexObj.args)
