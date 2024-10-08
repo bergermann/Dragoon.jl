@@ -3,7 +3,7 @@ export nelderMead, nelderMeadLinesearch
 
 """
     nelderMead(booster::Booster,hist::Vector{State},freqs::Array{Float64},
-        α::Float64,β::Float64,γ::Float64,δ::Float64,Δmin::Real,
+        α::Float64,β::Float64,γ::Float64,δ::Float64,Δmin1::Real,Δmin2::Real,
         objFunction::Callback,
         initSimplex::Callback,
         simplexObj::Callback,
@@ -29,7 +29,8 @@ Perform Nelder-Mead optimization on a physical or analytical booster, returns pr
 - `β::Float64`: Expansion parameter.
 - `γ::Float64`: Contraction parameter.
 - `δ::Float64`: Shrinking parameter.
-- `Δmin::Real`: Minimum allowed simplex size.
+- `Δmin1::Real`: Minimum allowed outer simplex size.
+- `Δmin2::Real`: Minimum allowed inner simplex size.
 - `objFunction::Callback`: Objective function of the booster system.
 - `initSimplex`: Simplex initializer.
 - `simplexObj`: Manager to iterate over all vertices when getting all objective values.
@@ -45,7 +46,7 @@ Perform Nelder-Mead optimization on a physical or analytical booster, returns pr
 - `returntimes::Bool=false`: Return timestamps additionally to the trace.
 """
 function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
-        α::Float64,β::Float64,γ::Float64,δ::Float64,Δmin::Real,
+        α::Float64,β::Float64,γ::Float64,δ::Float64,Δmin1::Real,Δmin2::Real,
         objFunction::Callback,
         initSimplex::Callback,
         simplexObj::Callback,
@@ -138,8 +139,6 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
                     f[end] = foc
                 else # shrink
                     println("performing shrink step a")
-                    println(getSimplexSize(x, f))
-
                     for j in 2:booster.ndisk+1
                         v = x[:, 1] + δ * (x[:, j] - x[:, 1])
                         x[:, j] = v
@@ -147,8 +146,6 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
 
                     f[2:end] = simplexObj.func(x, collect(2:booster.ndisk+1),
                         booster, hist, freqs, objFunction, simplexObj.args)
-
-                    println(getSimplexSize(x, f))
                 end
             else # inside contraction
                 if fic < fr
@@ -157,16 +154,13 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
                     f[end] = fic
                 else # shrink
                     println("performing shrink step b")
-                    println(getSimplexSize(x, f))
-
                     for j in 2:booster.ndisk+1
                         v = x[:, 1] + δ * (x[:, j] - x[:, 1])
                         x[:, j] = v
                     end
+
                     f[2:end] = simplexObj.func(x, collect(2:booster.ndisk+1),
                         booster, hist, freqs, objFunction, simplexObj.args)
-                    
-                    println(getSimplexSize(x, f))
                 end
             end
         end
@@ -180,9 +174,8 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
 
         showtrace && i % showevery == 0 && println(getSimplexSize(x, f))
 
-        if getSimplexSize(x, f) < Δmin
+        if getSimplexSize(x, f) < Δmin1 || getSimplexInnerSize(x) < Δmin2
             showtrace && println("Minimum simplex size reached.")
-            println(getSimplexSize(x, f))
 
             stuck = unstuckinator.func(booster, hist, freqs, objFunction, simplexObj, x, f,
                 unstuckinator.args; showtrace=showtrace)
