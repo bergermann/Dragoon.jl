@@ -172,6 +172,7 @@ function nelderMead(booster::Booster,hist::States,freqs::Array{Float64},
 
         if getSimplexSize(x, f) < Δmin
             showtrace && println("Minimum simplex size reached.")
+            println(getSimplexSize(x, f))
 
             stuck = unstuckinator.func(booster, hist, freqs, objFunction, simplexObj, x, f,
                 unstuckinator.args; showtrace=showtrace)

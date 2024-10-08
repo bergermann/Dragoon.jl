@@ -13,7 +13,7 @@ include(joinpath(pwd(),"examples\\analysis\\tools\\tools.jl"));
 
 f = 22
 
-freqs = genFreqs(f*1e9+25e6,100e6; n=20);
+freqs = genFreqs(f*1e9+25e6,100e6; n=10);
 freqsplot = genFreqs(f*1e9+25e6,150e6; n=1000);
 
 booster = AnalyticalBooster(P0[f]; tand=6e-5)
@@ -32,20 +32,19 @@ d0 = findpeak1d((freqs[1]+freqs[end])/2,booster.ndisk;
     eps=booster.epsilon,tand=booster.tand,granularity=10_000,deviation=0.3)
 move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
 
-plot(freqsplot/1e9,getBoost1d(booster,freqsplot)/1e3)
-plot(freqsplot/1e9,abs.(getRef1d(booster,freqsplot)))
+plot(freqsplot/1e9,getBoost1d(booster,freqsplot)/1e3; xlabel="Frequency [GHz]",ylabel="Boostfactor β² × 10³",label="")
+plot!(twinx(),freqsplot/1e9,abs.(getRef1d(booster,freqsplot)); ylabel="|S_11|",c=:red,label="")
 
-# booster.tand = 0.
 move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
 trace = nelderMead(booster,hist,freqs,
-            1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
-            obj1,
-            # ObjAnalytical,
+            1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-7,
+            # obj1,
+            ObjAnalytical,
             InitSimplexRegular(1e-4),
             DefaultSimplexSampler,
             # UnstuckNew(InitSimplexRegular(1e-4),true,5);
             UnstuckDont;
-            maxiter=Int(1e4),
+            maxiter=Int(1e5),
             showtrace=true,
             showevery=Int(1e3),
             unstuckisiter=true,);
