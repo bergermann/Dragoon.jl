@@ -82,7 +82,7 @@ plot(freqs/1e9,real.(ref0); c=:blue,label="real"); plot!(freqs/1e9,imag.(ref0); 
 plot(freqs/1e9,abs.(ref0))
 obj1 = ObjRef1dSquare(ref0);
 obj2 = ObjRef1dS(ref0,x->x);
-obj3 = Dragoon.ObjRef1dSP(ref0,x->x)
+obj3 = Dragoon.ObjRef1dSP(ref0,x->x);
 
 
 d0 = findpeak1d((freqs[1]+freqs[end])/2,booster.ndisk;
@@ -94,16 +94,16 @@ plot!(twinx(),freqsplot/1e9,abs.(getRef1d(booster,freqsplot)); ylabel="|S_11|",c
 
 move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
 trace = nelderMead(booster,hist,freqs,
-            1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
+            1.01,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
             obj2,
             # ObjAnalytical,
-            InitSimplexRegular(5e-4),
+            InitSimplexRegular(1e-4),
             DefaultSimplexSampler,
             # UnstuckNew(InitSimplexRegular(1e-4),true,5);
             UnstuckDont;
-            maxiter=Int(1e4),
+            maxiter=Int(4e2),
             showtrace=true,
-            showevery=Int(1e3),
+            showevery=Int(1e0),
             unstuckisiter=true,);
 
             
@@ -112,18 +112,18 @@ plot(freqs/1e9,abs.(ref0)); plot!(freqsplot/1e9,abs.(getRef1d(booster,freqsplot)
 
 
 
-move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
-trace = simulatedAnnealing(booster,hist,freqs,
-            10e-6,
-            TempLinear(0.1,100_001),
-            obj2,
-            UnstuckDont;
-            maxiter=Int(100_001),
-            nreset=500,
-            showtrace=true,
-            showevery=1000,
-            unstuckisiter=true,
-            traceevery=1000);
+# move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
+# trace = simulatedAnnealing(booster,hist,freqs,
+#             10e-6,
+#             TempLinear(0.1,100_001),
+#             obj2,
+#             UnstuckDont;
+#             maxiter=Int(100_001),
+#             nreset=500,
+#             showtrace=true,
+#             showevery=1000,
+#             unstuckisiter=true,
+#             traceevery=1000);
             
 plot(freqsplot/1e9,getBoost1d(booster,freqsplot))
 plot(freqs/1e9,abs.(ref0)); plot!(freqsplot/1e9,abs.(getRef1d(booster,freqsplot)))
@@ -132,3 +132,6 @@ plot(1:20,pos2dist(P0[f]); seriestype=:scatter); plot!(1:20,pos2dist(booster.pos
 
 
 
+for i in eachindex(trace)
+    println(i,": ",getSimplexInnerSize(trace[i].x))
+end

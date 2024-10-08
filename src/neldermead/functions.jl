@@ -160,3 +160,26 @@ function getSimplexSize(x::Matrix{Float64},f::Vector{Float64})
 
     return s
 end
+
+
+
+"""
+    getSimplexInnerSize(x::Matrix{Float64})
+
+Return closest vertex distance from simplex centroid.
+"""
+function getSimplexInnerSize(x::Matrix{Float64})
+    d = Inf64
+
+    x_ = sum(x; dims=2)/size(x,2)
+
+    for i in axes(x,2)
+        d_ = pNorm(x[:,i]-x_)
+
+        if d_ < d
+            d = d_
+        end
+    end
+
+    return d
+end
