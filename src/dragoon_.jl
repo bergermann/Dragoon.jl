@@ -26,7 +26,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
         end
 
         trace = nelderMead(booster,hist,freqs,
-                    1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
+                    1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,1e-12,
                     objective,
                     InitSimplexRegular(1e-4),
                     DefaultSimplexSampler,
@@ -49,7 +49,7 @@ function dragoon(booster::Booster,hist::Vector{State},bandwidth::Float64,overlap
 
     while cont
         trace = nelderMead(booster,hist,freqs,
-                    1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,
+                    1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,1e-12,
                     objective,
                     InitSimplexRegular(1e-5),
                     DefaultSimplexSampler,
