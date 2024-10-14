@@ -34,6 +34,7 @@ O1,P1,F1,s1 = dragoon(booster,hist,50e6,5e6,
 f1 = [(f[1]+f[end])/2 for f in F1];
 
 
+
 p3 = plot(collect(10:1:100).+0.025,-B0/1e3,label="scratch",seriestype=:scatter,
     xlabel="Frequency [GHz]",ylabel="Objective Value × 10³",markersize=2)
 plot!(p3,f1/1e9,-O1/1e3; label="rescaling 1",c=:blue,lw=2)

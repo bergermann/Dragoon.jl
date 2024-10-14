@@ -96,14 +96,14 @@ plot!(twinx(),freqsplot/1e9,abs.(getRef1d(booster,freqsplot)); ylabel="|S_11|",c
 
 move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
 trace = nelderMead(booster,hist,freqs,
-            1.01,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-9,1e-9,
+            1.01,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-7,1e-7,
             obj2,
             # ObjAnalytical,
             InitSimplexRegular(1e-4),
             DefaultSimplexSampler,
             UnstuckNew(InitSimplexRegular(1e-5),true,5);
             # UnstuckDont;
-            maxiter=Int(1e4),
+            maxiter=Int(1e5),
             showtrace=true,
             showevery=Int(1e3),
             unstuckisiter=true,);
@@ -112,7 +112,7 @@ trace = nelderMead(booster,hist,freqs,
 plot(freqsplot/1e9,getBoost1d(booster,freqsplot))
 plot(freqs/1e9,abs.(ref0)); plot!(freqsplot/1e9,abs.(getRef1d(booster,freqsplot)))
 
-
+analyse(booster,hist,trace,freqs)
 
 # move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
 # trace = simulatedAnnealing(booster,hist,freqs,
