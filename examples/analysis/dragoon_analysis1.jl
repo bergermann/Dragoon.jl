@@ -25,23 +25,38 @@ minimum(getBoost1d(booster,freqs))
 
 
 
-move(booster,P0[25]; additive=false);
+move(booster,P0[22]; additive=false);
 O1,P1,F1,s1 = dragoon(booster,hist,50e6,5e6,
         obj,UnstuckDont;
-        fmin=25.0e9,fmax=28.05e9,nfreqs=10,
-        scalerange=(1.1,1.3),scalesteps=1000,
-        preoptimize=false,reverse=false)
+        fmin=10.0e9,fmax=22.05e9,nfreqs=10,niters=2000,
+        scalerange=(0.5,1.5),scalesteps=1000,
+        preoptimize=false,reverse=true)
 f1 = [(f[1]+f[end])/2 for f in F1];
 
 
 
 p3 = plot(collect(10:1:100).+0.025,-B0/1e3,label="scratch",seriestype=:scatter,
     xlabel="Frequency [GHz]",ylabel="Objective Value × 10³",markersize=2)
-plot!(p3,f1/1e9,-O1/1e3; label="rescaling 1",c=:blue,lw=2)
+plot!(f1/1e9,-O1/1e3; label="rescaling 1",c=:blue,lw=2)
+plot(f1/1e9,-O1/1e3; label="rescaling 1",c=:blue,lw=2)
 
 
 plot(s1)
 
+p4 = plot(collect(10:1:100).+0.025,-B0/1e3,label="scratch",seriestype=:scatter,
+    xlabel="Frequency [GHz]",ylabel="Objective Value × 10³",markersize=2,legend=false)
+for f_ in 45:50
+    println(f_)
+    move(booster,P0[f_]; additive=false);
+    O1,P1,F1,s1 = dragoon(booster,hist,50e6,5e6,
+        obj,UnstuckDont;
+        fmin=f_*1e9,fmax=(f_+1)*1e9,nfreqs=10,niters=3000,
+        scalerange=(1.1,1.3),scalesteps=1000,
+        preoptimize=false,reverse=false)
+    f1 = [(f[1]+f[end])/2 for f in F1];
+    plot!(p4,f1/1e9,-O1/1e3; c=:blue,lw=2,label="")
+end
+p4
 
 
 # savefig(p5,"rescale.svg")
