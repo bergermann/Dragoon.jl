@@ -216,6 +216,7 @@ function prepareDataAll1d(path,threshold=Inf64;
     s = Settings(f0,df,nf,ndisk,eps,tand)
     pathes = []
     p = "$(f0)_$(df)_$(nf)_$(ndisk)_$(eps)_$(tand)"
+    println("searching for: ",p)
 
     for (root, dirs, files) in walkdir(path)
         for path in joinpath.(root,files)
