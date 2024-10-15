@@ -12,10 +12,10 @@ include(joinpath(pwd(),"examples\\analysis\\tools\\tools.jl"));
 @load "examples\\full_20_24.0_6.0e-5.jld2"
 # @load "examples\\full_20_24.0.jld2"
 
-f = 25
+f = 22
 
 freqs = genFreqs(f*1e9+25e6,100e6; n=100);
-freqsplot = genFreqs(f*1e9+25e6,150e6; n=1000);
+freqsplot = genFreqs(f*1e9+25e6,150e6; n=200);
 
 booster = AnalyticalBooster(P0[f]; tand=6e-5)
 # booster = AnalyticalBooster(P0[f]; tand=0)
@@ -99,7 +99,7 @@ trace = nelderMead(booster,hist,freqs,
             1.01,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-9,1e-9,
             obj2,
             # ObjAnalytical,
-            InitSimplexRegular(1e-4),
+            InitSimplexRegular(5e-4),
             DefaultSimplexSampler,
             UnstuckNew(InitSimplexRegular(1e-5),true,5);
             # UnstuckDont;
@@ -110,9 +110,12 @@ trace = nelderMead(booster,hist,freqs,
 
             
 plot(freqsplot/1e9,getBoost1d(booster,freqsplot))
-plot(freqs/1e9,abs.(ref0)); plot!(freqsplot/1e9,abs.(getRef1d(booster,freqsplot)))
 
+plot(freqs/1e9,abs.(ref0); label="reference",lw=2)
+plot!(freqsplot/1e9,abs.(getRef1d(booster,freqsplot)); label="match",seriestype=:scatter,
+    markersize=1.5)
 
+analyse(booster,hist,trace,freqsplot)
 
 # move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
 # trace = simulatedAnnealing(booster,hist,freqs,

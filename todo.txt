@@ -16,8 +16,8 @@ Computation:
 [ ] synchronize movement to measurement
 [ ] 3d tests
 [ ] loss tests?
-[ ] lossy reflectivity objective function: normalize to account for unknown loss
-[ ] group delay
+[t] lossy reflectivity objective function: normalize to account for unknown loss
+[t] group delay
 
 Analysis:
 [ ] check stability on more samples
@@ -29,7 +29,7 @@ Literature:
 [ ] Jacob Master Thesis (reflectivity spectrum mainly)
 
 
-
+[ ] add antenna mismatch (different eps in antenna layer (10%) -> move antenna far away from discs)
 
 Main:
 [x] show redundancy in optimized states

@@ -63,15 +63,17 @@ p4
 plotRescale(booster,P0[22],22.025e9,50e6,200e6,1.175,-5,5)
 
 
-p6 = plot(; legend=false); p7 = plot(; legend=false)
+p6 = plot(; xlabel="Frequency Index i",ylabel="Unnormalised Boost",legend=false,title="Area 1");
+p7 = plot(; xlabel="Frequency Index i",ylabel="Unnormalised |S11|",legend=false,title="Area 1");
 
 # for i in cat(10:27,33:57; dims=1)
-for i in 33:57
+for i in 10:27
     f = genFreqs(i*1e9+25e6,150e6; n=100)
     move(booster,P0[i])
-    # ref = abs.(getRef1d(booster,f))
-    boost = normalize_range(getBoost1d(booster,f))
-    ref = normalize_range(abs.(getRef1d(booster,f)))
+    boost = getBoost1d(booster,f)
+    ref = abs.(getRef1d(booster,f))
+    # boost = normalize_range(getBoost1d(booster,f))
+    # ref = normalize_range(abs.(getRef1d(booster,f)))
 
     # plot!(p6,log.(boost))
     # plot!(p7,log.(ref))
@@ -80,4 +82,10 @@ for i in 33:57
 end
 
 display(p6); display(p7)
+
+plot!(p3,collect(10:27),-B0[1:18]/1e3; label="area 1",lw=3,c=:red)
+plot!(p3,collect(33:56),-B0[24:47]/1e3; label="area 2",lw=3,c=:green)
+plot!(p3,collect(67:80),-B0[58:71]/1e3; label="area 3",lw=3,c=:blue)
+plot!(p3,collect(95:100),-B0[86:end]/1e3; label="area 3",lw=3,c=:yellow)
+
 
