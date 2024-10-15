@@ -9,7 +9,8 @@ export spacings_stefan,
     pNorm, normalize_range, copy,
     getDateString,
     λ, wavelength,
-    rande, modp
+    rande, modp,
+    getPeakNo
 
 """
     const spacings_stefan
@@ -394,4 +395,38 @@ end
 
 function lerp(range::Tuple{Number,Number},α::Number)
     return range[1]+(range[2]-range[1])*α
+end
+
+
+
+
+
+"""
+    getPeakNo(data::Data,freqsplot=nothing; threshold::Float64=0.5)
+
+Find and return peak numbers of boostfactor curves. If no `freqsplot` provided, use reconstructed boosts of data set.
+Filters for peaks above `threshold*maximum(boost)` only.
+"""
+function getPeakNo(data::Data,freqsplot=nothing; threshold::Float64=0.5)
+    no = zeros(Int,length(data))
+
+    if isnothing(freqsplot)
+        for i in ProgressBar(eachindex(data))
+            m = maximum(data.boost[:,i])
+            indices, heights = findmaxima(data.boost[:,i])
+
+            no[i] = sum(heights .>= threshold*m)
+        end
+    else
+        for i in ProgressBar(eachindex(data))
+            boost = boost1d(data.dist[:,i],freqsplot; eps=data.s.eps,tand=data.s.tand)
+
+            m = maximum(boost)
+            _, heights = findmaxima(boost)
+
+            no[i] = sum(heights .>= threshold*m)
+        end
+    end
+
+    return no
 end

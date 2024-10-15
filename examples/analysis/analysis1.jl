@@ -5,7 +5,7 @@ using HDF5, DataFrames
 
 include("tools/tools.jl");
 
-data = prepareDataAll1d(getPath(),-14_000);
+data = prepareDataAll1d(getPath(),-14_000; f0=22.025e9,tand=0.);
 sortData!(data)
 
 initdist = findpeak1d(data.s.f0,20)
@@ -75,3 +75,9 @@ longs = data[findall(i->data.optdist[i]>5,eachindex(data))]; length(longs)
 # histogram(longs.optdist; xlabel="Travel Distance [m]")
 histogram(data.optdist; xlabel="Travel Distance [m]",legend=false,ylim=[0,10_000],bins=200); vline!([5,])
 showDistribution(longs,d0)
+
+
+
+no = getPeakNo(data,genFreqs(22.025e9,100e6; n=50))
+
+sum(no .== 3)
