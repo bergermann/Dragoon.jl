@@ -402,12 +402,12 @@ end
 
 
 """
-    getPeakNo(data::Data,freqsplot=nothing; threshold::Float64=0.5)
+    getPeakNo(data,freqsplot=nothing; threshold::Float64=0.5)
 
 Find and return peak numbers of boostfactor curves. If no `freqsplot` provided, use reconstructed boosts of data set.
 Filters for peaks above `threshold*maximum(boost)` only.
 """
-function getPeakNo(data::Data,freqsplot=nothing; threshold::Float64=0.5)
+function getPeakNo(data,freqsplot=nothing; threshold::Float64=0.5)
     no = zeros(Int,length(data))
 
     if isnothing(freqsplot)

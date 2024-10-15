@@ -1,7 +1,7 @@
 
 using Pkg; Pkg.update()
 
-using Dragoon, BoostFractor
+using Dragoon
 using JLD2, Peaks
 
 include("tools/tools.jl");
