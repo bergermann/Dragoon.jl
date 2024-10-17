@@ -17,7 +17,7 @@ using BoostFractor
 using Distributed
 using LinearAlgebra
 using Plots
-using LaTeXStrings
+# using LaTeXStrings
 
 import Dates: DateTime, now, UTC, canonicalize, format,
     Year, Month, Day, Hour, Minute, Second, Nanosecond
