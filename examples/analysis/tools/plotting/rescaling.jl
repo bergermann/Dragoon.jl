@@ -1,4 +1,5 @@
 
+using LaTeXStrings
 
 function plotRescale(booster,p0,cf,bw,df,s,n1,n2; ylims=(-1,39))
     move(booster,p0; additive=false)
@@ -7,7 +8,7 @@ function plotRescale(booster,p0,cf,bw,df,s,n1,n2; ylims=(-1,39))
     p1 = plot(f/1e9,getBoost1d(booster,f)/1e3;
         xlabel="Frequency [GHz]",ylabel="Boostfactor β² × 10³",c=:red,label="original",lw=2,ylims=ylims)
     p2 = plot(f/1e9,abs.(getRef1d(booster,f));
-        xlabel="Frequency [GHz]",ylabel="Reflectivity |R|",c=:red,label="original",lw=2)
+        xlabel="Frequency [GHz]",ylabel=L"Reflectivity $|R|$",c=:red,label="original",lw=2)
 
     for i in n1:n2
         if i == 0

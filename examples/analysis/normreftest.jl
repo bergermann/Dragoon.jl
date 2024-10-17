@@ -85,6 +85,9 @@ obj2 = ObjRef1dS(ref0,x->x);
 obj3 = Dragoon.ObjRef1dSP(ref0,x->x);
 
 
+
+
+
 d0 = findpeak1d((freqs[1]+freqs[end])/2,booster.ndisk;
     eps=booster.epsilon,tand=booster.tand,granularity=10_000,deviation=0.3)
 move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
@@ -97,24 +100,21 @@ plot!(twinx(),freqsplot/1e9,abs.(getRef1d(booster,freqsplot)); ylabel="|S_11|",c
 move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
 trace = nelderMead(booster,hist,freqs,
             1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,1e-12,
-            obj1,
+            obj2,
             # ObjAnalytical,
             InitSimplexRegular(1e-4),
             DefaultSimplexSampler,
             UnstuckNew(InitSimplexRegular(5e-5),true,5);
             # UnstuckDont;
-            maxiter=Int(1e3),
+            maxiter=Int(1e4),
             showtrace=true,
-            showevery=Int(1e2),
+            showevery=Int(1e3),
             unstuckisiter=true,);
 
 
 p1 = copy(trace[end].x[:,1])
-move(booster,p1)
-b1 = getBoost1d(booster,freqsplot)
-move(booster,P0[f])
-b2 = getBoost1d(booster,freqsplot)
 
+move(booster,p1)
 plot(freqsplot/1e9,getBoost1d(booster,freqsplot))
 
 plot(freqs/1e9,abs.(ref0); label="reference",lw=2)
