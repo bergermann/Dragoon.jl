@@ -5,14 +5,26 @@ using Dragoon, Plots
 
 include("tools/tools.jl");
 
-tand = 6e-5
-eps = 24.0
-f0 = 22.025e9
+tand = 3e-5
+eps = 9.35
+f0 = 20.2e9
 
-ndisks = collect(15:30)
-# bws = collect(50:10:100)
-bws = [50]
+ndisks = collect(5:15)
+bws = collect(50:10:100)
+# bws = [50]
 
+
+B = Dict{Tuple{Int,Int},Vector{Float64}}()
+
+for bw in bws
+    for ndisk in ndisks
+        data = prepareDataAll1d(getPath(),0; f0=f0,df=bw*1e6,ndisk=ndisk,tand=tand,eps=eps)
+        
+        b = best(data)
+
+        B[(bw,ndisk)] = b.dist
+    end
+end
 
 for bw in bws
     freqsplot = genFreqs(f0,2*maximum(bws)*1e6; n=200)
@@ -36,3 +48,14 @@ for bw in bws
 
     savefig(p,"lanthal_$(bw).svg")
 end
+
+
+
+data = prepareDataAll1d(getPath(),-1500; f0=f0,df=50*1e6,ndisk=15,tand=tand,eps=eps)
+
+
+
+initdist = findpeak1d(data.s.f0,data.s.ndisk; eps=data.s.eps,tand=data.s.tand,granularity=20_000,deviation=0.5)
+showDistribution(data,initdist*ones(data.s.ndisk); dx=1)
+showDist(data,100; ndiv=10)
+

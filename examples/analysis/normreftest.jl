@@ -3,7 +3,7 @@ using Pkg; Pkg.update()
 
 
 using Dragoon
-using Plots, Plots.Measures
+using Plots, Plots.Measures, LaTeXStrings
 using Dates
 using JLD2
 
@@ -14,7 +14,7 @@ include(joinpath(pwd(),"examples\\analysis\\tools\\tools.jl"));
 
 f = 22
 
-freqs = genFreqs(f*1e9+25e6,100e6; n=100);
+freqs = genFreqs(f*1e9+25e6,50e6; n=50);
 freqsplot = genFreqs(f*1e9+25e6,150e6; n=200);
 
 booster = AnalyticalBooster(P0[f]; tand=6e-5)
@@ -24,7 +24,7 @@ hist = initHist(booster,2*(booster.ndisk^2),freqs,obj);
 
 plot(freqsplot/1e9,getBoost1d(booster,freqsplot))
 
-
+b0 = getBoost1d(booster,freqs)
 ref0 = getRef1d(booster,freqs);
 # ref0 = [
 #   0.9240607675676515 - 0.38224559885263165im,
@@ -96,19 +96,25 @@ plot!(twinx(),freqsplot/1e9,abs.(getRef1d(booster,freqsplot)); ylabel="|S_11|",c
 
 move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
 trace = nelderMead(booster,hist,freqs,
-            1.01,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-7,1e-7,
-            obj2,
+            1.,1+2/booster.ndisk,0.75-1/2booster.ndisk,1-1/booster.ndisk,1e-12,1e-12,
+            obj1,
             # ObjAnalytical,
-            InitSimplexRegular(5e-4),
+            InitSimplexRegular(1e-4),
             DefaultSimplexSampler,
-            UnstuckNew(InitSimplexRegular(1e-5),true,5);
+            UnstuckNew(InitSimplexRegular(5e-5),true,5);
             # UnstuckDont;
-            maxiter=Int(1e5),
+            maxiter=Int(1e3),
             showtrace=true,
-            showevery=Int(1e3),
+            showevery=Int(1e2),
             unstuckisiter=true,);
 
-            
+
+p1 = copy(trace[end].x[:,1])
+move(booster,p1)
+b1 = getBoost1d(booster,freqsplot)
+move(booster,P0[f])
+b2 = getBoost1d(booster,freqsplot)
+
 plot(freqsplot/1e9,getBoost1d(booster,freqsplot))
 
 plot(freqs/1e9,abs.(ref0); label="reference",lw=2)
@@ -116,6 +122,26 @@ plot!(freqsplot/1e9,abs.(getRef1d(booster,freqsplot)); label="match",seriestype=
     markersize=1.5)
 
 analyse(booster,hist,trace,freqsplot)
+
+move(booster,p1)
+ref1 = getRef1d(booster,freqsplot)
+move(booster,P0[f])
+ref2 = getRef1d(booster,freqsplot)
+
+pr = plot(freqsplot/1e9,real.(ref1); c=:blue,label="optimized",xlabel="Frequency [GHz]",ylabel=L"Reflectivity $R$")
+plot!(pr,freqsplot/1e9,imag.(ref1); c=:blue,linestyle=:dash,label="")
+plot!(pr,freqsplot/1e9,real.(ref2); c=:red,label="reference")
+plot!(pr,freqsplot/1e9,imag.(ref2); c=:red,linestyle=:dash,label="")
+
+
+
+plot(freqsplot/1e9,b1/1e3; c=:blue,label="optimized",xlabel="Frequency [GHz]",ylabel=L"Boostfactor $\beta^2 \times 10^3$")
+plot!(freqsplot/1e9,b2/1e3; c=:red,label="reference")
+
+
+scatter(1:20,pos2dist(p1)/1e-3; c=:blue,label="optimized",xlabel="Disc Index",ylabel=L"Distances $d_i$ [mm]")
+scatter!(1:20,pos2dist(P0[f])/1e-3; c=:red,label="reference",)
+
 
 # move(booster,dist2pos(ones(booster.ndisk)*d0); additive=false);
 # trace = simulatedAnnealing(booster,hist,freqs,

@@ -34,7 +34,14 @@ showQuality(data)
 
 showDist(data,100; ndiv=10)
 
-showDistribution(data,d0)
+
+
+f = 100
+initdist = findpeak1d(D[f].s.f0,D[f].s.ndisk; eps=D[f].s.eps,tand=D[f].s.tand,granularity=20_000,deviation=0.5)
+showDistribution(D[f],initdist*ones(D[f].s.ndisk); dx=0.5)
+showDist(D[f],100; ndiv=10)
+
+
 
 m = mean(data.pos,dims=2)[:]
 
@@ -43,13 +50,32 @@ plot(freqsplot/1e9,boost1d(pos2dist(m),freqsplot; eps=data.s.eps,tand=data.s.tan
 
 
 
-for i in 10:100
+for i in 10:19
     fp = genFreqs(i*1e9+25e6,100e6; n=50)
     # display(plot(fp/1e9,boost1d(best(D[i]).dist[:],fp; eps=D[22].s.eps,tand=D[22].s.tand)))
 
-    no = getPeakNo(D[i],fp)
-    display(histogram(no; xlabel="Peak Numbers",title="Frequency: $((i*1e9+25e6)/1e9) GHz",yscale=:log))
+    no = getPeakNo(D[i],fp; threshold=0.2)
+    # display(histogram(no; xlabel="Peak Numbers",title="Frequency: $((i*1e9+25e6)/1e9) GHz",yscale=:log))
+    if any(no.==4); println("quad peak detected"); end
+    r = sum(no.==3)
+    println("f = $i GHz, ratio = $r")
 end
 
+d_ = D[19][findall(no.==3)]
+b_ = best(D[19])
+
+fp = genFreqs(19.025e9,150e6; n=1000);
+plot(fp/1e9,boost1d(d_.dist[:],fp; eps=data.s.eps,tand=data.s.tand))
+plot!(fp/1e9,boost1d(b_.dist[:],fp; eps=data.s.eps,tand=data.s.tand))
+
+
+
+wiggle(d_.pos[:],1e-6,1_000,fp,(19e9,19.05e9); eps=data.s.eps,tand=data.s.tand);
+wiggle(b_.pos[:],1e-6,1_000,fp,(19e9,19.05e9); eps=data.s.eps,tand=data.s.tand);
+wiggle(d_.pos[:],5e-6,1_000,fp,(19e9,19.05e9); eps=data.s.eps,tand=data.s.tand);
+wiggle(b_.pos[:],5e-6,1_000,fp,(19e9,19.05e9); eps=data.s.eps,tand=data.s.tand);
+
+wigglewiggle(d_.pos[:],collect(1:10)*1e-6,100,fp,(19e9,19.05e9); eps=data.s.eps,tand=data.s.tand)
+wigglewiggle(b_.pos[:],collect(1:10)*1e-6,100,fp,(19e9,19.05e9); eps=data.s.eps,tand=data.s.tand)
 
 

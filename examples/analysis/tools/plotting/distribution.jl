@@ -38,12 +38,12 @@ function showDist(data,n=1000; ndiv=10)
 end
 
 
-function showDistribution(data,d0)
+function showDistribution(data,d0; dx=1)
     dd = data.dist .- d0
     Hdx = []; Hdy = []
 
     for i in 1:data.s.ndisk
-        f = fit(Histogram,dd[i,:]/1e-3,-1:0.01:1)
+        f = fit(Histogram,dd[i,:]/1e-3,-dx:dx/100:dx)
         e = collect(f.edges[1])
         push!(Hdx,(e[2:end]+e[1:end-1])/2)
         push!(Hdy,f.weights)
@@ -54,13 +54,14 @@ function showDistribution(data,d0)
     display(vline!([0]; c=:black,linestyle=:dash,linewidth=0.5))
 
     md = reshape(mean(dd; dims=1),(size(dd,2)));
-    display(histogram(md/1e-3; xlabel="μ(Δd) [mm]",bins=-0.1:0.001:0.1,label=""))
+    display(histogram(md/1e-3; xlabel="μ(Δd) [mm]",bins=-dx/10:dx/1000:dx/10,label=""))
 
+    p0 = dist2pos(d0)
     dp = data.pos .- p0;
     Hpx = []; Hpy = []
 
     for i in 1:data.s.ndisk
-        f = fit(Histogram,dp[i,:]/1e-3,-1:0.01:1)
+        f = fit(Histogram,dp[i,:]/1e-3,-dx:dx/100:dx)
         e = collect(f.edges[1])
         push!(Hpx,(e[2:end]+e[1:end-1])/2)
         push!(Hpy,f.weights)
@@ -71,7 +72,7 @@ function showDistribution(data,d0)
     display(vline!([0]; c=:black,linestyle=:dash,linewidth=0.5))
 
     mp = reshape(mean(dp; dims=1),(size(dd,2)));
-    display(histogram(mp/1e-3; xlabel="μ(Δp) [mm]",bins=-0.1:0.001:0.1,label=""))
+    display(histogram(mp/1e-3; xlabel="μ(Δp) [mm]",bins=-dx/10:dx/1000:dx/10,label=""))
 
     return
 end

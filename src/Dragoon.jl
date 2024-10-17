@@ -21,6 +21,8 @@ using Plots
 import Dates: DateTime, now, UTC, canonicalize, format,
     Year, Month, Day, Hour, Minute, Second, Nanosecond
 import DateFormats: /ₜ, *ₜ
+import ProgressBars: ProgressBar
+import Peaks: findmaxima
 
 # General optimizers
 include("types.jl")
