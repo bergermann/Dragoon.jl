@@ -36,7 +36,7 @@ f1 = [(f[1]+f[end])/2 for f in F1];
 
 
 p3 = plot(collect(10:1:100).+0.025,-B0/1e3,label="scratch",seriestype=:scatter,
-    xlabel="Frequency [GHz]",ylabel="Objective Value × 10³",markersize=2)
+    xlabel="Frequency [GHz]",ylabel="Objective Value × 10³",markersize=3)
 plot!(f1/1e9,-O1/1e3; label="rescaling 1",c=:blue,lw=2)
 plot(f1/1e9,-O1/1e3; label="rescaling 1",c=:blue,lw=2)
 
@@ -65,7 +65,7 @@ plotRescale(booster,P0[22],22.025e9,50e6,200e6,1.175,-5,5)
 
 
 p6 = plot(; xlabel="Frequency Index i",ylabel="Unnormalised Boost",legend=false,title="Area 1");
-p7 = plot(; xlabel="Frequency Index i",ylabel="Unnormalised |S11|",legend=false,title="Area 1");
+p7 = plot(; xlabel="Frequency Index i",ylabel=L"Unnormalised Reflectivity $|R|$",legend=false,title="Area 1");
 
 # for i in cat(10:27,33:57; dims=1)
 for i in 10:27
@@ -84,9 +84,9 @@ end
 
 display(p6); display(p7)
 
-plot!(p3,collect(10:27),-B0[1:18]/1e3; label="area 1",lw=3,c=:red)
-plot!(p3,collect(33:56),-B0[24:47]/1e3; label="area 2",lw=3,c=:green)
-plot!(p3,collect(67:80),-B0[58:71]/1e3; label="area 3",lw=3,c=:blue)
-plot!(p3,collect(95:100),-B0[86:end]/1e3; label="area 3",lw=3,c=:yellow)
+plot!(p3,collect(10:27),-B0[1:18]/1e3; label="area 1",lw=3,c=:red,alpha=0.5)
+plot!(p3,collect(33:56),-B0[24:47]/1e3; label="area 2",lw=3,c=:green,alpha=0.5)
+plot!(p3,collect(67:80),-B0[58:71]/1e3; label="area 3",lw=3,c=:blue,alpha=0.5)
+plot!(p3,collect(95:100),-B0[86:end]/1e3; label="area 3",lw=3,c=:yellow,alpha=0.5)
 
 

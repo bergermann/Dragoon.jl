@@ -88,7 +88,7 @@ function unstuckExpandSimplex(booster,hist,freqs,objFunction,simplexObj,x,f,
     
     for i in 1:booster.ndisk
         v = x[:,end]+δ*(x[:,i]-x[:,end])
-        x[:,j] = v
+        x[:,i] = v
     end
 
     f[1:end-1] = simplexObj.func(x,collect(1:booster.ndisk),booster,hist,freqs,objFunction,simplexObj.args)
