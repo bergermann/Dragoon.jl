@@ -61,7 +61,7 @@ p4
 
 # savefig(p5,"rescale.svg")
 
-plotRescale(booster,P0[22],22.025e9,50e6,200e6,1.175,-5,5)
+# plotRescale(booster,P0[22],22.025e9,50e6,200e6,1.175,-5,5)
 
 
 p6 = plot(; xlabel="Frequency Index i",ylabel="Unnormalised Boost",legend=false,title="Area 1");

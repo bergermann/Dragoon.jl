@@ -1,5 +1,5 @@
 
-using LaTeXStrings
+# using LaTeXStrings
 
 function plotRescale(booster,p0,cf,bw,df,s,n1,n2; ylims=(-1,39))
     move(booster,p0; additive=false)
