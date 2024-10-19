@@ -10,13 +10,15 @@ include("tools/tools.jl");
 
 D = Dict{Int,Data}()
 
-for i in 10:100
+T = []
+
+for i in 10:27
     try
         threshold = B0[i-9]*0.8
         data = prepareDataAll1d(getPath(),threshold; f0=i*1e9+25e6,df=50e6,tand=6e-5);
-        sortData!(data)
 
-        D[i] = data
+        # D[i] = data
+        append!(T,data.opttime)
     catch e
         display(e)
     end
