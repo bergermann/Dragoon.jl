@@ -66,8 +66,8 @@ function tm(freqs,distances; tand=0.0,eps=24.0,disc_thickness=1e-3,nm=1e15)
             end
         end
         
-        RB[1,j] = T[1,2]/T[2,2]
-        RB[2,j] = M[1,1]+M[1,2]-(M[2,1]+M[2,2])*T[1,2]/T[2,2]
+        RB[j] = T[1,2]/T[2,2]
+        RB[l1+j] = M[1,1]+M[1,2]-(M[2,1]+M[2,2])*T[1,2]/T[2,2]
 
         # display(det(T))
 
@@ -78,51 +78,8 @@ function tm(freqs,distances; tand=0.0,eps=24.0,disc_thickness=1e-3,nm=1e15)
     return RB
 end
 
-rb = @btime tm($freqs,$d; nm=1e10);
-rb = tm(freqs,d; nm=1e9); ref = rb[1,:]; boost = rb[2,:];
+rb = @btime tm($freqs,$d; nm=1e20);
+rb = tm(freqs[1],d; nm=1e20); ref = rb[1,:]; boost = rb[2,:];
 
 plot(freqs/1e9,abs2.(boost))
 # plot(freqs/1e9,abs.(ref-ref0))
-
-r1,b1 = tm(22.025e9,[7e-3]; nm=1e9,eps=24.)[:]; abs2(b1)
-r2,b2 = disk_system([22.025e9]; num_disk=1,disk_epsilon=24.,disk_thickness=1e-3,spacings=[7e-3,0]); abs2(b2[])
-
-
-
-
-
-
-
-
-nm = complex(1e20); nd = complex(sqrt(24.0))
-Av = 1; Ad = 1/24.; Am = 1/nm^2
-
-G0 = [1+nm 1-nm; 1-nm 1+nm]/2
-G1 = [nd+1 nd-1; nd-1 nd+1]/2nd
-G2 = [1+nd 1-nd; 1-nd 1+nd]/2
-
-pd1 = cispi(-2*22.025e9*nd*1e-3/c0)
-pd2 = cispi(+2*22.025e9*nd*1e-3/c0)
-pv1 = cispi(-2*22.025e9*1*7e-3/c0)
-pv2 = cispi(+2*22.025e9*1*7e-3/c0)
-P0 = [  1 0; 0   1]
-P1 = [pv1 0; 0 pv2]
-P2 = [pd1 0; 0 pd2]
-
-T = G2*P2*G1*P1*G0*P0; r = T[1,2]/T[2,2]
-
-
-
-S0 = [1 0; 0 1]*(Av-Am)/2
-S1 = [1 0; 0 1]*(Ad-Av)/2
-S2 = [1 0; 0 1]*(Av-Ad)/2
-
-M = ComplexF64[0 0; 0 0]
-M += S2
-M += G2*P2*S1
-M += G2*P2*G1*P1*S0
-
-abs2((M[1,1]+M[1,2]-(M[2,1]+M[2,2])*T[1,2]/T[2,2]))
-
-
-
