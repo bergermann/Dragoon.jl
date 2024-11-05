@@ -17,6 +17,7 @@ using BoostFractor
 using Distributed
 using LinearAlgebra
 using Plots
+using StaticArrays
 # using LaTeXStrings
 
 import Dates: DateTime, now, UTC, canonicalize, format,
@@ -32,6 +33,7 @@ include("objectivefunctions.jl")
 include("unstuckinators.jl")
 
 include("Analytical1D.jl")
+include("tm.jl")
 include("general_utilities.jl")
 
 # Linesearch options
