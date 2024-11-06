@@ -1,5 +1,5 @@
 
-export transfer_matrix
+export transfer_matrix, Dist, Pos
 
 const c0 = 299792458.
 
