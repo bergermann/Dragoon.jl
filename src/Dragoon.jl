@@ -33,7 +33,7 @@ include("objectivefunctions.jl")
 include("unstuckinators.jl")
 
 include("Analytical1D.jl")
-include("tm.jl")
+include("transfer_matrix.jl")
 include("general_utilities.jl")
 
 # Linesearch options
