@@ -147,7 +147,7 @@ Omitting `Space` defaults to distance space.
 
 #Examples
 ```jldoctest
-julia> tm = transfer_matrix(Dist,22:0.01:22.05,[1,2,3,4]*1e-3)
+julia> tm = transfer_matrix(Dist,22e9:0.01e9:22.05e9,[1,2,3,4]*1e-3)
 6×2 Matrix{ComplexF64}:
  -0.920801+0.390032im  0.572322-0.116214im
  -0.920395+0.39099im    0.57135-0.116326im
