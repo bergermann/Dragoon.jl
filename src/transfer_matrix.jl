@@ -1,5 +1,5 @@
 
-export tm
+export transfer_matrix
 
 const c0 = 299792458.
 
