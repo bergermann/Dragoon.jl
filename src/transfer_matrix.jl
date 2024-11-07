@@ -9,8 +9,9 @@ abstract type Pos  <: Space end
 
 
 
-function transfer_matrix(::Type{Dist},freqs::Union{Real,AbstractVector{<:Real}},distances::AbstractVector{<:Real};
-        tand::Real=0.0,eps::Real=24.0,disc_thickness::Real=1e-3,nm::Real=1e15)::Matrix{ComplexF64}
+function transfer_matrix(::Type{Dist},freqs::Union{Real,AbstractVector{<:Real}},
+        distances::AbstractVector{<:Real};
+        eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3,nm::Real=1e15)::Matrix{ComplexF64}
 
     ϵ  = eps*(1.0-1.0im*tand)
     nd = sqrt(ϵ); nm = complex(nm)
@@ -33,8 +34,8 @@ function transfer_matrix(::Type{Dist},freqs::Union{Real,AbstractVector{<:Real}},
     W  = MMatrix{2,2,ComplexF64}(undef) # work matrix for multiplication
 
     @inbounds @views for j in eachindex(freqs)
-        pd1 = cispi(-2*freqs[j]*nd*disc_thickness/c0)
-        pd2 = cispi(+2*freqs[j]*nd*disc_thickness/c0)
+        pd1 = cispi(-2*freqs[j]*nd*thickness/c0)
+        pd2 = cispi(+2*freqs[j]*nd*thickness/c0)
         
         # iterate in reverse order to sum up M in single sweep (thx david)
         for i in Iterators.reverse(eachindex(distances))
@@ -68,14 +69,15 @@ function transfer_matrix(::Type{Dist},freqs::Union{Real,AbstractVector{<:Real}},
 end
 
 transfer_matrix(freqs::Union{Real,AbstractVector{<:Real}},distances::AbstractVector{<:Real};
-    tand::Real=0.0,eps::Real=24.0,disc_thickness::Real=1e-3,nm::Real=1e15) =
-    transfer_matrix(Dist,freqs,distances; tand=tand,eps=eps,disc_thickness=disc_thickness,nm=nm)
+    eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3,nm::Real=1e15) =
+    transfer_matrix(Dist,freqs,distances; tand=tand,eps=eps,thickness=thickness,nm=nm)
 
 
 
 
-function transfer_matrix(::Type{Pos},freqs::Union{Real,AbstractVector{<:Real}},position::AbstractVector{<:Real};
-        tand::Real=0.0,eps::Real=24.0,disc_thickness::Real=1e-3,nm::Real=1e15)::Matrix{ComplexF64}
+function transfer_matrix(::Type{Pos},freqs::Union{Real,AbstractVector{<:Real}},
+        position::AbstractVector{<:Real};
+        eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3,nm::Real=1e15)::Matrix{ComplexF64}
 
     ϵ  = eps*(1.0-1.0im*tand)
     nd = sqrt(ϵ); nm = complex(nm)
@@ -98,8 +100,8 @@ function transfer_matrix(::Type{Pos},freqs::Union{Real,AbstractVector{<:Real}},p
     W  = MMatrix{2,2,ComplexF64}(undef) # work matrix for multiplication
 
     @inbounds @views for j in eachindex(freqs)
-        pd1 = cispi(-2*freqs[j]*nd*disc_thickness/c0)
-        pd2 = cispi(+2*freqs[j]*nd*disc_thickness/c0)
+        pd1 = cispi(-2*freqs[j]*nd*thickness/c0)
+        pd2 = cispi(+2*freqs[j]*nd*thickness/c0)
 
         # iterate in reverse order to sum up M in single sweep (thx david)
         for i in Iterators.reverse(eachindex(position))
@@ -110,7 +112,7 @@ function transfer_matrix(::Type{Pos},freqs::Union{Real,AbstractVector{<:Real}},p
 
             mul!(W,T,Gv); T .= W    # T *= Gd*Pd*Gv
 
-            d = position[i]-(i==1 ? 0 : position[i-1]+disc_thickness)
+            d = position[i]-(i==1 ? 0 : position[i-1]+thickness)
             T[:,1] .*= cispi(-2*freqs[j]*d/c0)
             T[:,2] .*= cispi(+2*freqs[j]*d/c0)   # T = Gd*Pd*Gv*Gd*S_-1
 
@@ -136,8 +138,9 @@ end
 
 
 @doc """
-    transfer_matrix(::Type{Space},freqs::Union{Real,AbstractVector{<:Real}},disc_configuration::AbstractVector{<:Real};
-        tand::Real=0.0,eps::Real=24.0,disc_thickness::Real=1e-3,nm::Real=1e15)::Matrix{ComplexF64}
+transfer_matrix(::Type{Space},freqs::Union{Real,AbstractVector{<:Real}},
+    disc_configuration::AbstractVector{<:Real};
+    eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3,nm::Real=1e15)::Matrix{ComplexF64}
 
 Return matrix containing (complex) reflectivity (first column) and boost (second column) of the
 [transfer matrix algorithm](https://arxiv.org/pdf/1612.07057) for a disc system.
@@ -156,7 +159,7 @@ julia> tm = transfer_matrix(Dist,22e9:0.01e9:22.05e9,[1,2,3,4]*1e-3)
  -0.919163+0.393876im  0.568408-0.116656im
  -0.918749+0.394843im  0.567419-0.116764im
 
-julia> ref = tm[:,1]; boost = abs2.(tm[:,2])
+julia> ref = tm[:,1]; boost = abs2.(tm[:,2]);
 ```
 """ transfer_matrix
 
