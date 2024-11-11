@@ -59,6 +59,7 @@ include("annealing/unstuckinators.jl")
 
 # Adam options
 include("adam/optimizer.jl")
+include("adam/functions.jl")
 
 include("dragoon_.jl")
 
