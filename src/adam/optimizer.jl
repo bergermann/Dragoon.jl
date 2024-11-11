@@ -29,6 +29,8 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
 
     β1_ = β1; β2_ = β2; α_ = α
 
+    θ = copy(booster.pos)
+
     i = 0
     while i < maxiter
         i += 1
@@ -46,19 +48,16 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
         #early stopping if descend is too slow
         pNorm(g) <= ϵgrad && ((showtrace && println("Gradient threshold reached.
                                                 Terminating.")); break)
-
-        # updateHist!(booster, hist, freqs, objFunction)
-
+                                                
         m *= β1; m += (1-β1)*g
         v *= β2; @. v += (1-β2)*g^2
 
         β1_ *= β1; β2_ *= β2
 
         α_ = α*sqrt(1-β2_)/(1-β1_)
+        @. θ -= α_*m/(sqrt(v)+ϵ)
 
-        move(booster,)
-
-
+        move(booster,θ; additive=false)
 
         # showtrace && i%showevery == 0 && printIter(booster, hist, i, k)
 
