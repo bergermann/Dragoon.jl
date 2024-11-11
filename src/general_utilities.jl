@@ -26,61 +26,88 @@ const spacings_stefan = [1.00334, 6.94754, 7.1766, 7.22788, 7.19717,
 
 
 """
-    boost1d(spacings::Vector{Float64},frequencies::Vector{Float64};
-        eps::Real=24.,thickness::Real=1e-3,tand::Real=0.)
+    boost1d(space::Type{<:Space},config::AbstractVector{<:Real},
+        frequencies::Union{Real,AbstractVector{<:Real}};
+        eps::Real=24.,tand::Real=0.,thickness::Real=1e-3)
 
-Return analytical1d boost values for given `spacings` and `frequencies`.
+Return transfer matrix boost values for given disc `config` and `frequencies`.
+Use `space` as `Dist` or `Pos` to switch between distance and position space.
 """
-function boost1d(spacings::Vector{Float64},frequencies::Vector{Float64};
-        eps::Real=24.,thickness::Real=1e-3,tand::Real=0.)
+function boost1d(space::Type{<:Space},config::AbstractVector{<:Real},
+        frequencies::Union{Real,AbstractVector{<:Real}};
+        eps::Real=24.,tand::Real=0.,thickness::Real=1e-3)
     
-    return abs2.(disk_system(frequencies;
-        tand=tand,spacings=[spacings;0],disk_thickness=thickness,
-        disk_epsilon=eps,num_disk=length(spacings))[2])
+    # return abs2.(disk_system(frequencies;
+    #     tand=tand,spacings=[spacings;0],disk_thickness=thickness,
+    #     disk_epsilon=eps,num_disk=length(spacings))[2])
+    return abs2.(transfer_matrix(space,frequencies,config;
+        eps=eps,tand=tand,thickness=thickness)[:,2])
 end
 
+boost1d(distances,frequencies; eps=24.,tand=0.,thickness=1e-3) =
+    boost1d(Dist,distances,frequencies; eps=eps,tand=tand,thickness=thickness)
 
 
 """
-    ref1d(spacings::Vector{Float64},frequencies::Vector{Float64};
+    ref1d(space::Type{<:Space},config::AbstractVector{<:Real},
+        frequencies::Union{Real,AbstractVector{<:Real}};
         eps::Real=24.,thickness::Real=1e-3,tand::Real=0.)
 
-Return (complex) analytical1d reflectivity values for given `spacings` and
-`frequencies`.
+Return (complex) transfer matrix reflectivity values for given disc `config` and
+`frequencies`. Use `space` as `Dist` or `Pos` to switch between distance and position space.
 """
-function ref1d(spacings::Vector{Float64},frequencies::Vector{Float64};
+function ref1d(space::Type{<:Space},config::AbstractVector{<:Real},
+        frequencies::Union{Real,AbstractVector{<:Real}};
         eps::Real=24.,thickness::Real=1e-3,tand::Real=0.)
 
-    return disk_system(frequencies;
-        tand=tand,spacings=[spacings;0],disk_thickness=thickness,
-        disk_epsilon=eps,num_disk=length(spacings))[1]
+    # return disk_system(frequencies;
+    #     tand=tand,spacings=[spacings;0],disk_thickness=thickness,
+    #     disk_epsilon=eps,num_disk=length(spacings))[1]
+    return transfer_matrix(space,frequencies,config;
+        eps=eps,tand=tand,thickness=thickness)[:,1]
 end
 
+ref1d(distances,frequencies; eps=24.,tand=0.,thickness=1e-3) =
+    ref1d(Dist,distances,frequencies; eps=eps,tand=tand,thickness=thickness)
+
 
 
 """
-    getBoost1d(booster::Booster,frequencies::Array{Float64})
+    getBoost1d(space::Type{<:Space},booster::Booster,
+        frequencies::Union{Real,AbstractVector{<:Real}})
 
-Return analytical1d boost values for given `booster` and
-    `frequencies`.
+Return analytical1d boost values for given `booster` and `frequencies`.
+Use `space` as `Dist` or `Pos` to switch between distance and position space. Here,
+default space is position.
 """
-function getBoost1d(booster::Booster,frequencies::Array{Float64})
-    return boost1d(pos2dist(booster.pos; disk_thickness=booster.thickness),
-        frequencies; eps=booster.epsilon,tand=booster.tand,
+function getBoost1d(space::Type{<:Space},booster::Booster,
+        frequencies::Union{Real,AbstractVector{<:Real}})
+
+    return boost1d(space,booster.pos,frequencies;
+        eps=booster.epsilon,tand=booster.tand,
         thickness=booster.thickness)
 end
 
-"""
-    getRef1d(booster::Booster,frequencies::Array{Float64})
+getBoost1d(booster,frequencies) = getBoost1d(Pos,booster,frequencies)
 
-Return (complex) analytical1d reflectivity values for given `booster` and
-`frequencies`.
 """
-function getRef1d(booster::Booster,frequencies::Array{Float64})
-    return ref1d(pos2dist(booster.pos; disk_thickness=booster.thickness),
-        frequencies; eps=booster.epsilon,tand=booster.tand,
+    getRef1d(space::Type{<:Space},booster::Booster,
+        frequencies::Union{Real,AbstractVector{<:Real}})
+
+Return (complex) analytical1d reflectivity values for given `booster` and `frequencies`.
+Use `space` as `Dist` or `Pos` to switch between distance and position space. Here,
+default space is position.
+"""
+function getRef1d(space::Type{<:Space},booster::Booster,
+        frequencies::Union{Real,AbstractVector{<:Real}})
+        
+    return ref1d(space,booster.pos,frequencies;
+        eps=booster.epsilon,tand=booster.tand,
         thickness=booster.thickness)
 end
+
+getRef1d(booster,frequencies) = getBoost1d(Pos,booster,frequencies)
+
 
 
 """
@@ -152,7 +179,7 @@ See [`boost3d`](@ref).
 function getBoost3d(booster::Booster,frequencies::Array{Float64},
         (M,L,gridwidth,dx)::Tuple{Int,Int,Real,Real}=(1,0,1,0.02))
 
-    return boost3d(pos2dist(booster.pos; disk_thickness=booster.thickness),
+    return boost3d(pos2dist(booster.pos; thickness=booster.thickness),
         frequencies; eps=booster.epsilon,tand=booster.tand,
         thickness=booster.thickness,R=booster.R,
         M=M,L=L,gridwidth=gridwidth,dx=dx)
@@ -182,7 +209,7 @@ function findpeak1d(frequency::Real,ndisk::Int;
             eps=eps,tand=tand,thickness=thickness)[1]
     end
 
-    return D[findmax(B)[2]]
+    return D[argmax(B)]
 end
 
 """
@@ -210,7 +237,7 @@ function findpeak3d(frequency::Real,n::Int,
             M=M,L=L,gridwidth=gridwidth,dx=dx)[1]
     end
 
-    return D[findmax(B)[2]]
+    return D[argmax(B)]
 end
 
 
@@ -230,31 +257,33 @@ end
 
 Return `n` equally spaced frequencies from `bounds[1]` to `bounds[2]`.
 """
-function genFreqs(bounds; n::Int=100)
-    return collect(range(bounds[1]; stop=bounds[2],length=n))
+function genFreqs(bounds::Union{Tuple,AbstractVector{<:Real}}; n::Int=100)
+    @assert length(bounds) == 2 "Bounds needs to be a collection of 2 values."
+
+    return collect(range(bounds[1],bounds[2],n))
 end
 
 """
-    pos2dist(position::Array{Float64}; disk_thickness::Real=1e-3)
+    pos2dist(position::Array{Float64}; thickness::Real=1e-3)
 
 Return distances corresponding to `position`.
 """
-function pos2dist(position::Array{Float64}; disk_thickness::Real=1e-3)
+function pos2dist(position::Array{Float64}; thickness::Real=1e-3)
     pos = [0; position]
     d = (pos[2:end]-pos[1:end-1])
-    d[2:end] .-= disk_thickness
+    d[2:end] .-= thickness
     
     return d
 end
 
 
 """
-    dist2pos(distances::Array{Float64}; disc_thickness::Real=1e-3)
+    dist2pos(distances::Array{Float64}; thickness::Real=1e-3)
 
 Return position corresponding to `distances`.
 """
-function dist2pos(distances::Array{Float64}; disc_thickness::Real=1e-3)
-    return [sum(distances[1:i])+(i-1)*disc_thickness for i in 1:length(distances)]
+function dist2pos(distances::Array{Float64}; thickness::Real=1e-3)
+    return [sum(distances[1:i])+(i-1)*thickness for i in 1:length(distances)]
 end
 
 
