@@ -38,7 +38,7 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
 
         derivator.func(g, h, booster, hist, freqs, objFunction, derivator.args)
 
-        if Int(iter%traceevery)==0
+        if iter%traceevery == 0
             trace[Int(iter/traceevery)+1] = ATrace(booster.pos,
                 hist[1].objvalue,g,booster.timestamp,booster.summeddistance)
         end
