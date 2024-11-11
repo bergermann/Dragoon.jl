@@ -12,7 +12,7 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
         maxiter::Integer=Int(1e2),
         showtrace::Bool=false,
         showevery::Integer=1,
-        unstuckisiter::Bool=true,
+        traceevery::Int=1,
         resettimer::Bool=true,
         returntimes::Bool=false)
 
@@ -20,7 +20,7 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
 
     t0 = setTimes!(booster,resettimer)
 
-    trace = Vector{ATrace}(undef,maxiter+1)
+    trace = Vector{ATrace}(undef,round(Int,maxiter/traceevery)+2)
 
     m = zeros(booster.ndisk)
     v = zeros(booster.ndisk)
@@ -34,14 +34,16 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
 
     i = 0
     while i < maxiter
-        i += 1
-
         updateHist!(booster, hist, freqs, objFunction)
 
         derivator.func(g, h, booster, hist, freqs, objFunction, derivator.args)
 
-        trace[i] = ATrace(booster.pos,hist[1].objvalue,copy(g),
-            booster.timestamp,booster.summeddistance)
+        if Int(iter%traceevery)==0
+            trace[Int(iter/traceevery)+1] = SATrace(x,objx,xsol,objsol,τ,iter,
+                                    booster.timestamp,booster.summeddistance)
+        end
+        
+        i += 1
 
         showtrace && i%showevery == 0 && println("Gradient norm: ",
                                                 round(pNorm(g), sigdigits=3))
@@ -60,16 +62,12 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
 
         move(booster,θ; additive=false)
 
-        # showtrace && i%showevery == 0 && printIter(booster, hist, i, k)
+        showtrace && i%showevery == 0 && printAIter(booster, hist, i)
 
-        stuck = unstuckinator.func(booster, hist, freqs, objFunction,
-            unstuckinator.args; showtrace=showtrace)
-
-        !unstuckisiter && (i -= 1) #reset iteration count if false
-
-        stuck && break
-
-        #end of iteration
+        # stuck = unstuckinator.func(booster, hist, freqs, objFunction,
+        #     unstuckinator.args; showtrace=showtrace)
+        
+        # stuck && break
     end
 
     updateTimeStamp!(booster,:codetimestamp,resettimer,t0)
