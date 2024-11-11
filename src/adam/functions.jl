@@ -35,7 +35,9 @@ function printAIter(booster::Booster,hist,i::Int)
     
     println("Iter finished. Objective value: ",round(hist[1].objvalue; digits=3),"\n")
             
-    k == 0 && println("Stuck. Trying to unstuck.\n")
+    # println("Stuck. Trying to unstuck.\n")
+
+    return
 end
 
 
