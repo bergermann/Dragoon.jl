@@ -1,4 +1,5 @@
 
+export adam
 
 
 
@@ -74,7 +75,7 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
     updateTimeStamp!(booster,:codetimestamp,resettimer,t0)
 
     idx = min(findlast(i->isassigned(trace,i),eachindex(trace))+1,length(trace))
-    trace[idx] = LATrace(booster.pos,hist[1].objvalue,g,h,booster.timestamp, booster.summeddistance)
+    trace[idx] = ATrace(booster.pos,hist[1].objvalue,g,booster.timestamp,booster.summeddistance)
 
     term = printTermination(booster,hist,i,maxiter,showtrace)
 
