@@ -39,8 +39,8 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
 
         derivator.func(g, h, booster, hist, freqs, objFunction, derivator.args)
 
-        trace[i] = ATrace(booster.pos, hist[1].objvalue, copy(g), copy(h),
-            booster.timestamp, booster.summeddistance)
+        trace[i] = ATrace(booster.pos,hist[1].objvalue,copy(g),
+            booster.timestamp,booster.summeddistance)
 
         showtrace && i%showevery == 0 && println("Gradient norm: ",
                                                 round(pNorm(g), sigdigits=3))
