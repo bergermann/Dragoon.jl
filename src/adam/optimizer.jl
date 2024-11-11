@@ -19,7 +19,7 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
 
     t0 = setTimes!(booster,resettimer)
 
-    # trace = Vector{ATrace}(undef,maxiter+1)
+    trace = Vector{ATrace}(undef,maxiter+1)
 
     m = zeros(booster.ndisk)
     v = zeros(booster.ndisk)
@@ -39,8 +39,8 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
 
         derivator.func(g, h, booster, hist, freqs, objFunction, derivator.args)
 
-        # trace[i] = LSTrace(booster.pos, hist[1].objvalue, copy(g), copy(h),
-        #     booster.timestamp, booster.summeddistance)
+        trace[i] = ATrace(booster.pos, hist[1].objvalue, copy(g), copy(h),
+            booster.timestamp, booster.summeddistance)
 
         showtrace && i%showevery == 0 && println("Gradient norm: ",
                                                 round(pNorm(g), sigdigits=3))
@@ -48,7 +48,7 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
         #early stopping if descend is too slow
         pNorm(g) <= ϵgrad && ((showtrace && println("Gradient threshold reached.
                                                 Terminating.")); break)
-                                                
+
         m *= β1; m += (1-β1)*g
         v *= β2; @. v += (1-β2)*g^2
 
@@ -73,13 +73,12 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
 
     updateTimeStamp!(booster,:codetimestamp,resettimer,t0)
 
-    # idx = min(findlast(i->isassigned(trace,i),eachindex(trace))+1,length(trace))
-    # trace[idx] = LATrace(booster.pos,hist[1].objvalue,g,h,booster.timestamp, booster.summeddistance)
+    idx = min(findlast(i->isassigned(trace,i),eachindex(trace))+1,length(trace))
+    trace[idx] = LATrace(booster.pos,hist[1].objvalue,g,h,booster.timestamp, booster.summeddistance)
 
     term = printTermination(booster,hist,i,maxiter,showtrace)
 
-    # return returntimes ? (trace[1:idx], term) : trace[1:idx]
-    return
+    return returntimes ? (trace[1:idx], term) : trace[1:idx]
 end
 
 
