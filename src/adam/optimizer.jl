@@ -32,8 +32,8 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
 
     θ = copy(booster.pos)
 
-    i = 0
-    while i < maxiter
+    iter = 0
+    while iter < maxiter
         updateHist!(booster, hist, freqs, objFunction)
 
         derivator.func(g, h, booster, hist, freqs, objFunction, derivator.args)
@@ -43,9 +43,9 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
                                     booster.timestamp,booster.summeddistance)
         end
         
-        i += 1
+        iter += 1
 
-        showtrace && i%showevery == 0 && println("Gradient norm: ",
+        showtrace && iter%showevery == 0 && println("Gradient norm: ",
                                                 round(pNorm(g), sigdigits=3))
 
         #early stopping if descend is too slow
@@ -62,7 +62,7 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
 
         move(booster,θ; additive=false)
 
-        showtrace && i%showevery == 0 && printAIter(booster, hist, i)
+        showtrace && iter%showevery == 0 && printAIter(booster, hist, iter)
 
         # stuck = unstuckinator.func(booster, hist, freqs, objFunction,
         #     unstuckinator.args; showtrace=showtrace)
@@ -75,7 +75,7 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
     idx = min(findlast(i->isassigned(trace,i),eachindex(trace))+1,length(trace))
     trace[idx] = ATrace(booster.pos,hist[1].objvalue,g,booster.timestamp,booster.summeddistance)
 
-    term = printTermination(booster,hist,i,maxiter,showtrace)
+    term = printTermination(booster,hist,iter,maxiter,showtrace)
 
     return returntimes ? (trace[1:idx], term) : trace[1:idx]
 end
