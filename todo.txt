@@ -20,10 +20,10 @@ Computation:
 [t] group delay
 
 Analysis:
-[ ] check stability on more samples
+[x] check stability on more samples
 [ ] optimize more from reflectivity
 [ ] check stability on reflectivity
-[ ] check stability with loss
+[x] check stability with loss
 
 Literature:
 [ ] Jacob Master Thesis (reflectivity spectrum mainly)
