@@ -44,8 +44,8 @@ end
 
 
 """
-    analyse(hist,trace::Vector{ATrace},freqsplot;
-        freqs=nothing,plotting=true,div=5,ylim=[-0.05e4,3e4])
+analyse(booster,hist,trace::Vector{ATrace},freqsplot;
+    freqs=nothing,plotting=true,div=5,ylim=[-0.05e4,3e4])
 
 Analyse linesearch trace and create plot output using Analytical1d.
 
@@ -58,7 +58,7 @@ Analyse linesearch trace and create plot output using Analytical1d.
 - `div=5`: Amount of intermediate steps.
 - `ylim=[-0.05e4,3e4]`: Manual limit of y-axis.
 """
-function analyse(hist,trace::Vector{ATrace},freqsplot;
+function analyse(booster,hist,trace::Vector{ATrace},freqsplot;
         freqs=nothing,plotting=true,div=5,ylim=[-0.05e4,3e4])
     
     tracex = hcat((x->x.x).(trace)...)
