@@ -3,7 +3,7 @@
 To-Do-List (27.09.24):
 Package:
 [t] implement missing unstuckinators
-[ ] fix analyse functions
+[t] fix analyse functions
 [ ] check allocations (e.g. updateHist)
 [ ] add "measurement count"
 [ ] add spacings folder with "search" function to examples

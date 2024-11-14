@@ -16,10 +16,11 @@ module Dragoon
 using BoostFractor
 using Distributed
 using LinearAlgebra
-using Plots
 using StaticArrays
-# using LaTeXStrings
+using LaTeXStrings
 
+import Plots: plot, plot!, scatter, vline!, title!, xlabel!, ylabel!,
+    annotate!, display
 import Dates: DateTime, now, UTC, canonicalize, format,
     Year, Month, Day, Hour, Minute, Second, Nanosecond
 import DateFormats: /ₜ, *ₜ

@@ -1,9 +1,7 @@
 ###     information tracing and output for nelder mead
 
-export analyse
+export Analyse
 
-import Plots: plot, plot!, scatter, vline!, title!, xlabel!, ylabel!,
-        annotate!, display
 
 
 mutable struct NMTrace <: Trace
@@ -92,37 +90,37 @@ function analyse(booster,hist,trace::Vector{NMTrace},freqsplot;
             vline!([minimum(freqs),maximum(freqs)]/scale,c="black",linestyle=:dash,
                     label="")
         end
-        
+
         title!("Boostfactor")
         xlabel!("Frequency [$(magLabel(mag))Hz]")
-        ylabel!("β²")
+        ylabel!(L"Power Boost Factor $β^2$")
         annotate!([(minimum(freqsplot)/scale,0.9*ylim[2],
                     "Final value:\n"*string(round(tracef[l],digits=1)),:left)])
 
         plt2 = plot(1:l,tracef; legend=false)
         title!("Objective trace best vertex")
         xlabel!("Iteration")
-        ylabel!("Objective value")
+        ylabel!(L"Objective value $f$")
 
         plt3 = plot(1:l,traced'; legend=false)
         title!("Distance trace best vertex")
         xlabel!("Iteration")
-        ylabel!("d_i")
+        ylabel!(L"Distances $d_i$ [mm]")
 
         plt4 = scatter(1:n,traced[:,l]; legend=false)
         title!("Final distances")
-        xlabel!("Disk")
-        ylabel!("d_i")
+        xlabel!("Disk index")
+        ylabel!(L"Distances $d_i$ [mm]")
 
-        plt5 = plot(1:lh,histf[1:lh]; legend=false)
+        plt5 = plot(-lh:-1,histf[1:lh]; legend=false)
         title!("History objective value")
-        xlabel!("Step")
-        ylabel!("Objective value")
+        xlabel!("Step index")
+        ylabel!(L"Objective value $f$")
 
-        plt6 = plot(1:lh,histd[:,1:lh]'; legend=false)
+        plt6 = plot(-lh:-1,histd[:,1:lh]'; legend=false)
         title!("History distances")
-        xlabel!("Step")
-        ylabel!("d_i")
+        xlabel!("Step index")
+        ylabel!(L"Distances $d_i$ [mm]")
 
         display(plt1)
         display(plt2)

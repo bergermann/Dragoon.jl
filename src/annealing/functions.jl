@@ -72,7 +72,7 @@ Analyse simulated annealing trace and create plot output using Analytical1d.
 - `div=5`: Amount of intermediate steps.
 - `ylim=[-0.05e4,3e4]`: Manual limit of y-axis.
 """
-function analyse(hist,trace::Vector{SATrace},freqsplot;
+function analyse(booster,hist,trace::Vector{SATrace},freqsplot;
         freqs=nothing,plotting=true,div=5,ylim=[-0.05e4,3e4])
 
     tracex = hcat((x -> x.x).(trace)...)
@@ -86,66 +86,81 @@ function analyse(hist,trace::Vector{SATrace},freqsplot;
 
     tracet = (x -> x.τ).(trace)
 
+    lh = length(hist[(x->x.objvalue).(hist) .!= 0.])
+
+    histx = hcat((x->x.pos).(hist[lh:-1:1])...)
+    histf = (x->x.objvalue).(hist[lh:-1:1])
+    histd = hcat((x->pos2dist(x.pos)).(hist[lh:-1:1])...)
+
     l = length(trace)
     n = length(tracex[:, 1])
 
     mag = getMag(maximum(freqsplot)); scale = 10^mag
 
     if plotting
-        plt1 = plot(freqsplot / scale, boost1d(pos2dist(tracexsol[:, 1]), freqsplot);
-            ylim=ylim, label="init", lc="blue", lw=2)
-
+        plt1 = plot(freqsplot/scale,
+            boost1d(Pos,tracex[:,1],freqsplot;eps=booster.epsilon,
+            tand=booster.tand,thickness=booster.thickness);
+            ylim=ylim,label="init",lc="blue",lw=2)
         if div != 0
             for i in 2:maximum([1, l ÷ div]):(l-1)
-                plot!(freqsplot / scale, boost1d(pos2dist(tracexsol[:, i]), freqsplot);
-                    ylim=ylim, label="it.: " * string(i))
+                plot!(freqsplot/scale,
+                    boost1d(Pos,tracex[:,i],freqsplot;eps=booster.epsilon,
+                    tand=booster.tand,thickness=booster.thickness);
+                    ylim=ylim,label="it.: "*string(i))
             end
         end
 
-        plot!(freqsplot / scale, boost1d(pos2dist(tracexsol[:, l]), freqsplot);
-            ylim=ylim, label="final", lc="red", lw=2)
+        plot!(freqsplot/scale,
+            boost1d(Pos,tracex[:,l],freqsplot;eps=booster.epsilon,
+            tand=booster.tand,thickness=booster.thickness);
+            ylim=ylim,label="final",lc="red",lw=2)
 
         if freqs !== nothing
-            vline!([minimum(freqs), maximum(freqs)] / scale, c="black", linestyle=:dash,
+            vline!([minimum(freqs),maximum(freqs)]/scale,c="black",linestyle=:dash,
                 label="")
         end
 
         title!("Boostfactor")
         xlabel!("Frequency [$(magLabel(mag))Hz]")
-        ylabel!("β²")
-        annotate!([(minimum(freqsplot) / scale, 0.9 * ylim[2],
-            "Final value:\n" * string(round(traceobjsol[l], digits=1)), :left)])
+        ylabel!(L"Power Boost Factor $β^2$")
+        annotate!([(minimum(freqsplot)/scale,0.9*ylim[2],
+                    "Final value:\n"*string(round(traceobjsol[l],digits=1)),:left)])
 
-        plt2 = plot(1:l, traceobjsol; legend=false)
-        title!("Solution objective trace")
+        plt2 = plot(1:l,traceobjsol; legend=false)
+        title!("Objective trace best vertex")
         xlabel!("Iteration")
-        ylabel!("Objective value")
+        ylabel!(L"Objective value $f$")
 
-        plt3 = plot(1:l, tracedsol'; legend=false)
-        title!("Solution distance trace [m]")
+        plt3 = plot(1:l,tracedsol'; legend=false)
+        title!("Distance trace best vertex")
         xlabel!("Iteration")
-        ylabel!("d_i")
+        ylabel!(L"Distances $d_i$ [mm]")
 
-        plt4 = scatter(1:n, tracedsol[:, l]; legend=false)
+        plt4 = scatter(1:n,tracedsol[:,l]; legend=false)
         title!("Final distances")
-        xlabel!("Disk")
-        ylabel!("d_i [m]")
+        xlabel!("Disk index")
+        ylabel!(L"Distances $d_i$ [mm]")
 
-        plt5 = plot(1:l, traceobj; legend=false)
+        plt5 = plot(1:l,traceobj; legend=false)
         title!("Thermal objective trace")
         xlabel!("Iteration")
-        ylabel!("Objective value")
+        ylabel!(L"Objective value $f$")
 
-        plt6 = plot(1:l, traced'; legend=false)
+        plt6 = plot(1:l,traced'; legend=false)
         title!("Thermal distance trace")
         xlabel!("Iteration")
-        ylabel!("d_i [m]")
+        ylabel!(L"Distances $d_i$ [mm]")
 
-        plt7 = plot((x->x.objvalue).(hist[(x->x.objvalue).(hist).!=0.0])[end:-1:1][1:end];
-            legend=false)
-        title!("History")
-        xlabel!("Step")
-        ylabel!("Objective value")
+        plt7 = plot(-lh:-1,histf[1:lh]; legend=false)
+        title!("History objective value")
+        xlabel!("Step index")
+        ylabel!(L"Objective value $f$")
+
+        plt8 = plot(-lh:-1,histd[:,1:lh]'; legend=false)
+        title!("History distances")
+        xlabel!("Step index")
+        ylabel!(L"Distances $d_i$ [mm]")
 
         display(plt1)
         display(plt2)
@@ -154,11 +169,11 @@ function analyse(hist,trace::Vector{SATrace},freqsplot;
         display(plt5)
         display(plt6)
         display(plt7)
-    end
+        display(plt8)
 
-    if !plotting
-        return tracex, traced, tracexsol, tracedsol, traceobj, traceobjsol, tracet
+        return plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8
     else
-        return plt1, plt2, plt3, plt4, plt5, plt6, plt7
+        return tracex, traced, tracexsol, tracedsol, traceobj, traceobjsol, tracet,
+            histx, histf, histd
     end
 end
