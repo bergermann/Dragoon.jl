@@ -102,6 +102,7 @@ function analyse(booster,hist,trace::Vector{SATrace},freqsplot;
             boost1d(Pos,tracex[:,1],freqsplot;eps=booster.epsilon,
             tand=booster.tand,thickness=booster.thickness);
             ylim=ylim,label="init",lc="blue",lw=2)
+
         if div != 0
             for i in 2:maximum([1, l ÷ div]):(l-1)
                 plot!(freqsplot/scale,
@@ -137,7 +138,7 @@ function analyse(booster,hist,trace::Vector{SATrace},freqsplot;
         xlabel!("Iteration")
         ylabel!(L"Distances $d_i$ [mm]")
 
-        plt4 = scatter(1:n,tracedsol[:,l]; legend=false)
+        plt4 = scatter(1:n,tracedsol[:,l]/1e-3; legend=false)
         title!("Final distances")
         xlabel!("Disk index")
         ylabel!(L"Distances $d_i$ [mm]")
@@ -147,7 +148,7 @@ function analyse(booster,hist,trace::Vector{SATrace},freqsplot;
         xlabel!("Iteration")
         ylabel!(L"Objective value $f$")
 
-        plt6 = plot(1:l,traced'; legend=false)
+        plt6 = plot(1:l,traced'/1e-3; legend=false)
         title!("Thermal distance trace")
         xlabel!("Iteration")
         ylabel!(L"Distances $d_i$ [mm]")
@@ -157,7 +158,7 @@ function analyse(booster,hist,trace::Vector{SATrace},freqsplot;
         xlabel!("Step index")
         ylabel!(L"Objective value $f$")
 
-        plt8 = plot(-lh:-1,histd[:,1:lh]'; legend=false)
+        plt8 = plot(-lh:-1,histd[:,1:lh]'/1e-3; legend=false)
         title!("History distances")
         xlabel!("Step index")
         ylabel!(L"Distances $d_i$ [mm]")
