@@ -70,21 +70,21 @@ function analyse(booster,hist,trace::Vector{NMTrace},freqsplot;
 
     if plotting
         plt1 = plot(freqsplot/scale,
-            boost1d(pos2dist(tracex[:,1]),freqsplot; eps=booster.epsilon,tand=booster.tand,
-                thickness=booster.thickness);
-                ylim=ylim,label="init",lc="blue",lw=2)
+            boost1d(Pos,tracex[:,1],freqsplot; eps=booster.epsilon,tand=booster.tand,
+            thickness=booster.thickness);
+            ylim=ylim,label="init",lc="blue",lw=2)
 
         if div != 0
             for i in 2:maximum([1,l÷div]):(l-1)
                 plot!(freqsplot/scale,
-                    boost1d(pos2dist(tracex[:,i]),freqsplot;eps=booster.epsilon,
-                        tand=booster.tand,thickness=booster.thickness);
-                        ylim=ylim,label="it.: "*string(i))
+                    boost1d(Pos,tracex[:,i],freqsplot;eps=booster.epsilon,
+                    tand=booster.tand,thickness=booster.thickness);
+                    ylim=ylim,label="it.: "*string(i))
             end
         end
 
         plot!(freqsplot/scale,
-            boost1d(pos2dist(tracex[:,l]),freqsplot;eps=booster.epsilon,tand=booster.tand,
+            boost1d(Pos,tracex[:,l],freqsplot;eps=booster.epsilon,tand=booster.tand,
                 thickness=booster.thickness);
                 ylim=ylim,label="final",lc="red",lw=2)
 
@@ -92,6 +92,7 @@ function analyse(booster,hist,trace::Vector{NMTrace},freqsplot;
             vline!([minimum(freqs),maximum(freqs)]/scale,c="black",linestyle=:dash,
                     label="")
         end
+        
         title!("Boostfactor")
         xlabel!("Frequency [$(magLabel(mag))Hz]")
         ylabel!("β²")

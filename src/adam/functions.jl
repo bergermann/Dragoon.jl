@@ -65,7 +65,6 @@ function analyse(booster,hist,trace::Vector{ATrace},freqsplot;
     traced = hcat((x->pos2dist(x.x)).(trace)...)
     tracef = (x->x.obj).(trace)
     traceg = hcat((x->x.g).(trace)...)
-    traceh = cat((x->x.h).(trace)...;dims=3)
 
     l = length(trace)
     n = length(tracex[:,1])
@@ -73,18 +72,23 @@ function analyse(booster,hist,trace::Vector{ATrace},freqsplot;
     mag = getMag(maximum(freqsplot)); scale = 10^mag
 
     if plotting
-        plt1 = plot(freqsplot/scale,boost1d(pos2dist(tracex[:,1]),freqsplot);
-                ylim=ylim,label="init",lc="blue",lw=2)
+        plt1 = plot(freqsplot/scale,
+            boost1d(Pos,tracex[:,1],freqsplot;eps=booster.epsilon,
+            tand=booster.tand,thickness=booster.thickness);
+            ylim=ylim,label="init",lc="blue",lw=2)
 
         if div != 0
             for i in 2:maximum([1,l÷div]):(l-1)
                 plot!(plt1,freqsplot/scale,
-                    boost1d(pos2dist(tracex[:,i]),freqsplot);
+                    boost1d(Pos,tracex[:,i],freqsplot;eps=booster.epsilon,
+                    tand=booster.tand,thickness=booster.thickness);
                     ylim=ylim,label="it.: "*string(i))
             end
         end
 
-        plot!(plt1,freqsplot/scale,boost1d(pos2dist(tracex[:,l]),freqsplot);
+        plot!(plt1,freqsplot/scale,
+            boost1d(Pos,tracex[:,l],freqsplot;eps=booster.epsilon,
+            tand=booster.tand,thickness=booster.thickness);
             ylim=ylim,label="final",lc="red",lw=2)
 
         if freqs !== nothing
@@ -127,7 +131,7 @@ function analyse(booster,hist,trace::Vector{ATrace},freqsplot;
     end
 
     if !plotting
-        return tracex, traced, tracef, traceg, traceh
+        return tracex, traced, tracef, traceg
     else
         return plt1, plt2, plt3, plt4, plt5
     end
