@@ -102,7 +102,7 @@ function analyse(booster,hist,trace::Vector{ATrace},freqsplot;
 
         title!(plt1,"Boostfactor")
         xlabel!(plt1,"Frequency [$(magLabel(mag))Hz]")
-        ylabel!(plt1,L"Power Boost Factor β²")
+        ylabel!(plt1,L"Power Boost Factor $β^2$")
         annotate!(plt1,[(minimum(freqsplot)/scale,0.9*ylim[2],
                     "Final value:\n"*string(round(tracef[l],digits=1)),:left)])
 
