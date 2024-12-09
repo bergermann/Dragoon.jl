@@ -3,7 +3,7 @@
 To-Do-List (21.10.24):
 Package:
 [t] implement missing unstuckinators
-[ ] fix analyse functions
+[t] fix analyse functions
 [ ] check allocations (e.g. updateHist)
 [ ] add "measurement count"
 [ ] add spacings folder with "search" function to examples
@@ -20,10 +20,10 @@ Computation:
 [t] group delay
 
 Analysis:
-[ ] check stability on more samples
+[x] check stability on more samples
 [ ] optimize more from reflectivity
 [ ] check stability on reflectivity
-[ ] check stability with loss
+[x] check stability with loss
 
 Literature:
 [ ] Jacob Master Thesis (reflectivity spectrum mainly)
@@ -43,3 +43,16 @@ Main:
 New/Cross features:
 [ ] reflectivity fitting?
 [ ] gradient method?
+
+
+
+
+DESY Motors - Constellations:
+- control system with "satellites" - independent controllers
+    - https://constellation.pages.desy.de/
+- motors
+    - https://www.jpe-innovations.com/cryo-uhv-products/cryo-positioning-systems-controller/
+- interferrometer auslese schnittstelle in python?
+    - precise in relative measurements, not precise in initial measurement
+- collision avoidance? motor failure? failsafe?
+- move single motor at once (likely)

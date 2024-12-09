@@ -16,9 +16,11 @@ module Dragoon
 using BoostFractor
 using Distributed
 using LinearAlgebra
-using Plots
-# using LaTeXStrings
+using StaticArrays
+using LaTeXStrings
 
+import Plots: plot, plot!, scatter, vline!, title!, xlabel!, ylabel!,
+    annotate!, display
 import Dates: DateTime, now, UTC, canonicalize, format,
     Year, Month, Day, Hour, Minute, Second, Nanosecond
 import DateFormats: /ₜ, *ₜ
@@ -32,6 +34,7 @@ include("objectivefunctions.jl")
 include("unstuckinators.jl")
 
 include("Analytical1D.jl")
+include("transfer_matrix.jl")
 include("general_utilities.jl")
 
 # Linesearch options
@@ -54,6 +57,10 @@ include("annealing/optimizer.jl")
 include("annealing/functions.jl")
 include("annealing/tempmanagers.jl")
 include("annealing/unstuckinators.jl")
+
+# Adam options
+include("adam/optimizer.jl")
+include("adam/functions.jl")
 
 include("dragoon_.jl")
 
