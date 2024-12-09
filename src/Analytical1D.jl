@@ -119,14 +119,17 @@ function transform_surface(freq::AbstractArray, gamma::AbstractArray;
 		#println("axion_out is: ")
         #println(axion_out)
 
+        # display(axion_out)
         # Propagate the axion wave
         # Propagates in the direction of the reflected wave therefore the leading sign in the exponent is minus
 
-		axion_out = complex(axion_out)
+		# axion_out = complex(axion_out)
 
         for i in eachindex(wavel)
             axion_out[i] *= exp(-1.0im * 2. * pi * l / wavel[i])
         end
+        
+        # display(axion_out)
 		#println("axion_out is: ")
         #println(axion_out)
     end
@@ -216,11 +219,12 @@ function disk_system(freq::AbstractArray;
     #if mirror:
     #    axion_out=np.ones(freq.shape) + 0*1j
     #else:
-    axion_out = fill!(similar(freq), 0.) .+ 0.0 * 1.0im
+    # axion_out = fill!(similar(freq), 0.) .+ 0.0 * 1.0im
+    axion_out = zeros(ComplexF64,length(freq))
 
     # Metal Disk
     if mirror
-        gamma = transform_surface(freq, fill!(similar(freq), 0.); axion_out = axion_out, eps_i = 1., eps_m = 1e20, l = 100e-3, kwargs...)
+        gamma = transform_surface(freq, zeros(ComplexF64,length(freq)); axion_out = axion_out, eps_i = 1., eps_m = 1e20, l = 100e-3, kwargs...)
 		#println("gamma is: ")
         #println(gamma)
 	else
@@ -239,8 +243,10 @@ function disk_system(freq::AbstractArray;
         #println(gamma)
         for i in collect(1:num_disk)
             # Disk i+1
+            # display(axion_out)
             gamma = transform_surface(freq, gamma; axion_out = axion_out, eps_i = eps_2_tr, eps_m = eps_1, l = disk_thickness, kwargs...)
             # Air i+2
+            # display(axion_out)
             gamma = transform_surface(freq, gamma; axion_out = axion_out, eps_i = eps_1, eps_m = eps_2_tr, l = spacings[i+1], kwargs...)
         end
 		#println("gamma is: ")

@@ -1,6 +1,6 @@
 
 
-To-Do-List (27.09.24):
+To-Do-List (21.10.24):
 Package:
 [t] implement missing unstuckinators
 [ ] fix analyse functions
@@ -9,13 +9,13 @@ Package:
 [ ] add spacings folder with "search" function to examples
 
 Computation:
-[ ] move repo to rwth gitlab
+[ ] move repo to rwth (or desy?) gitlab
 [t] frequency shift, optimization from optimized state
-- direct re-optimization
-- sophisticated linesearch beforehand, then re-optimization
+[ ] direct re-optimization
+[t] sophisticated linesearch beforehand, then re-optimization
 [ ] synchronize movement to measurement
 [ ] 3d tests
-[ ] loss tests?
+[x] loss tests?
 [t] lossy reflectivity objective function: normalize to account for unknown loss
 [t] group delay
 
@@ -27,9 +27,14 @@ Analysis:
 
 Literature:
 [ ] Jacob Master Thesis (reflectivity spectrum mainly)
-
+[ ] git tutorials
 
 [ ] add antenna mismatch (different eps in antenna layer (10%) -> move antenna far away from discs)
+[ ] use davids ana1d code? incorporate effective loss in tand
+[ ] check optimized boost dependency on tand
+[ ] try to optimize broadband (two peaks) for 6 or less discs
+[ ] optimize for reflectivity from higher peak config -> try to optimize for specific peak number
+
 
 Main:
 [x] show redundancy in optimized states
