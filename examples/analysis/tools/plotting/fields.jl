@@ -6,7 +6,7 @@ function showFields(pos::Vector{Float64}, frequency::Float64, freqsplot=nothing;
     R::Float64=0.1, eps::Float64=24.0, tand::Float64=0.0, thickness::Float64=1e-3,
     obj::Float64=Inf64)
 
-    ndisk = 20#length(pos)
+    ndisk = length(pos)
 
     eps_ = ComplexF64[!iseven(i) ? 1 : eps for i in 1:2*ndisk+1]
     prepend!(eps_, NaN)
