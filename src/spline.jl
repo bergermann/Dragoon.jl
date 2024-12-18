@@ -1,4 +1,5 @@
 
+using Plots
 using LinearAlgebra
 
 function eval_polynomial(x::Number,coeffs::AbstractVector)
@@ -26,6 +27,7 @@ end
 
 function cSpline(x,y; b=[1,0,0,1],c=[0,0])
     @assert length(x) == length(y) "x and y need same lengths."
+    @assert length(x) > 1 "Need at least 2 knots."
 
     h = x[2]-x[1]
     n = length(x)-1
@@ -38,7 +40,9 @@ function cSpline(x,y; b=[1,0,0,1],c=[0,0])
 
     A2 = Tridiagonal(dl, d, du); A2_ = inv(A2)
 
-    D = zeros(Float64,n); D[1] = c[1]-y[1]; D[end] = c[2]-y[end]
+    D = zeros(Float64,n);
+    D[1] = -c[1]-y[1];     D[2] = y[1]
+    D[end] = -c[2]-y[end]; D[end-1] = y[end]
 
     for i in 2:n-1
         D[i-1] += y[i]
@@ -49,8 +53,12 @@ function cSpline(x,y; b=[1,0,0,1],c=[0,0])
     D .*= 3/h
 
     A[:,3] = A2_*D
-    @. A[1:end-1,4] = A[2:end,3]-A[1:end-1,3]
+    @. A[1:end-1,4] = (A[2:end,3]-A[1:end-1,3])/3h; A[end,4] = -A[end,3]/3h
     @. A[:,2] = (y[2:end]-y[1:end-1])/h + A[:,3]*h + A[:,4]*h^2
+
+    display(A2)
+    display(D)
+    display(A)
 
     return Spline(3,x,A)
 end
@@ -87,16 +95,22 @@ function spline(spline::Spline,x::Real)
 end
 
 
-x = collect(0:10)
-y = rand(length(x))
+x = collect(0:6)
+# y = rand(length(x))
+# y = ones(length(x))
+y = collect(0:6)
 
-S = cSpline(x,y)
+S = cSpline(x,y; b=[1,0,0,1],c=[1,1])
+
+0
 
 spline(S,4)
 y[5]
 
-x_ = collect(0:0.01:10)
+x_ = collect(0:0.01:6)
 S_ = [spline(S,x_[i]) for i in eachindex(x_)]
 
 scatter(x,y)
 plot!(x_,S_)
+
+
