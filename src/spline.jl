@@ -1,12 +1,19 @@
 
-using Plots
-using LinearAlgebra
-
 function eval_polynomial(x::Number,coeffs::AbstractVector)
     p = 0
 
-    for i in eachindex(coeffs)
+    @inbounds @simd for i in eachindex(coeffs)
         p += coeffs[i]*x^(i-1)
+    end
+
+    return p
+end
+
+function eval_polynomial(x::Vector{<:Number},coeffs::AbstractVector)
+    p = zeros(Float64,length(x))
+
+    @inbounds @simd for i in eachindex(coeffs)
+        @. p += coeffs[i]*x^(i-1)
     end
 
     return p
@@ -72,7 +79,7 @@ function differentiate(spline::Spline)
         return Spline(0,spline.knots,zeros(size(spline.coeffs)))
     end
 
-    coeffs = Matrix{undef,size(spline.coeffs,1),spline.order}
+    coeffs = Matrix{Float64}(undef,size(spline.coeffs,1),spline.order)
 
     for i in 1:spline.order
         coeffs[:,i] = i*spline.coeffs[:,i+1]
@@ -83,33 +90,57 @@ end
 
 const diff = differentiate
 
-function spline(spline::Spline,x::Real)
-    @assert spline.knots[1] <= x <= spline.knots[end] "x needs to be within spline bounds."
-
-    idx = min(findlast(y->y<=x,spline.knots),length(spline.knots)-1)
-
-    return eval_polynomial(x-spline.knots[idx],spline.coeffs[idx,:])
+function differentiate(spline::Spline,order::Int)
+    for _ in 1:order; spline = differentiate(spline); end; return spline
 end
 
+function spline(spline::Spline,x::Real)
+    idx1 = findlast(y->y<=x,spline.knots)
+    if isnothing(idx1); idx1 = 1; end
+    idx2 = min(idx1,length(spline.knots)-1)
 
-x = collect(0:10)
-y = rand(length(x))
-# y = ones(length(x))
-# y = collect(0:6)
-# y = collect(6:-1:0)
-# y = sin.(x*pi/4)
+    return eval_polynomial(x-spline.knots[idx1],spline.coeffs[idx2,:])
+end
 
-S = cSpline(x,y; b=[1,0,0,1],c=[0,0])
+function spline(spline::Spline,x::Vector{<:Real})
+    if x[end] <= spline.knots[2]
+        return eval_polynomial(x.-spline.knots[1],spline.coeffs[1,:])
+    elseif x[1] >= spline.knots[end-1]
+        return eval_polynomial(x.-spline.knots[end-1],spline.coeffs[end,:])
+    end
+    
+    s = zeros(length(x))
+    
+    idx0 = findlast(y->y<=x[1],spline.knots)
+    if isnothing(idx0); idx0 = 1; end
 
-0
+    idx1 = 1
+    if idx0 < length(spline.knots)
+        idx2 = findnext(y->y>=spline.knots[idx0+1],x,idx1+1)
+        if isnothing(idx2); idx2 = length(x)+1; end
+        idx2 -= 1
+    else
+        idx2 = length(x)
+    end
+    
+    s[idx1:idx2] .= eval_polynomial(x[idx1:idx2].-spline.knots[idx0],
+        spline.coeffs[idx0,:])
 
-spline(S,4)
-y[5]
+    while idx2 < length(x)
+        idx0 += 1
+        idx1 = idx2+1
+        if idx0 < length(spline.knots)-1
+            idx2 = findnext(y->y>=spline.knots[idx0+1],x,idx1+1)
+            if isnothing(idx2); idx2 = length(x)+1; end
+            idx2 -= 1
+        else
+            idx2 = length(x)
+        end
+        idx0 = min(idx0,length(spline.knots)-1)
+        
+        s[idx1:idx2] .= eval_polynomial(x[idx1:idx2].-spline.knots[idx0],
+            spline.coeffs[idx0,:])
+    end
 
-x_ = collect(x[1]:0.01:x[end])
-S_ = [spline(S,x_[i]) for i in eachindex(x_)]
-
-scatter(x,y)
-plot!(x_,S_)
-
-
+    return s
+end

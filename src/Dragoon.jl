@@ -36,6 +36,7 @@ include("unstuckinators.jl")
 include("Analytical1D.jl")
 include("transfer_matrix.jl")
 include("general_utilities.jl")
+include("spline.jl")
 
 # Linesearch options
 include("linesearch/optimizer.jl")
