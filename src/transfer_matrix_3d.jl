@@ -124,6 +124,21 @@ function propagate!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Numb
     return
 end
 
+function propagateL!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Number)
+    fft!(E0)
+    @. E0 *= cis(sqrt(k0^2-coords.kR)*dz)
+    ifft!(E0)
+
+    return
+end
+
+function propagateL!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Number)
+    fft!(E0)
+    @. E0 *= cis(-conj(sqrt(k0^2-coords.kR))*dz)
+    ifft!(E0)
+
+    return
+end
 
 
 coords = Coordinates(1,0.001; diskR=0.15);
@@ -134,21 +149,32 @@ E0 .*= coords.diskmaskin
 
 heatmap(coords.X,coords.X,abs2.(E0))
 
-@time propagate!(E0,coords,1e-2,k0)
 
 const c0 = 299792458.
 f = 20e9; ω = 2π*f; λ = c0/f
 eps = complex(1)
 k0 = 2π*f/c0*sqrt(eps)
 
-for i in 1:10
-    E1 = copy(E0)
-    propagate!(E1,coords,i*1e-2,k0)
-    display(heatmap(coords.X,coords.X,abs2.(E1)))
-end
+@time propagate!(E0,coords,1e-2,k0)
+
+# for i in 1:10
+#     E1 = copy(E0)
+#     propagate!(E1,coords,i*1e-2,k0)
+#     display(heatmap(coords.X,coords.X,abs2.(E1)))
+# end
 
 heatmap(coords.X,coords.X,abs2.(E0))
 
+
+
+E0 = ones(ComplexF64,axes(coords.R));
+E0 .*= coords.diskmaskin
+
+@time propagateL!(E0,coords,1e-2,k0)
+
+heatmap(coords.X,coords.X,abs2.(E0))
+E1 = copy(E0);
+E2 = copy(E0);
 
 
 
@@ -157,12 +183,12 @@ heatmap(coords.X,coords.X,abs2.(E0))
 m = Modes(1,0,coords; diskR=0.15);
 
 
+@. k0^2-coords.kR
 
 
 
 
-
-# using BoostFractor
+using BoostFractor
 
 coords_ = SeedCoordinateSystem(; X=-0.5:0.001:0.5,Y=-0.5:0.001:0.5)
 
@@ -172,7 +198,7 @@ E0_ .*= [abs(x^2 + y^2) <= 0.15^2 for x in coords_.X, y in coords_.Y];
 
 heatmap(coords_.X,coords_.Y,abs2.(E0_))
 
-@time E1_ = propagatorNoTilts(E0_,1e-1,0.15,eps,0,0,0,λ,coords_)
+@time E1_ = propagatorNoTilts(E0_,1e-1,0.15,eps,0,0,0,λ,coords_);
 
 heatmap(coords_.X,coords_.Y,abs2.(E1_))
 
@@ -203,12 +229,3 @@ function propagatorNoTilts(E0, dz, diskR, eps, tilt_x, tilt_y, surface, lambda, 
 end
 
 
-
-
-n_points = 50;
-x_max = 0.5;
-dx = 2 * x_max / n_points;
-k_max = pi / dx;
-dk = k_max / n_points * 2;
-
-Vk = dk*(-n_points:n_points)
