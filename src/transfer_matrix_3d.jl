@@ -5,6 +5,7 @@ using SpecialFunctions, FunctionZeros
 using OffsetArrays: OffsetArray, OffsetMatrix, Origin
 using Plots
 
+const c0 = 299792458.
 
 
 function kSpace(X)
@@ -22,6 +23,7 @@ struct Coordinates
     kR::Matrix{Float64}
     Φ::Matrix{Float64}
 
+    diskR::Float64
     diskmaskin::BitMatrix
     diskmaskout::BitMatrix
 
@@ -35,6 +37,7 @@ struct Coordinates
         new(X,kX,R,
             [kx^2+ky^2 for kx in kX, ky in kX],
             [atan(y,x) for  x in  X,  y in  X],
+            diskR,
             m,.!m
         )
     end
@@ -52,7 +55,8 @@ struct Coordinates
         new(X,kX,R,
             [kx^2+ky^2 for kx in kX, ky in kX],
             [atan(y,x) for  x in  X,  y in  X],
-                m,.!m
+            diskR,
+            m,.!m
         )
     end
 end
@@ -97,17 +101,25 @@ mutable struct Modes
 end
 
 function setMasks(coords::Coordinates,diskR::Real)
+    coords.diskR = diskR
     coords.diskmaskin = coords.R .<= diskR
     coords.diskmaskout = .!coords.maskin
 
     return
 end
 
-function mode(m::Integer,l::Integer,coords::Coordinates; diskR::Real=0.15)
+function setMasks(coords::Coordinates,diskR::Real)
+    coords.diskmaskin = coords.R .<= coords.diskR
+    coords.diskmaskout = .!coords.maskin
+
+    return
+end
+
+function mode(m::Integer,l::Integer,coords::Coordinates)
     kr = besselj_zero(l,m)/diskR
 
     pattern = @. besselj(l,kr*coords.R)*cis(-l*coords.Φ)
-    pattern[coords.R .> diskR] .= 0.
+    pattern[coords.R .> coords.diskR] .= 0.
     pattern ./= sqrt(sum(abs2.(pattern)))
     pattern = reshape(pattern,(size(pattern)...,1))
 
@@ -116,15 +128,15 @@ end
 
 
 
+# function propagate!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Number)
+#     fft!(E0)
+#     @. E0 *= cis(-coords.kR*dz/2k0)
+#     ifft!(E0)
+
+#     return
+# end
+
 function propagate!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Number)
-    fft!(E0)
-    @. E0 *= cis(-coords.kR*dz/2k0)
-    ifft!(E0)
-
-    return
-end
-
-function propagateL!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Number)
     fft!(E0)
     @. E0 *= cis(sqrt(k0^2-coords.kR)*dz)
     ifft!(E0)
@@ -132,100 +144,42 @@ function propagateL!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Num
     return
 end
 
-function propagateL!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Number)
-    fft!(E0)
-    @. E0 *= cis(-conj(sqrt(k0^2-coords.kR))*dz)
-    ifft!(E0)
+# function propagateL!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Number)
+#     fft!(E0)
+#     @. E0 *= cis(-conj(sqrt(k0^2-coords.kR))*dz)
+#     ifft!(E0)
 
-    return
-end
-
-
-coords = Coordinates(1,0.001; diskR=0.15);
+#     return
+# end
 
 
-E0 = ones(ComplexF64,axes(coords.R));
-E0 .*= coords.diskmaskin
-
-heatmap(coords.X,coords.X,abs2.(E0))
-
-
-const c0 = 299792458.
 f = 20e9; ω = 2π*f; λ = c0/f
 eps = complex(1)
 k0 = 2π*f/c0*sqrt(eps)
 
-@time propagate!(E0,coords,1e-2,k0)
-
-# for i in 1:10
-#     E1 = copy(E0)
-#     propagate!(E1,coords,i*1e-2,k0)
-#     display(heatmap(coords.X,coords.X,abs2.(E1)))
-# end
-
-heatmap(coords.X,coords.X,abs2.(E0))
-
+coords = Coordinates(1,λ/2; diskR=0.15)
 
 
 E0 = ones(ComplexF64,axes(coords.R));
-E0 .*= coords.diskmaskin
-
-@time propagateL!(E0,coords,1e-2,k0)
+E0 .*= coords.diskmaskin;
+# EL = copy(E0);
 
 heatmap(coords.X,coords.X,abs2.(E0))
-E1 = copy(E0);
-E2 = copy(E0);
+
+
+propagate!(E0,coords,1e-2,k0)
+# propagateL!(EL,coords,1e-2,k0)
 
 
 
+heatmap(coords.X,coords.X,abs2.(E0))
+# heatmap(coords.X,coords.X,abs2.(EL))
 
-
-m = Modes(1,0,coords; diskR=0.15);
-
-
-@. k0^2-coords.kR
-
-
-
-
-using BoostFractor
-
-coords_ = SeedCoordinateSystem(; X=-0.5:0.001:0.5,Y=-0.5:0.001:0.5)
-
-E0_ = ones(ComplexF64,length(coords_.X),length(coords_.Y));
-E0_ .*= [abs(x^2 + y^2) <= 0.15^2 for x in coords_.X, y in coords_.Y];
-
-
-heatmap(coords_.X,coords_.Y,abs2.(E0_))
-
-@time E1_ = propagatorNoTilts(E0_,1e-1,0.15,eps,0,0,0,λ,coords_);
-
-heatmap(coords_.X,coords_.Y,abs2.(E1_))
+heatmap(coords.X,coords.X,angle.(E0))
+# heatmap(coords.X,coords.X,angle.(EL))
+# heatmap(coords.X,coords.X,-angle.(EL))
 
 
 
-function propagatorNoTilts(E0, dz, diskR, eps, tilt_x, tilt_y, surface, lambda, coords::CoordinateSystem)
-    # Diffract at the Disk. Only the disk is diffracting.
-    E0 .*= [abs(x^2 + y^2) <= diskR^2 for x in coords.X, y in coords.Y]
-    # FFT the E-Field to spatial frequencies
-    # fft! and ifft! in the current release (1.2.2) only work with type ComplexF32 and ComplexF64
-    # fft and ifft seem more stable
-    fft!(E0)
-    E0 = fftshift(E0)
-
-    # TODO: If maximum k is higher than k0, then it is not defined
-    #       what happens with this mode
-    #       We should give a warning and handle this here
-    #       At the moment the script will just also propagate with a loss for those components
-    # Propagate through space
-    k0 = 2*pi/lambda*sqrt(eps)
-    k_prop = [conj(sqrt(k0^2 - Kx^2 - Ky^2)) for Kx in coords.kX, Ky in coords.kY]
-
-    E0 = E0 .* exp.(-1im*k_prop*dz)
-    # Backtransform
-    E0 = ifftshift(E0)
-    ifft!(E0)
-    return E0
-end
 
 

@@ -190,19 +190,19 @@ end
 """
     findpeak1d(frequency::Real,ndisk::Int;
         eps::Real=24.,tand::Real=0.,thickness::Real=1e-3,
-        granularity::Int=1000,deviation::Real=0.1)
+        granularity::Int=1000,deviation::Real=0.1,scale::Real=1.)
     
 Return the best found spacing using analytical1d that maximizes the boost value at the
 given `frequency` for `n` equidistant discs. Search for `granularity` steps between
-`(1-deviation)*λ`, `(1+deviation)*λ`.
+`(1-deviation)*scale*λ/2`, `(1+deviation)*scale*λ/2`.
 """
 function findpeak1d(frequency::Real,ndisk::Int;
         eps::Real=24.,tand::Real=0.,thickness::Real=1e-3,
-        granularity::Int=1000,deviation::Real=0.1)
+        granularity::Int=1000,deviation::Real=0.1,scale::Real=1.)
 
     λ = 299792458.0/frequency
     B = zeros(granularity)
-    D = range(1-deviation; stop=1+deviation,length=granularity)*λ/2
+    D = range(1-deviation; stop=1+deviation,length=granularity)*scale*λ/2
 
     for i in eachindex(D)
         B[i] = boost1d(ones(ndisk)*D[i],[frequency];
