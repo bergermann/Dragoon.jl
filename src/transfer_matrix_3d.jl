@@ -93,7 +93,7 @@ mutable struct Modes
         display(typeof(kt))
         
         for m in 1:M, l in -L:L
-            kt[m,l], patterns[m,l,:,:,:] = mode(m,l,coords; diskR=diskR)
+            kt[m,l], patterns[m,l,:,:,:] = mode(m,l,coords)
         end
 
         return Modes(M,L,patterns,kt)
