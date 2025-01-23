@@ -9,7 +9,7 @@ const c0 = 299792458.
 
 
 function kSpace(X)
-    @assert X[1] == -X[end] "Coords need to be symmetric around 0."
+    @assert X == -reverse(X) "Coordinates need to be symmetric around 0."
 
     k_max = π*length(X)/maximum(X)
 
@@ -27,7 +27,7 @@ struct Coordinates
     diskmaskin::BitMatrix
     diskmaskout::BitMatrix
 
-    function Coordinates(X::AbstractVector=-0.5:0.01:0.5; diskR::Real=0.)
+    function Coordinates(X::AbstractVector=-0.5:0.01:0.5; diskR::Real=0.15)
         @assert X == -reverse(X) "Coordinates must be symmetrical around 0."
 
         kX = kSpace(X)
@@ -42,7 +42,7 @@ struct Coordinates
         )
     end
 
-    function Coordinates(xsize::Real,dx::Real; diskR::Real=0.)
+    function Coordinates(xsize::Real,dx::Real; diskR::Real=0.15)
         @assert xsize*dx > 0 "Inputs must be larger than 0."
     
         nx = ceil(xsize/2dx);
@@ -81,7 +81,7 @@ mutable struct Modes
         new(M,L,patterns,kt,id,z)
     end
 
-    function Modes(M,L,coords; diskR=0.15)
+    function Modes(M,L,coords)
         @assert M > 0 "m needs to be larger than 0."
 
         L_ = 2L+1
@@ -108,7 +108,7 @@ function setMasks(coords::Coordinates,diskR::Real)
     return
 end
 
-function setMasks(coords::Coordinates,diskR::Real)
+function setMasks(coords::Coordinates)
     coords.diskmaskin = coords.R .<= coords.diskR
     coords.diskmaskout = .!coords.maskin
 

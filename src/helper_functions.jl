@@ -200,7 +200,7 @@ function setTimes!(booster::Booster,reset::Bool)
     if hasproperty(booster, :startingtime) && reset
         t0 = DateTime(0)
 
-        showtrace && println("Resetting starting time.")
+        # showtrace && println("Resetting starting time.")
 
         booster.startingtime = unow()
         booster.timestamp = unow()
