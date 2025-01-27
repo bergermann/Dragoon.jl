@@ -138,7 +138,7 @@ end
 
 function propagate!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Number)
     fft!(E0)
-    @. E0 *= cis(sqrt(k0^2-coords.kR)*dz)
+    @. @views E0 *= cis(sqrt(k0^2-coords.kR)*dz)
     ifft!(E0)
 
     return

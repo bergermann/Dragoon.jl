@@ -56,3 +56,5 @@ DESY Motors - Constellations:
     - precise in relative measurements, not precise in initial measurement
 - collision avoidance? motor failure? failsafe?
 - move single motor at once (likely)
+
+collect information about control system of booster for hamburg collab meeting
