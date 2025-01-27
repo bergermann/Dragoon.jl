@@ -1,6 +1,6 @@
 
 
-To-Do-List (21.10.24):
+To-Do-List (27.01.24):
 Package:
 [t] implement missing unstuckinators
 [t] fix analyse functions
@@ -15,15 +15,12 @@ Computation:
 [t] sophisticated linesearch beforehand, then re-optimization
 [ ] synchronize movement to measurement
 [ ] 3d tests
-[x] loss tests?
 [t] lossy reflectivity objective function: normalize to account for unknown loss
 [t] group delay
 
 Analysis:
-[x] check stability on more samples
 [ ] optimize more from reflectivity
 [ ] check stability on reflectivity
-[x] check stability with loss
 
 Literature:
 [ ] Jacob Master Thesis (reflectivity spectrum mainly)
@@ -37,7 +34,6 @@ Literature:
 
 
 Main:
-[x] show redundancy in optimized states
 [ ] write paper i guess
 
 New/Cross features:
