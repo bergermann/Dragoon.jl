@@ -2,10 +2,10 @@
 using LinearAlgebra
 using FFTW: fft, fft!, ifft, ifft!, fftshift, fftshift!, ifftshift, ifftshift!
 using SpecialFunctions, FunctionZeros
-using OffsetArrays: OffsetArray, OffsetMatrix, Origin
+using OffsetArrays: OffsetArray, OffsetMatrix, Origin, no_offset_view
 using Plots
 
-const OM = OffsetMatrix; OA = OffsetArray; O = Origin
+const OM = OffsetMatrix; const OA = OffsetArray; const O = Origin; const raw = no_offset_view
 
 const c0 = 299792458.
 
@@ -63,6 +63,21 @@ struct Coordinates
     end
 end
 
+function setMasks(coords::Coordinates,diskR::Real)
+    coords.diskR = diskR
+    coords.diskmaskin = coords.R .<= diskR
+    coords.diskmaskout = .!coords.maskin
+
+    return
+end
+
+function setMasks(coords::Coordinates)
+    coords.diskmaskin = coords.R .<= coords.diskR
+    coords.diskmaskout = .!coords.maskin
+
+    return
+end
+
 
 
 mutable struct Modes
@@ -103,22 +118,8 @@ fieldDims(modes::Modes) = size(modes.modes,5)
 
 import Base.getindex, Base.setindex!
 Base.getindex(m::Modes,inds...) = getindex(m.modes,inds...)
-# Base.setindex(m::Modes,x,inds...) = setindex(m.modes,x,inds...)
+Base.setindex!(m::Modes,x,inds...) = setindex!(m.modes,x,inds...)
 
-function setMasks(coords::Coordinates,diskR::Real)
-    coords.diskR = diskR
-    coords.diskmaskin = coords.R .<= diskR
-    coords.diskmaskout = .!coords.maskin
-
-    return
-end
-
-function setMasks(coords::Coordinates)
-    coords.diskmaskin = coords.R .<= coords.diskR
-    coords.diskmaskout = .!coords.maskin
-
-    return
-end
 
 function mode(m::Integer,l::Integer,coords::Coordinates)
     kr = besselj_zero(l,m)/coords.diskR
@@ -130,6 +131,7 @@ function mode(m::Integer,l::Integer,coords::Coordinates)
 
     return kr, mode
 end
+
 
 
 # function propagate!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Number)
@@ -209,17 +211,92 @@ end
 
 field2modes(E::Array{<:ComplexF64},coords::Coordinates,modes::Modes) = axionModes(coords,modes; B=E)
 
+function showField(E::Array{ComplexF64}; kwargs...)
+    for i in axes(E,3)
+        display(heatmap(abs2.(E[:,:,i])*1e3; right_margin=4Plots.mm,colorbar_title="×1e-3",kwargs...))
+    end
+end
+
+function showField(E::Array{ComplexF64},coords::Coordinates; kwargs...)
+    for i in axes(E,3)
+        display(heatmap(coords.X,coords.X,abs2.(E[:,:,i])*1e3; right_margin=4Plots.mm,colorbar_title="×1e-3",kwargs...))
+    end
+end
+
 ax = axionModes(coords,m)
 E = modes2field(ax,coords,m)
 
+showField(E0,coords)
+showField(E,coords)
 heatmap(abs2.(E[:,:,1]))
 
 
 coeffs = field2modes(E0,coords,m)
 heatmap(abs2.(modes2field(coeffs,coords,m)[:,:,1]))
 
-function showField(E::Array{ComplexF64})
-    for i in axes(E,3)
-        heatmap(abs2.(E[:,:,i]))
-    end
+
+for i in 1:3, j in -3:3
+    showField(raw(m.modes[i,j,:,:,1]),coords; title="M=$i, L=$j")
 end
+
+
+
+
+
+
+function propagation_matrix(dz, diskR, eps, tilt_x, tilt_y, surface, lambda, coords::CoordinateSystem, modes::Modes; is_air=(real(eps)==1), onlydiagonal=false, prop=propagator)
+    matching_matrix = Array{Complex{Float64}}(zeros(modes.M*(2modes.L+1),modes.M*(2modes.L+1)))
+
+    k0 = 2pi/lambda*sqrt(eps)
+
+    # Define the propagation function
+    propfunc = nothing # initialize
+    if is_air
+        # In air use the propagator we get
+        function propagate(x)
+            return prop(copy(x), dz, diskR, eps, tilt_x, tilt_y, surface, lambda, coords)
+        end
+        propfunc = propagate
+    else
+        # In the disk the modes are eigenmodes, so we only have to apply the
+        # inaccuracies and can apply the propagation later separately
+        propfunc(efields) = efields.*[exp(-1im*k0*tilt_x*x) * exp(-1im*k0*tilt_y*y) for x in coords.X, y in coords.Y].*exp.(-1im*k0*surface)
+        # Applying exp element-wise to the surface is very important otherwise it is e^M with M matrix
+    end
+
+    # Calculate the mixing matrix
+    for m_prime in 1:modes.M, l_prime in -modes.L:modes.L
+        # Propagated fields of mode (m_prime, l_prime)
+        for i in 1:e_field_dimensions(modes)
+            # If 3D E-field, fields propagate separately. For interaction need to implement in propagator.
+            propagated = propfunc(modes.mode_patterns[m_prime,l_prime+modes.L+1,:,:,i])
+
+            for m in (onlydiagonal ? [m_prime] : 1:modes.M), l in (onlydiagonal ? [l_prime] : -modes.L:modes.L)
+                # P_ml^m'l' = <E_ml | E^p_m'l' > = ∫ dA \bm{E}_ml^* ⋅ \bm{E}^p_m'l' = ∑_{j = x,y,z} ∫ dA ({E}_j)_ml^* ⋅ ({E}_j)^p_m'l'
+                # 6.15 in Knirck
+                matching_matrix[(m-1)*(2modes.L+1)+l+modes.L+1, (m_prime-1)*(2modes.L+1)+l_prime+modes.L+1] +=
+                        sum( conj.(modes.mode_patterns[m,l+modes.L+1,:,:,i]) .* propagated ) #*dx*dy
+
+                #v = 1-abs2.(matching_matrix[(m-1)*(2L+1)+l+L+1, (m_prime-1)*(2L+1)+l_prime+L+1])
+            end
+        end
+    end
+
+    if !is_air
+        propagation_matrix = Array{Complex{Float64}}(zeros(modes.M*(2modes.L+1),modes.M*(2modes.L+1)))
+        #The propagation within the disk is still missing
+        for m in 1:modes.M, l in -modes.L:modes.L
+            kz = sqrt(k0^2 - modes.mode_kt[m,l+modes.L+1]^2)
+            propagation_matrix[(m-1)*(2modes.L+1)+l+modes.L+1, (m-1)*(2modes.L+1)+l+modes.L+1] = exp(-1im*kz*dz)
+        end
+        # It is important to note the multiplication from the left
+        matching_matrix = propagation_matrix*matching_matrix
+    end
+
+    return matching_matrix
+
+    # TODO: This only takes surface roughness at the end of the propagation into account, not at its
+    # start. General problem in all the codes so far.
+end
+
+
