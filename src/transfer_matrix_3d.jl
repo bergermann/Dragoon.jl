@@ -165,66 +165,75 @@ E0 .*= coords.diskmaskin;
 
 
 
+function modeDecomp(E::Union{Matrix{ComplexF64},Array{ComplexF64,3}},modes::Modes;)
+    @assert size(E,1) == size(E,2) == size(modes,3) "Grids of fiel and modes don't match."
+    @assert size(E,3) == size(modes,5) "Dimensionality of field and modes don't match."
 
+    N = sqrt(sum(abs2.(E)))
 
-function axionModes(coords::Coordinates,modes::Modes; B=nothing,velocity_x::Real=0,f::Real=20e9)
-    if isnothing(B)
-        d = fieldDims(modes)
-        B = zeros(ComplexF64,length(coords.X),length(coords.X),d)
-        B[:,:,1+Int(d==3)] .= 1
+    coeffs = O(1,-modes.L)(zeros(ComplexF64,modes.M,2modes.L+1))
+    for m in 1:modes.M, l in -modes.L:modes.L
+        coeffs[m,l] = sum(@. conj(modes.modes[m,l,:,:,:])*E)/N
     end
 
-    # Inaccuracies of the emitted fields: BField and Velocity Effects ###################
+    return coeffs
+end
+
+const modeDecomposition = const decomp = const field2modes = modeDecomp
+
+
+
+function axionModes(coords::Coordinates,modes::Modes; velocity_x::Real=0,f::Real=20e9)
+    d = fieldDims(modes)
+    Ea = zeros(ComplexF64,length(coords.X),length(coords.X),d)
+    Ea[:,:,1+Int(d==3)] .= 1; Ea .*= coords.diskmaskin
+
+    # Inaccuracies of the emitted fields: BField and Velocity Effects
     if velocity_x != 0
-        B = Array{Complex{Float64}}(B)
         k_a = 2π*f/c0 # k = 2pi/lambda (c/f = lambda)
 
         for (i,x) in enumerate(coords.X)
-            B[i,:,:] .*= cis(k_a*x*velocity_x)
+            Ea[i,:,:] .*= cis(k_a*x*velocity_x)
         end
     end
 
-    # Only the axion-induced field on the disks matters:
-    B .*= coords.diskmaskin
-
-    # Note: in all the normalizations the dx factors are dropped, since they should drop out in the final
-    #       integrals
-    B ./= sqrt(sum(abs2.(B)))
-
-    modes_ = O(1,-modes.L)(zeros(ComplexF64,modes.M,2modes.L+1))
-    for m in 1:modes.M, l in -modes.L:modes.L
-        modes_[m,l] = sum(@. B*conj(modes.modes[m,l,:,:,:]))
-    end
-
-    return modes_
+    return modeDecomp(Ea,modes)
 end
 
-function modes2field(mode_coeffs::OM{ComplexF64,Matrix{ComplexF64}},coords::Coordinates,modes::Modes)
-    field = zeros(Complex{Float64},length(coords.X),length(coords.X),fieldDims(modes))
+function modes2field(coeffs::OM{ComplexF64,Matrix{ComplexF64}},modes::Modes)
+    @assert all(size(coeffs) < size(modes)[1:2]) "More coefficients than modes available."
+
+    field = zeros(Complex{Float64},size(modes,3),size(modes,4),size(modes,5))
 
     for m in 1:modes.M, l in -modes.L:modes.L
-         @. field += mode_coeffs[m,l]*modes.modes[m,l,:,:,:]
+         @. field += coeffs[m,l]*modes.modes[m,l,:,:,:]
     end
 
     return field
 end
 
-field2modes(E::Array{<:ComplexF64},coords::Coordinates,modes::Modes) = axionModes(coords,modes; B=E)
+
 
 function showField(E::Array{ComplexF64}; kwargs...)
-    for i in axes(E,3)
-        display(heatmap(abs2.(E[:,:,i])*1e3; right_margin=4Plots.mm,colorbar_title="×1e-3",kwargs...))
-    end
+    for i in axes(E,3); display(heatmap(abs.(E[:,:,i]); right_margin=4Plots.mm,kwargs...)); end
 end
 
 function showField(E::Array{ComplexF64},coords::Coordinates; kwargs...)
-    for i in axes(E,3)
-        display(heatmap(coords.X,coords.X,abs2.(E[:,:,i])*1e3; right_margin=4Plots.mm,colorbar_title="×1e-3",kwargs...))
-    end
+    for i in axes(E,3); display(heatmap(coords.X,coords.X,abs.(E[:,:,i]); right_margin=4Plots.mm,kwargs...)); end
+end
+
+function showCross(E::Array{ComplexF64}; kwargs...)
+    n = size(E,1); @assert isodd(n) "Grid for E needs odd edge lengths."; n2 = div(n+1,2)
+    for i in axes(E,3); display(plot(abs.(E[n2,:,i]); kwargs...)); end
+end
+
+function showCross(E::Array{ComplexF64},coords::Coordinates; kwargs...)
+    n = size(E,1); @assert isodd(n) "Grid for E needs odd edge lengths."; n2 = div(n+1,2)
+    for i in axes(E,3); display(plot(coords.X,abs.(E[n2,:,i]); kwargs...)); end
 end
 
 ax = axionModes(coords,m)
-E = modes2field(ax,coords,m)
+E = modes2field(ax,m)
 
 showField(E0,coords)
 showField(E,coords)
