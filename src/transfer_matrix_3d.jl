@@ -241,7 +241,6 @@ heatmap(abs2.(E[:,:,1]))
 
 
 coeffs = field2modes(E0,coords,m)
-heatmap(abs2.(modes2field(coeffs,coords,m)[:,:,1]))
 
 
 for i in 1:3, j in -3:3
