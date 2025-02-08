@@ -6,6 +6,7 @@ using OffsetArrays: OffsetArray, OffsetMatrix, Origin, no_offset_view
 using Plots
 
 const OM = OffsetMatrix; const OA = OffsetArray; const O = Origin; const raw = no_offset_view
+const C64 = ComplexF64
 
 const c0 = 299792458.
 
@@ -83,17 +84,17 @@ end
 mutable struct Modes
     M::Int64
     L::Int64
-    modes::OA{ComplexF64,5,Array{ComplexF64,5}}
-    kt::OM{ComplexF64,Matrix{ComplexF64}}
-    id::Matrix{ComplexF64}
-    zero::Matrix{ComplexF64}
+    modes::OA{C64,5,Array{C64,5}}
+    kt::OM{C64,Matrix{C64}}
+    id::Matrix{C64}
+    zero::Matrix{C64}
 
     function Modes(M,L,modes,kt)                
         @assert M > 0 "m needs to be larger than 0."
 
         s = M*(2L+1)
-        id = Matrix{ComplexF64}(I,s,s)
-        z = zeros(ComplexF64,s,s)
+        id = Matrix{C64}(I,s,s)
+        z = zeros(C64,s,s)
 
         new(M,L,modes,kt,id,z)
     end
@@ -103,8 +104,8 @@ mutable struct Modes
 
         L_ = 2L+1
         modes = O(1,-L,1,1,1)(
-                zeros(ComplexF64,M,L_,length(coords.X),length(coords.X),1))
-        kt = O(1,-L)(zeros(ComplexF64,M,L_))
+                zeros(C64,M,L_,length(coords.X),length(coords.X),1))
+        kt = O(1,-L)(zeros(C64,M,L_))
         
         for m in 1:M, l in -L:L
             kt[m,l], modes[m,l,:,:,:] = mode(m,l,coords)
@@ -118,7 +119,11 @@ fieldDims(modes::Modes) = size(modes.modes,5)
 
 import Base.getindex, Base.setindex!
 Base.getindex(m::Modes,inds...) = getindex(m.modes,inds...)
+Base.getindex(m::Modes,ind1,ind2) = getindex(m.modes,ind1,ind2,:,:)
+Base.getindex(m::Modes,ind1,ind2,ind3) = getindex(m.modes,ind1,ind2,:,:,ind3)
 Base.setindex!(m::Modes,x,inds...) = setindex!(m.modes,x,inds...)
+Base.setindex(m::Modes,ind1,ind2) = setindex(m.modes,ind1,ind2,:,:)
+Base.setindex(m::Modes,ind1,ind2,ind3) = setindex(m.modes,ind1,ind2,:,:,ind3)
 
 
 function mode(m::Integer,l::Integer,coords::Coordinates)
@@ -134,7 +139,7 @@ end
 
 
 
-# function propagate!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Number)
+# function propagate!(E0::Matrix{C64},coords::Coordinates,dz::Real,k0::Number)
 #     fft!(E0)
 #     @. @views E0 *= cis(sqrt(k0^2-coords.kR)*dz)
 #     ifft!(E0)
@@ -142,7 +147,7 @@ end
 #     return
 # end
 
-function propagateL!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Number)
+function propagate!(E0::Matrix{C64},coords::Coordinates,dz::Real,k0::Number)
     fft!(E0)
     @. E0 *= cis(-conj(sqrt(k0^2-coords.kR))*dz)
     ifft!(E0)
@@ -151,27 +156,15 @@ function propagateL!(E0::Matrix{ComplexF64},coords::Coordinates,dz::Real,k0::Num
 end
 
 
-f = 20e9; ω = 2π*f; λ = c0/f
-eps = complex(1)
-k0 = 2π*f/c0*sqrt(eps)
-
-coords = Coordinates(1,λ/2; diskR=0.15);
-m = Modes(3,3,coords);
 
 
-E0 = ones(ComplexF64,axes(coords.R));
-E0 .*= coords.diskmaskin;
-
-
-
-
-function modeDecomp(E::Union{Matrix{ComplexF64},Array{ComplexF64,3}},modes::Modes;)
-    @assert size(E,1) == size(E,2) == size(modes,3) "Grids of fiel and modes don't match."
-    @assert size(E,3) == size(modes,5) "Dimensionality of field and modes don't match."
+function modeDecomp(E::Union{Matrix{C64},Array{C64,3}},modes::Modes;)
+    @assert size(E,1) == size(E,2) == size(modes.modes,3) "Grids of field and modes don't match."
+    @assert size(E,3) == size(modes.modes,5) "Dimensionality of field and modes don't match."
 
     N = sqrt(sum(abs2.(E)))
 
-    coeffs = O(1,-modes.L)(zeros(ComplexF64,modes.M,2modes.L+1))
+    coeffs = O(1,-modes.L)(zeros(C64,modes.M,2modes.L+1))
     for m in 1:modes.M, l in -modes.L:modes.L
         coeffs[m,l] = sum(@. conj(modes.modes[m,l,:,:,:])*E)/N
     end
@@ -185,7 +178,7 @@ const modeDecomposition = const decomp = const field2modes = modeDecomp
 
 function axionModes(coords::Coordinates,modes::Modes; velocity_x::Real=0,f::Real=20e9)
     d = fieldDims(modes)
-    Ea = zeros(ComplexF64,length(coords.X),length(coords.X),d)
+    Ea = zeros(C64,length(coords.X),length(coords.X),d)
     Ea[:,:,1+Int(d==3)] .= 1; Ea .*= coords.diskmaskin
 
     # Inaccuracies of the emitted fields: BField and Velocity Effects
@@ -200,7 +193,7 @@ function axionModes(coords::Coordinates,modes::Modes; velocity_x::Real=0,f::Real
     return modeDecomp(Ea,modes)
 end
 
-function modes2field(coeffs::OM{ComplexF64,Matrix{ComplexF64}},modes::Modes)
+function modes2field(coeffs::OM{C64,Matrix{C64}},modes::Modes)
     @assert all(size(coeffs) < size(modes)[1:2]) "More coefficients than modes available."
 
     field = zeros(Complex{Float64},size(modes,3),size(modes,4),size(modes,5))
@@ -214,23 +207,37 @@ end
 
 
 
-function showField(E::Array{ComplexF64}; kwargs...)
+function showField(E::Array{C64}; kwargs...)
     for i in axes(E,3); display(heatmap(abs.(E[:,:,i]); right_margin=4Plots.mm,kwargs...)); end
 end
 
-function showField(E::Array{ComplexF64},coords::Coordinates; kwargs...)
+function showField(E::Array{C64},coords::Coordinates; kwargs...)
     for i in axes(E,3); display(heatmap(coords.X,coords.X,abs.(E[:,:,i]); right_margin=4Plots.mm,kwargs...)); end
 end
 
-function showCross(E::Array{ComplexF64}; kwargs...)
+function showCross(E::Array{C64}; kwargs...)
     n = size(E,1); @assert isodd(n) "Grid for E needs odd edge lengths."; n2 = div(n+1,2)
     for i in axes(E,3); display(plot(abs.(E[n2,:,i]); kwargs...)); end
 end
 
-function showCross(E::Array{ComplexF64},coords::Coordinates; kwargs...)
+function showCross(E::Array{C64},coords::Coordinates; kwargs...)
     n = size(E,1); @assert isodd(n) "Grid for E needs odd edge lengths."; n2 = div(n+1,2)
     for i in axes(E,3); display(plot(coords.X,abs.(E[n2,:,i]); kwargs...)); end
 end
+
+
+
+f = 20e9; ω = 2π*f; λ = c0/f
+eps = complex(1)
+k0 = 2π*f/c0*sqrt(eps)
+
+coords = Coordinates(1,λ/2; diskR=0.15);
+m = Modes(3,3,coords);
+
+
+E0 = ones(C64,axes(coords.R));
+E0 .*= coords.diskmaskin;
+
 
 ax = axionModes(coords,m)
 E = modes2field(ax,m)
@@ -240,7 +247,7 @@ showField(E,coords)
 heatmap(abs2.(E[:,:,1]))
 
 
-coeffs = field2modes(E0,coords,m)
+coeffs = field2modes(E0,m)
 
 
 for i in 1:3, j in -3:3
@@ -249,8 +256,34 @@ end
 
 
 
+function propagationMatrix(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
+        eps::Number,modes::Modes,coords::Coordinates)
 
+    @assert all(dz .> 0) "All propagated distances dz must be positive."
 
+    P = OA(zeros(C64,length(freqs),length(dz),modes.M,2modes.L+1,modes.M,2modes.L+1),
+        1,1,1,-modes.L,1,-modes.L)
+
+    for i in eachindex(freqs)
+        k0 = 2π*freqs[i]/c0*sqrt(eps)
+
+        for j in eachindex(dz)
+            for m in modes.M, l in -modes.L:modes.L
+                for k in axes(modes.modes,5)
+                    mode_ = copy(raw(modes[m,l,k]))
+                    propagate!(mode_,coords,dz[j],k0)
+                    P[i,j,m,l,:,:] += modeDecomp(mode_,modes)
+                end
+            end
+        end
+    end
+
+    return P
+end
+
+const propMatrix = const propMat = const prop = propagationMatrix
+
+propagationMatrix([λ],[20e9],1.0,m,coords)
 
 function propagation_matrix(dz, diskR, eps, tilt_x, tilt_y, surface, lambda, coords::CoordinateSystem, modes::Modes; is_air=(real(eps)==1), onlydiagonal=false, prop=propagator)
     matching_matrix = Array{Complex{Float64}}(zeros(modes.M*(2modes.L+1),modes.M*(2modes.L+1)))
