@@ -229,35 +229,6 @@ end
 
 
 
-f = 20e9; ω = 2π*f; λ = c0/f
-eps = complex(1)
-k0 = 2π*f/c0*sqrt(eps)
-
-coords = Coordinates(1,λ/2; diskR=0.15);
-m = Modes(3,3,coords);
-
-
-E0 = ones(C64,axes(coords.R));
-E0 .*= coords.diskmaskin;
-
-
-ax = axionModes(coords,m)
-E = modes2field(ax,m)
-
-showField(E0,coords)
-showField(E,coords)
-heatmap(abs2.(E[:,:,1]))
-
-
-coeffs = field2modes(E0,m)
-
-
-for i in 1:3, j in -3:3
-    showField(raw(m.modes[i,j,:,:,1]),coords; title="M=$i, L=$j")
-end
-
-
-
 function propMatFreeSpace(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
         eps::Number,modes::Modes,coords::Coordinates)
 
@@ -321,7 +292,27 @@ end
 
 const propMatrix = const propMat = const prop = propagationMatrix
 
-m = Modes(3,0,coords)
+
+
+f = 20e9; ω = 2π*f; λ = c0/f
+eps = complex(1)
+k0 = 2π*f/c0*sqrt(eps)
+
+coords = Coordinates(1,λ/2; diskR=0.15);
+m = Modes(3,0,coords);
+
+
+E0 = ones(C64,axes(coords.R));
+E0 .*= coords.diskmaskin;
+
+
+ax = axionModes(coords,m)
+E = modes2field(ax,m)
+
+
+coeffs = field2modes(E0,m)
+
+
 
 freqs = collect(range(22e9,22.05e9,11))
 d = collect(range(1e-3,10e-3,10))
