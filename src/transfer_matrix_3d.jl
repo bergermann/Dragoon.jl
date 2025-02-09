@@ -117,14 +117,16 @@ end
 
 fieldDims(modes::Modes) = size(modes.modes,5)
 
-import Base.getindex, Base.setindex!
+import Base.getindex, Base.setindex!, Base.size, Base.axes
 Base.getindex(m::Modes,inds...) = getindex(m.modes,inds...)
 Base.getindex(m::Modes,ind1,ind2) = getindex(m.modes,ind1,ind2,:,:)
 Base.getindex(m::Modes,ind1,ind2,ind3) = getindex(m.modes,ind1,ind2,:,:,ind3)
 Base.setindex!(m::Modes,x,inds...) = setindex!(m.modes,x,inds...)
 Base.setindex(m::Modes,ind1,ind2) = setindex(m.modes,ind1,ind2,:,:)
 Base.setindex(m::Modes,ind1,ind2,ind3) = setindex(m.modes,ind1,ind2,:,:,ind3)
-
+Base.size(m::Modes) = size(m.modes)
+Base.size(m::Modes,d::Integer) = size(m.modes,d)
+Base.axes(m::Modes,d::Integer) = axes(m.modes,d) 
 
 function mode(m::Integer,l::Integer,coords::Coordinates)
     kr = besselj_zero(l,m)/coords.diskR
@@ -159,8 +161,8 @@ end
 
 
 function modeDecomp(E::Union{Matrix{C64},Array{C64,3}},modes::Modes;)
-    @assert size(E,1) == size(E,2) == size(modes.modes,3) "Grids of field and modes don't match."
-    @assert size(E,3) == size(modes.modes,5) "Dimensionality of field and modes don't match."
+    @assert size(E,1) == size(E,2) == size(modes,3) "Grids of field and modes don't match."
+    @assert size(E,3) == size(modes,5) "Dimensionality of field and modes doesn't match."
 
     N = sqrt(sum(abs2.(E)))
 
@@ -194,7 +196,7 @@ function axionModes(coords::Coordinates,modes::Modes; velocity_x::Real=0,f::Real
 end
 
 function modes2field(coeffs::OM{C64,Matrix{C64}},modes::Modes)
-    @assert all(size(coeffs) < size(modes)[1:2]) "More coefficients than modes available."
+    @assert all(size(coeffs) .<= size(modes)[1:2]) "More coefficients than modes available."
 
     field = zeros(Complex{Float64},size(modes,3),size(modes,4),size(modes,5))
 
@@ -256,24 +258,25 @@ end
 
 
 
-function propagationMatrix(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
+function propMatFreeSpace(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
         eps::Number,modes::Modes,coords::Coordinates)
 
     @assert all(dz .> 0) "All propagated distances dz must be positive."
 
-    P = OA(zeros(C64,length(freqs),length(dz),modes.M,2modes.L+1,modes.M,2modes.L+1),
-        1,1,1,-modes.L,1,-modes.L)
+    eps = complex(eps)
+
+    P = O(1,1, 1,-modes.L, 1,-modes.L)(
+        zeros(C64,length(freqs),length(dz), modes.M,2modes.L+1, modes.M,2modes.L+1))
 
     for i in eachindex(freqs)
         k0 = 2π*freqs[i]/c0*sqrt(eps)
 
         for j in eachindex(dz)
-            for m in modes.M, l in -modes.L:modes.L
-                for k in axes(modes.modes,5)
-                    mode_ = copy(raw(modes[m,l,k]))
-                    propagate!(mode_,coords,dz[j],k0)
-                    P[i,j,m,l,:,:] += modeDecomp(mode_,modes)
-                end
+            for m in 1:modes.M, l in -modes.L:modes.L, k in axes(modes,5)
+                mode_ = copy(raw(modes[m,l,k]))
+                propagate!(mode_,coords,dz[j],k0)
+                coeffs_ = modeDecomp(mode_,modes)
+                P[i,j,m,l,:,:] .+= coeffs_
             end
         end
     end
@@ -281,12 +284,63 @@ function propagationMatrix(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Re
     return P
 end
 
+function propMatWaveGuide(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
+        eps::Number,modes::Modes,coords::Coordinates)
+    
+    @assert all(dz .> 0) "All propagated distances dz must be positive."
+
+    eps = complex(eps)
+
+    P = O(1,1, 1,-modes.L, 1,-modes.L)(
+        zeros(C64,length(freqs),length(dz), modes.M,2modes.L+1, modes.M,2modes.L+1))
+
+    for i in eachindex(freqs)
+        k0 = 2π*freqs[i]/c0*sqrt(eps)
+
+        for j in eachindex(dz)
+            for m in 1:modes.M, l in -modes.L:modes.L#, k in axes(modes,5)
+                # add disk tilts and surface here
+                P[i,j,m,l,m,l] .= cis(-k0*dz[i])
+            end
+        end
+    end
+
+    return P
+end
+
+
+function propagationMatrix(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
+        eps::Number,modes::Modes,coords::Coordinates; waveguide::Bool=false)
+
+    if waveguide
+        return propMatWaveGuide(dz,freqs,eps,modes,coords)
+    else
+        return propMatFreeSpace(dz,freqs,eps,modes,coords)
+    end
+end
+
 const propMatrix = const propMat = const prop = propagationMatrix
 
-propagationMatrix([λ],[20e9],1.0,m,coords)
+m = Modes(3,0,coords)
+
+freqs = collect(range(22e9,22.05e9,11))
+d = collect(range(1e-3,10e-3,10))
+@time p = propagationMatrix(d,freqs,1.0,m,coords);
+
+
+include("spline.jl")
+
+
+
+
+
+
+
+
 
 function propagation_matrix(dz, diskR, eps, tilt_x, tilt_y, surface, lambda, coords::CoordinateSystem, modes::Modes; is_air=(real(eps)==1), onlydiagonal=false, prop=propagator)
     matching_matrix = Array{Complex{Float64}}(zeros(modes.M*(2modes.L+1),modes.M*(2modes.L+1)))
+
 
     k0 = 2pi/lambda*sqrt(eps)
 

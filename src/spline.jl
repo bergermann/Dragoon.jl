@@ -19,16 +19,17 @@ function eval_polynomial(x::Vector{<:Number},coeffs::AbstractVector)
     return p
 end
 
-struct Spline
+struct Spline{T}
     order::Int
     knots::Vector{Float64}
-    coeffs::Matrix{Float64}
+    coeffs::Matrix{T}
 
     function Spline(order,knots,coeffs)
         @assert order+1 == size(coeffs,2)
         @assert length(knots) == size(coeffs,1)+1
 
-        new(order,knots,coeffs)
+        T = eltype(coeffs)
+        new{T}(order,knots,coeffs)
     end
 end
 
@@ -59,10 +60,36 @@ function cSpline(x,y; b=[1,0,0,1],c=[0,0])
     @. A[:,2] = (y[2:end]-y[1:end-1])/h - A[:,3]*h - A[:,4]*h^2
     @. A[:,1] =  y[1:end-1]
 
-    display(A2)
-    display(D)
-    display(A)
-    display(A[:,4]-((y[2:end]-y[1:end-1])/h^3-A[:,2]/h^2-A[:,3]/h))
+    return Spline(3,x,A)
+end
+
+function cSpline(x,y::AbstractArray{<:ComplexF64}; b=[1,0,0,1],c=[0,0])
+    @assert length(x) == length(y) "x and y need same lengths."
+    @assert length(x) > 1 "Need at least 2 knots."
+
+    h = x[2]-x[1]
+    n = length(x)
+
+    A = zeros(ComplexF64,n-1,4)
+
+    du = ones(ComplexF64,n-1);   du[1] = b[2]
+    d  = ones(ComplexF64,n)*4;    d[1] = b[1]; d[end] = b[4]
+    dl = ones(ComplexF64,n-1); dl[end] = b[3]
+
+    A2 = Tridiagonal(dl, d, du); A2_ = inv(A2)
+    display(eltype(A2))
+
+    D = zeros(ComplexF64,n);
+    D[1] = c[1]; D[end] = c[2]
+    for i in 2:n-1
+        D[i] = y[i+1]-2y[i]+y[i-1]
+    end
+    D .*= 3/h; a2 = A2_*D
+
+    @. A[:,4] = (a2[2:end]-a2[1:end-1])/3h
+    @. A[:,3] = a2[1:end-1]
+    @. A[:,2] = (y[2:end]-y[1:end-1])/h - A[:,3]*h - A[:,4]*h^2
+    @. A[:,1] =  y[1:end-1]
 
     return Spline(3,x,A)
 end
