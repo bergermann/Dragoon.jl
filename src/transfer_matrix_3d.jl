@@ -5,6 +5,8 @@ using SpecialFunctions, FunctionZeros
 using OffsetArrays: OffsetArray, OffsetMatrix, Origin, no_offset_view
 using Plots
 
+include("spline.jl")
+
 const OM = OffsetMatrix; const OA = OffsetArray; const O = Origin; const raw = no_offset_view
 const C64 = ComplexF64
 
@@ -319,7 +321,39 @@ d = collect(range(1e-3,10e-3,10))
 @time p = propagationMatrix(d,freqs,1.0,m,coords);
 
 
-include("spline.jl")
+
+f_ = 1; m = 3; l = 0; m_ = 1; l_ = 0
+p_ = p[f_,:,m,l,m_,l_]
+s = cSpline(d,p_)
+
+xs = collect(1:0.01:10)*1e-3
+ys = spline(s,xs)
+plot(d/1e-3,[real.(p_),imag.(p_)]; seriestype=:scatter,label=permutedims(["re(data)","im(data)"]),
+    xlabel="d [mm]",title="F: $(freqs[f_]/1e9) GHz, m: $m, l: $l, m': $m_, l': $l_")
+plot!(xs/1e-3,[real.(ys),imag.(ys)]; label=permutedims(["re(spline)","im(spline)"]))
+
+
+
+a = p[1,:,:,0,:,0]
+
+
+
+
+for i in axes(a,1)
+    for m in 1:3, m_ in 1:3
+        if m == m_; continue; end
+        display(abs(a[i,m,m_]-a[i,m_,m]))
+        display(angle(a[i,m,m_])-angle(a[i,m_,m]))
+    end
+end
+
+
+
+
+
+
+
+
 
 
 
