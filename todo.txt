@@ -54,3 +54,30 @@ DESY Motors - Constellations:
 - move single motor at once (likely)
 
 collect information about control system of booster for hamburg collab meeting
+
+motors:
+- kontakt verlieren? stecken bleiben? -> very unlikely -> contingency plan
+    - disk movable mit 2 motoren -> compensate after movement
+
+
+
+- motoren auf schienen -> stromleitungen über schienen nach draußen zu controllern
+    - jede disc = 1 crate mit 3 motor controller -> connected zu disc controller -> connected zu fpga board und interferrometer
+    - jede disc mit 3 interferrometer kanälen
+    - motoren seperat fahrbar (nicht interferrometer gesteuert (würde extra kosten))
+    - discs interferrometer steuerbar -> disccontroller sollte disc alignen (im rahmen der toleranz)
+    - motoren müssen ggf nachjustiert werden, da ggf nicht alle gleichzeitig anhalten (possibly besser cryo?)
+    - einzelnen motor fahren, bewegt andere motoren, schrittweite in cryo ist fix (read up on motor mechanics)
+    - potentiell unterschiedliche geschwindigkeit -> versucht auf gleiche geschwindigkeit zu regeln
+
+    - motoren und interferrometer unabhängig von einander ansteuerbar -> feinjustierung
+
+- interferrormeter -> absolute genauigkeit 1/10 mm, relative genauigkeit < nm
+
+
+# - weitere box die motoren von kabeln trennt
+
+- align discs, then initialise interferrometer to keep track of movements
+    - align discs at room temperature?
+    - abstandshalter zwischen scheiben? alle discs gegeneinander fahren?
+    - optimisation of returned signal? isolate single discs?
