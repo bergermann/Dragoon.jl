@@ -357,6 +357,9 @@ mutable struct GrandPropagationMatrix
     thickness::Float64
     nd::ComplexF64
 
+    M::Int
+    L::Int
+
     PS::OffsetArray{Spline{ComplexF64}, 5, Array{Spline{ComplexF64}, 5}}
 
     # work matrices for transfer_matrix algorithm
@@ -404,7 +407,7 @@ mutable struct GrandPropagationMatrix
 
         W  = MMatrix{2,2,ComplexF64}(undef)
 
-        new(freqs,thickness,nd,ps,Gd,Gv,G0,T,S,S0,M,W )
+        new(freqs,thickness,nd,modes.M,modes.L,ps,Gd,Gv,G0,T,S,S0,M,W )
     end
 end
 
@@ -425,7 +428,7 @@ abstract type Pos  <: Space end
 
 function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::GPM;)::Matrix{ComplexF64}
     l = length(gpm.freqs)
-    RB = Matrix{ComplexF64}(undef,l,2)
+    RB = O(1,1,1,-gpm.L)(Matrix{ComplexF64}(undef,l,2,gpm.M,2gpm.L+1))
 
     T .= gpm.Gd
     M .= gpm.S
@@ -435,33 +438,36 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
 
         pd1 = cispi(-2*f*gpm.nd*gpm.thickness/c0)
         pd2 = cispi(+2*f*gpm.nd*gpm.thickness/c0)
-        
-        # iterate in reverse order to sum up M in single sweep (thx david)
-        for i in Iterators.reverse(eachindex(distances))
-            T[:,1] .*= pd1
-            T[:,2] .*= pd2 # T = Gd*Pd
 
-            mul!(W,T,S); M .-= W    # M = Gd*Pd*S_-1
+        for m in 1:gpm.M, l in -gpm.L:gpm.L
+            
+            # iterate in reverse order to sum up M in single sweep (thx david)
+            for i in Iterators.reverse(eachindex(distances))
+                T[:,1] .*= pd1
+                T[:,2] .*= pd2 # T = Gd*Pd
 
-            mul!(W,T,Gv); T .= W    # T *= Gd*Pd*Gv
+                mul!(W,T,S); M .-= W    # M = Gd*Pd*S_-1
 
-            T[:,1] .*= cispi(-2*f*distances[i]/c0)
-            T[:,2] .*= cispi(+2*f*distances[i]/c0)   # T = Gd*Pd*Gv*Gd*S_-1
+                mul!(W,T,Gv); T .= W    # T *= Gd*Pd*Gv
 
-            if i > 1
-                mul!(W,T,S); M .+= W
-                mul!(W,T,Gd); T .= W
-            else
-                mul!(W,T,S0); M .+= W
-                mul!(W,T,G0); T .= W
+                T[:,1] .*= cispi(-2*f*distances[i]/c0)
+                T[:,2] .*= cispi(+2*f*distances[i]/c0)   # T = Gd*Pd*Gv*Gd*S_-1
+
+                if i > 1
+                    mul!(W,T,S); M .+= W
+                    mul!(W,T,Gd); T .= W
+                else
+                    mul!(W,T,S0); M .+= W
+                    mul!(W,T,G0); T .= W
+                end
             end
-        end
-        
-        RB[j] = T[1,2]/T[2,2]
-        RB[l+j] = M[1,1]+M[1,2]-(M[2,1]+M[2,2])*T[1,2]/T[2,2]
+            
+            RB[j] = T[1,2]/T[2,2]
+            RB[l+j] = M[1,1]+M[1,2]-(M[2,1]+M[2,2])*T[1,2]/T[2,2]
 
-        M .= S
-        T .= 1.0+0.0im; T[1,1] += nd; T[2,2] += nd; T[2,1] -= nd; T[1,2] -= nd; T .*= 0.5
+            M .= S
+            T .= 1.0+0.0im; T[1,1] += nd; T[2,2] += nd; T[2,1] -= nd; T[1,2] -= nd; T .*= 0.5
+        end
     end
 
     return RB
