@@ -3,7 +3,10 @@ using LinearAlgebra
 using FFTW: fft, fft!, ifft, ifft!, fftshift, fftshift!, ifftshift, ifftshift!
 using SpecialFunctions, FunctionZeros
 using OffsetArrays: OffsetArray, OffsetMatrix, Origin, no_offset_view
+using StaticArrays
 using Plots
+
+include("spline.jl")
 
 const OM = OffsetMatrix; const OA = OffsetArray; const O = Origin; const raw = no_offset_view
 const C64 = ComplexF64
@@ -229,41 +232,8 @@ end
 
 
 
-f = 20e9; ω = 2π*f; λ = c0/f
-eps = complex(1)
-k0 = 2π*f/c0*sqrt(eps)
-
-coords = Coordinates(1,λ/2; diskR=0.15);
-m = Modes(3,3,coords);
-
-
-E0 = ones(C64,axes(coords.R));
-E0 .*= coords.diskmaskin;
-
-
-ax = axionModes(coords,m)
-E = modes2field(ax,m)
-
-showField(E0,coords)
-showField(E,coords)
-heatmap(abs2.(E[:,:,1]))
-
-
-coeffs = field2modes(E0,m)
-
-
-for i in 1:3, j in -3:3
-    showField(raw(m.modes[i,j,:,:,1]),coords; title="M=$i, L=$j")
-end
-
-
-
 function propMatFreeSpace(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
         eps::Number,modes::Modes,coords::Coordinates)
-
-    @assert all(dz .> 0) "All propagated distances dz must be positive."
-
-    eps = complex(eps)
 
     P = O(1,1, 1,-modes.L, 1,-modes.L)(
         zeros(C64,length(freqs),length(dz), modes.M,2modes.L+1, modes.M,2modes.L+1))
@@ -286,10 +256,6 @@ end
 
 function propMatWaveGuide(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
         eps::Number,modes::Modes,coords::Coordinates)
-    
-    @assert all(dz .> 0) "All propagated distances dz must be positive."
-
-    eps = complex(eps)
 
     P = O(1,1, 1,-modes.L, 1,-modes.L)(
         zeros(C64,length(freqs),length(dz), modes.M,2modes.L+1, modes.M,2modes.L+1))
@@ -312,6 +278,11 @@ end
 function propagationMatrix(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
         eps::Number,modes::Modes,coords::Coordinates; waveguide::Bool=false)
 
+    @assert all(dz .> 0) "All propagated distances dz must be positive."
+    @assert all(freqs .> 0) "All frequencies freqs must be positive."
+
+    eps = complex(eps)
+
     if waveguide
         return propMatWaveGuide(dz,freqs,eps,modes,coords)
     else
@@ -321,14 +292,189 @@ end
 
 const propMatrix = const propMat = const prop = propagationMatrix
 
-m = Modes(3,0,coords)
+
+
+f = 20e9; ω = 2π*f; λ = c0/f
+eps = complex(1)
+k0 = 2π*f/c0*sqrt(eps)
+
+coords = Coordinates(1,λ/2; diskR=0.15);
+modes = Modes(3,0,coords);
+
+
+E0 = ones(C64,axes(coords.R));
+E0 .*= coords.diskmaskin;
+
+
+ax = axionModes(coords,modes)
+E = modes2field(ax,modes)
+
+
+coeffs = field2modes(E0,modes)
+
+
 
 freqs = collect(range(22e9,22.05e9,11))
 d = collect(range(1e-3,10e-3,10))
-@time p = propagationMatrix(d,freqs,1.0,m,coords);
+@time p = propagationMatrix(d,freqs,1.0,modes,coords);
 
 
-include("spline.jl  ")
+
+# f_ = 1; m = 3; l = 0; m_ = 1; l_ = 0
+# p_ = p[f_,:,m,l,m_,l_]
+# s = cSpline(d,p_)
+
+# xs = collect(1:0.01:10)*1e-3
+# ys = spline(s,xs)
+# plot(d/1e-3,[real.(p_),imag.(p_)]; seriestype=:scatter,label=permutedims(["re(data)","im(data)"]),
+#     xlabel="d [mm]",title="F: $(freqs[f_]/1e9) GHz, m: $m, l: $l, m': $m_, l': $l_")
+# plot!(xs/1e-3,[real.(ys),imag.(ys)]; label=permutedims(["re(spline)","im(spline)"]))
+
+
+
+ps = O(1,1,-modes.L,1,-modes.L)(
+        Array{Spline{C64}}(undef,length(freqs),modes.M,2modes.L+1,modes.M,2modes.L+1))
+
+for f in eachindex(freqs)
+    for m in 1:modes.M, l in -modes.L:modes.L
+        for m_ in 1:modes.M, l_ in -modes.L:modes.L
+            ps[f,m,l,m_,l_] = cSpline(d,p[f,:,m,l,m_,l_])
+        end
+    end
+end
+
+# for i in axes(a,1)
+#     for m in 1:3, m_ in 1:3
+#         if m == m_; continue; end
+#         display(abs(a[i,m,m_]-a[i,m_,m]))
+#         display(angle(a[i,m,m_])-angle(a[i,m_,m]))
+#     end
+# end
+
+
+mutable struct GrandPropagationMatrix
+    freqs::Vector{Float64}
+    thickness::Float64
+    nd::ComplexF64
+
+    M::Int
+    L::Int
+
+    PS::OffsetArray{Spline{ComplexF64}, 5, Array{Spline{ComplexF64}, 5}}
+
+    # work matrices for transfer_matrix algorithm
+    Gd::SMatrix{2,2,ComplexF64}
+    Gv::SMatrix{2,2,ComplexF64}
+    G0::SMatrix{2,2,ComplexF64}
+     T::MMatrix{2,2,ComplexF64}
+
+     S::SMatrix{2,2,ComplexF64}
+    S0::SMatrix{2,2,ComplexF64}
+     M::MMatrix{2,2,ComplexF64}
+
+     W::MMatrix{2,2,ComplexF64}
+
+    function GrandPropagationMatrix(freqs,distances,modes,coords; 
+            eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3,nm::Real=1e15)
+
+        p = propagationMatrix(distances,freqs,1.0,modes,coords);
+
+        ps = O(1,1,-modes.L,1,-modes.L)(
+        Array{Spline{C64}}(undef,length(freqs),modes.M,2modes.L+1,modes.M,2modes.L+1))
+
+        for f in eachindex(freqs)
+            for m in 1:modes.M, l in -modes.L:modes.L
+                for m_ in 1:modes.M, l_ in -modes.L:modes.L
+                    ps[f,m,l,m_,l_] = cSpline(d,p[f,:,m,l,m_,l_])
+                end
+            end
+        end
+
+        ϵ  = eps*(1.0-1.0im*tand)
+        nd = sqrt(ϵ); nm = complex(nm)
+        ϵm = nm^2
+        A  = 1-1/ϵ
+        A0 = 1-1/ϵm
+
+        Gd = SMatrix{2,2,ComplexF64}((1+nd)/2,   (1-nd)/2,   (1-nd)/2,   (1+nd)/2)
+        Gv = SMatrix{2,2,ComplexF64}((nd+1)/2nd, (nd-1)/2nd, (nd-1)/2nd, (nd+1)/2nd)
+        G0 = SMatrix{2,2,ComplexF64}((1+nm)/2,   (1-nm)/2,   (1-nm)/2,   (1+nm)/2)
+        T  = MMatrix{2,2,ComplexF64}(undef)
+
+        S  = SMatrix{2,2,ComplexF64}( A/2, 0.0im, 0.0im,  A/2)
+        S0 = SMatrix{2,2,ComplexF64}(A0/2, 0.0im, 0.0im, A0/2)
+        M  = MMatrix{2,2,ComplexF64}(undef)
+
+        W  = MMatrix{2,2,ComplexF64}(undef)
+
+        new(freqs,thickness,nd,modes.M,modes.L,ps,Gd,Gv,G0,T,S,S0,M,W )
+    end
+end
+
+const GPM = GrandPropagationMatrix
+
+
+
+
+gpm = GPM(freqs,d,modes,coords)
+
+
+
+
+
+abstract type Space end
+abstract type Dist <: Space end
+abstract type Pos  <: Space end
+
+function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::GPM;)::Matrix{ComplexF64}
+    l = length(gpm.freqs)
+    RB = O(1,1,1,-gpm.L)(Matrix{ComplexF64}(undef,l,2,gpm.M,2gpm.L+1))
+
+    T .= gpm.Gd
+    M .= gpm.S
+
+    @inbounds @views for j in eachindex(gpm.freqs)
+        f = gpm.freqs[j]
+
+        pd1 = cispi(-2*f*gpm.nd*gpm.thickness/c0)
+        pd2 = cispi(+2*f*gpm.nd*gpm.thickness/c0)
+
+        for m in 1:gpm.M, l in -gpm.L:gpm.L
+            
+            # iterate in reverse order to sum up M in single sweep (thx david)
+            for i in Iterators.reverse(eachindex(distances))
+                T[:,1] .*= pd1
+                T[:,2] .*= pd2 # T = Gd*Pd
+
+                mul!(W,T,S); M .-= W    # M = Gd*Pd*S_-1
+
+                mul!(W,T,Gv); T .= W    # T *= Gd*Pd*Gv
+
+                T[:,1] .*= cispi(-2*f*distances[i]/c0)
+                T[:,2] .*= cispi(+2*f*distances[i]/c0)   # T = Gd*Pd*Gv*Gd*S_-1
+
+                if i > 1
+                    mul!(W,T,S); M .+= W
+                    mul!(W,T,Gd); T .= W
+                else
+                    mul!(W,T,S0); M .+= W
+                    mul!(W,T,G0); T .= W
+                end
+            end
+            
+            RB[j] = T[1,2]/T[2,2]
+            RB[l+j] = M[1,1]+M[1,2]-(M[2,1]+M[2,2])*T[1,2]/T[2,2]
+
+            M .= S
+            T .= 1.0+0.0im; T[1,1] += nd; T[2,2] += nd; T[2,1] -= nd; T[1,2] -= nd; T .*= 0.5
+        end
+    end
+
+    return RB
+end
+
+
+
 
 
 
