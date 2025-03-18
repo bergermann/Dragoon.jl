@@ -101,14 +101,14 @@ end
 
 function freq2time(yf::AbstractArray,f::AbstractArray)
     yt = ifftshift(ifft(yf))
-    t = ifftshift(fftfreq(length(f),1/(f[2]-f[1])))
+    t = fftshift(fftfreq(length(f),1/(f[2]-f[1])))
 
     return yt, t
 end
 
 function time2freq(yt::AbstractArray,t::AbstractArray)
     yf = fftshift(fft(yt))
-    f = fftshift(fftfreq(length(t),1/(t[2]-t[1])))
+    f = ifftshift(fftfreq(length(t),1/(t[2]-t[1])))
 
     return yf, f
 end
@@ -133,8 +133,12 @@ s = a+b+c+d
 
 plot(f/1e9,real.(s))
 
+yt,t = freq2time(s,f)
+
+plot(t,abs.(yt),xlim=[-10,10]/1e9)
 
 
+yf,f_ = time2freq()
 
 
 
