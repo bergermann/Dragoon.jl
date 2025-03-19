@@ -1,4 +1,7 @@
 using FFTW
+using JLD2
+using Plots
+
 
 
 function idealBandPass(y::AbstractVector,x::AbstractVector,lld::Real=-Inf64,uld::Real=Inf64)
@@ -101,14 +104,15 @@ end
 
 function freq2time(yf::AbstractArray,f::AbstractArray)
     yt = ifftshift(ifft(yf))
-    t = fftshift(fftfreq(length(f),1/(f[2]-f[1])))
+    t = fftshift(fftfreq(length(f),(length(f)-1)/(f[end]-f[1])))
 
     return yt, t
 end
 
 function time2freq(yt::AbstractArray,t::AbstractArray)
-    yf = fftshift(fft(yt))
-    f = ifftshift(fftfreq(length(t),1/(t[2]-t[1])))
+    yf = fft(yt)
+    dt = (length(t)-1)/(t[end]-t[1])
+    f = fftshift(fftfreq(length(t),dt)).+dt
 
     return yf, f
 end
@@ -116,37 +120,33 @@ end
 function timeGate(y::AbstractVector,f::AbstractVector,llg::Real=-Inf64,ulg::Real=Inf64)
     yt, t = freq2time(y,f)
     idealBandPass!(yt,t,llg,ulg)
-    yf = time2freq(yt,t)
+    yf, _ = time2freq(yt,t)
 
-    return y
+    return yf
 end
 
 
 
-f = collect(18:0.001:22)*1e9
-a = 1.0*cispi.(2*0.03e-9*x)
-b = 0.1*cispi.(2*2e-9*x)
-c = 0.05*cispi.(2*3e-9*x)
-d = 0.01*(2*rand(length(x)).-1)
+@load "C:\\Users\\domin\\OneDrive\\Desktop\\testdata_3_7_sleep1.jld2"
 
-s = a+b+c+d
+s = R[1]
+f = collect(range(18,22,length(s)))*1e9
+p = plot(f/1e9,abs.(s),xlabel="f [GHz]")
 
-plot(f/1e9,real.(s))
 
 yt,t = freq2time(s,f)
+plot(t/1e-9,abs.(yt),xlim=[-0,50],xlabel="t [ns]")
 
-plot(t,abs.(yt),xlim=[-10,10]/1e9)
-
-
-yf,f_ = time2freq()
-
+yf,f_ = time2freq(yt,t)
+plot(f_/1e9,abs.(yf),xlabel="f [GHz]")
 
 
 
+yf = timeGate(s,f,10e-9,20e-9)
+plot(p,f/1e9,abs.(yf))
 
 
-
-
+fft
 
 # F = fftshift(fft(s))
 # freqs = fftshift(fftfreq(length(x),1/(x[2]-x[1])))
