@@ -4,49 +4,77 @@ using Plots
 
 
 
-function idealBandPass(y::AbstractVector,x::AbstractVector,lld::Real=-Inf64,uld::Real=Inf64)
+function bandPass(y::AbstractVector,x::AbstractVector,lld::Real=-Inf64,uld::Real=Inf64; ramp::Real=0)
     @assert length(x) == length(y) "x and y require same length."
     @assert lld < uld "Lower level discriminator needs to lower than upper level discriminator."
+    @assert ramp <= uld-lld "Ramp needs to be smaller than uld-lld."
 
     y_ = copy(y)
-    for i in eachindex(y)
-        y_[i] *= lld < x[i] < uld
+    if ramp == 0
+        @simd for i in eachindex(y)
+            y_[i] *= lld < x[i] < uld
+        end
+    else
+        @simd for i in eachindex(y)
+            y_[i] *= clamp((x[i]-lld)/2ramp+0.5,0.,1.)*clamp(-(x[i]-uld)/2ramp+0.5,0.,1.)
+        end
     end
 
     return y_
 end
 
-function idealBandPass!(y::AbstractVector,x::AbstractVector,lld::Real=-Inf64,uld::Real=Inf64)
+function bandPass!(y::AbstractVector,x::AbstractVector,lld::Real=-Inf64,uld::Real=Inf64; ramp::Real=0)
     @assert length(x) == length(y) "x and y require same length."
     @assert lld < uld "Lower level discriminator needs to lower than upper level discriminator."
+    @assert ramp <= uld-lld "Ramp needs to be smaller than uld-lld."
 
-    for i in eachindex(y)
-        y[i] *= lld < x[i] < uld
+    if ramp == 0
+        @simd for i in eachindex(y)
+            y[i] *= lld < x[i] < uld
+        end
+    else
+        @simd for i in eachindex(y)
+            y[i] *= clamp((x[i]-lld)/2ramp+0.5,0.,1.)*clamp(-(x[i]-uld)/2ramp+0.5,0.,1.)
+        end
     end
 
     return y
 end
 
-function idealBandPass(y::AbstractVector,lld::Real=0,uld::Real=1)
+function bandPass(y::AbstractVector,lld::Real=0,uld::Real=1; ramp::Real=0)
     @assert 0 <= lld <= 1 && 0 <= uld <= 1 "Discriminators need to be within range [0,1]"
     @assert lld < uld "Lower level discriminator needs to lower than upper level discriminator."
+    @assert ramp <= uld-lld "Ramp needs to be smaller than uld-lld."
 
     y_ = copy(y)
     l = length(y)+1
-    for i in eachindex(y)
-        y_[i] *= lld < i/l < uld
+    if ramp == 0
+        @simd for i in eachindex(y)
+            y_[i] *= lld < i/l < uld
+        end
+    else
+        @simd for i in eachindex(y)
+            y_[i] *= clamp((i/l-lld)/2ramp+0.5,0.,1.)*clamp(-(i/l-uld)/2ramp+0.5,0.,1.)
+        end
     end
 
     return y_
 end
 
-function idealBandPass!(y::AbstractVector,lld::Real=0,uld::Real=1)
+function bandPass!(y::AbstractVector,lld::Real=0,uld::Real=1; ramp::Real=0)
     @assert length(x) == length(y) "x and y require same length."
     @assert lld < uld "Lower level discriminator needs to lower than upper level discriminator."
+    @assert ramp <= uld-lld "Ramp needs to be smaller than uld-lld."
 
     l = length(y)+1
-    for i in eachindex(y)
-        y[i] *= lld < i/l < uld
+    if ramp == 0
+        @simd for i in eachindex(y)
+            y[i] *= lld < i/l < uld
+        end
+    else
+        @simd for i in eachindex(y)
+            y[i] *= clamp((i/l-lld)/2ramp+0.5,0.,1.)*clamp(-(i/l-uld)/2ramp+0.5,0.,1.)
+        end
     end
 
     return y
@@ -54,7 +82,7 @@ end
 
 
 
-function idealBandStop(y::AbstractVector,x::AbstractVector,lld::Real=-Inf64,uld::Real=Inf64)
+function bandStopIdeal(y::AbstractVector,x::AbstractVector,lld::Real=-Inf64,uld::Real=Inf64)
     @assert length(x) == length(y) "x and y require same length."
     @assert lld < uld "Lower level discriminator needs to lower than upper level discriminator."
 
@@ -66,7 +94,7 @@ function idealBandStop(y::AbstractVector,x::AbstractVector,lld::Real=-Inf64,uld:
     return y_
 end
 
-function idealBandStop!(y::AbstractVector,x::AbstractVector,lld::Real=-Inf64,uld::Real=Inf64)
+function bandStopIdeal!(y::AbstractVector,x::AbstractVector,lld::Real=-Inf64,uld::Real=Inf64)
     @assert length(x) == length(y) "x and y require same length."
     @assert lld < uld "Lower level discriminator needs to lower than upper level discriminator."
 
@@ -77,7 +105,7 @@ function idealBandStop!(y::AbstractVector,x::AbstractVector,lld::Real=-Inf64,uld
     return y
 end
 
-function idealBandStop(y::AbstractVector,lld::Real=0,uld::Real=1)
+function bandStopIdeal(y::AbstractVector,lld::Real=0,uld::Real=1)
     @assert 0 <= lld <= 1 && 0 <= uld <= 1 "Discriminators need to be within range [0,1]"
     @assert lld < uld "Lower level discriminator needs to lower than upper level discriminator."
 
@@ -90,7 +118,7 @@ function idealBandStop(y::AbstractVector,lld::Real=0,uld::Real=1)
     return y_
 end
 
-function idealBandStop!(y::AbstractVector,lld::Real=0,uld::Real=1)
+function bandStopIdeal!(y::AbstractVector,lld::Real=0,uld::Real=1)
     @assert length(x) == length(y) "x and y require same length."
     @assert lld < uld "Lower level discriminator needs to lower than upper level discriminator."
 
@@ -117,50 +145,33 @@ function time2freq(yt::AbstractArray,t::AbstractArray)
     return yf, f
 end
 
-function timeGate(y::AbstractVector,f::AbstractVector,llg::Real=-Inf64,ulg::Real=Inf64)
+function timeGate(y::AbstractVector,f::AbstractVector,llg::Real=-Inf64,ulg::Real=Inf64; ramp::Real=0.)
     yt, t = freq2time(y,f)
-    idealBandPass!(yt,t,llg,ulg)
+    bandPass!(yt,t,llg,ulg; ramp=ramp)
     yf, _ = time2freq(yt,t)
 
     return yf
 end
 
 
+# @load "\\\\inst3\\data\\Benutzer\\bergermann\\Desktop\\testdata_3_7_sleep1.jld2"
+# @load "C:\\Users\\domin\\OneDrive\\Desktop\\testdata_3_7_sleep1.jld2"
 
-@load "C:\\Users\\domin\\OneDrive\\Desktop\\testdata_3_7_sleep1.jld2"
-
-s = R[1]
-f = collect(range(18,22,length(s)))*1e9
-p = plot(f/1e9,abs.(s),xlabel="f [GHz]")
-
-
-yt,t = freq2time(s,f)
-plot(t/1e-9,abs.(yt),xlim=[-0,50],xlabel="t [ns]")
-
-yf,f_ = time2freq(yt,t)
-plot(f_/1e9,abs.(yf),xlabel="f [GHz]")
+# s = R[1]
+# f = collect(range(18,22,length(s)))*1e9
+# p = plot(f/1e9,abs.(s),xlabel="f [GHz]")
 
 
+# yt,t = freq2time(s,f)
+# plot(t/1e-9,abs.(yt),xlim=[-20,50],xlabel="t [ns]")
 
-yf = timeGate(s,f,10e-9,20e-9)
-plot(p,f/1e9,abs.(yf))
+# yf,f_ = time2freq(yt,t)
+# plot(f_/1e9,abs.(yf),xlabel="f [GHz]")
 
 
 
-# F = fftshift(fft(s))
-# freqs = fftshift(fftfreq(length(x),1/(x[2]-x[1])))
+# yf = timeGate(s,f,10e-9,20e-9; ramp=3e-9)
+# plot(p,f/1e9,abs.(yf))
 
-# plot(x,abs.(s))
-# plot!(x,real.(s))
-# plot!(x,imag.(s))
 
-# plot(freqs,abs.(F),xlim=[0,5]); vline!([1.5,2.5,3.5])
 
-# F_ = idealBandPass(F,freqs,0.9*1.5,1.1*1.5)
-# plot(freqs,abs.(F_),xlim=[0,5]); vline!([0.9*1.5,1.1*1.5])
-
-# s_ = ifft(ifftshift(F_))
-
-# plot(x,abs.(s_))
-# plot!(x,real.(s_))
-# plot!(x,imag.(s_))
