@@ -146,7 +146,6 @@ yf = timeGate(s,f,10e-9,20e-9)
 plot(p,f/1e9,abs.(yf))
 
 
-fft
 
 # F = fftshift(fft(s))
 # freqs = fftshift(fftfreq(length(x),1/(x[2]-x[1])))
