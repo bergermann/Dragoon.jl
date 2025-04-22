@@ -64,7 +64,7 @@ mutable struct AnalyticalBooster <: Booster
 
     function AnalyticalBooster(initdist::Real; ndisk=20,ϵ=24,tand=0,τ=1e-3,R=0.15,
             vmotor=0.1e-3,maxlength=2)
-        new(dist2pos(initdist*ones(ndisk)),ndisk,ϵ,tand,τ,R,
+        new(dist2pos(initdist*ones(ndisk); thickness=τ),ndisk,ϵ,tand,τ,R,
             vmotor,maxlength,DateTime(0),unow(),0,0,0)
     end
 
