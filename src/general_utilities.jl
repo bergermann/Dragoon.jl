@@ -209,8 +209,6 @@ function findpeak1d(frequency::Real,ndisk::Int;
             eps=eps,tand=tand,thickness=thickness)[1]
     end
 
-    println("max boost: ",maximum(B))
-
     return D[argmax(B)]
 end
 
