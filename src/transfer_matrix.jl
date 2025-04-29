@@ -163,3 +163,30 @@ julia> ref = tm[:,1]; boost = abs2.(tm[:,2]);
 ```
 """ transfer_matrix
 
+
+
+
+
+
+function transfer_matrix_2port(::Type{Dist},freqs::Union{Real,AbstractVector{<:Real}},
+        distances::AbstractVector{<:Real}; eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3)
+
+    distances = copy(distances); distances[1] = 0.
+    
+    RB2 = transfer_matrix(Dist,freqs,distances; eps=eps,tand=tand,thickness=thickness,nm=0)
+
+    distances[2:end] .= distances[end:-1:2]; distances[1] = 0.
+
+    RB1 = transfer_matrix(Dist,freqs,distances; eps=eps,tand=tand,thickness=thickness,nm=0)
+
+    return [RB2,RB1]
+end
+
+
+transfer_matrix_2port(::Type{Pos},freqs::Union{Real,AbstractVector{<:Real}},
+        distances::AbstractVector{<:Real}; eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3) =
+    transfer_matrix_2port(Dist,freqs,pos2dist(distances); eps=eps,tand=tand,thickness=thickness)
+
+transfer_matrix_2port(freqs::Union{Real,AbstractVector{<:Real}},
+        distances::AbstractVector{<:Real}; eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3) =
+    transfer_matrix_2port(Dist,freqs,distances; eps=eps,tand=tand,thickness=thickness)
