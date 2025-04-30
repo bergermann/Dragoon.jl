@@ -174,7 +174,7 @@ function transfer_matrix_2port(::Type{Dist},freqs::Union{Real,AbstractVector{<:R
     
     RB2 = transfer_matrix(Dist,freqs,vcat(0,distances);
         eps=eps,tand=tand,thickness=thickness,nm=1)
-    RB1 = transfer_matrix(Dist,freqs,vcat(reverse(distances),0);
+    RB1 = transfer_matrix(Dist,freqs,vcat(0,reverse(distances));
         eps=eps,tand=tand,thickness=thickness,nm=1)
 
     return [RB2,RB1]
