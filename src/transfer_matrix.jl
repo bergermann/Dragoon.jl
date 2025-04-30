@@ -1,5 +1,6 @@
 
 export transfer_matrix, Dist, Pos
+export transfer_matrix_2port
 
 const c0 = 299792458.
 
@@ -170,14 +171,11 @@ julia> ref = tm[:,1]; boost = abs2.(tm[:,2]);
 
 function transfer_matrix_2port(::Type{Dist},freqs::Union{Real,AbstractVector{<:Real}},
         distances::AbstractVector{<:Real}; eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3)
-
-    distances = copy(distances); distances[1] = 0.
     
-    RB2 = transfer_matrix(Dist,freqs,distances; eps=eps,tand=tand,thickness=thickness,nm=0)
-
-    distances[2:end] .= distances[end:-1:2]; distances[1] = 0.
-
-    RB1 = transfer_matrix(Dist,freqs,distances; eps=eps,tand=tand,thickness=thickness,nm=0)
+    RB2 = transfer_matrix(Dist,freqs,vcat(0,distances);
+        eps=eps,tand=tand,thickness=thickness,nm=1)
+    RB1 = transfer_matrix(Dist,freqs,vcat(reverse(distances),0);
+        eps=eps,tand=tand,thickness=thickness,nm=1)
 
     return [RB2,RB1]
 end
