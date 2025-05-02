@@ -205,7 +205,7 @@ function findpeak1d(frequency::Real,ndisk::Int;
     D = range(1-deviation; stop=1+deviation,length=granularity)*scale*λ/2
 
     for i in eachindex(D)
-        B[i] = boost1d(ones(ndisk)*D[i],[frequency];
+        B[i] = boost1d(Dist,ones(ndisk)*D[i],[frequency];
             eps=eps,tand=tand,thickness=thickness)[1]
     end
 
