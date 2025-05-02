@@ -106,7 +106,7 @@ function getRef1d(space::Type{<:Space},booster::Booster,
         thickness=booster.thickness)
 end
 
-getRef1d(booster,frequencies) = getBoost1d(Pos,booster,frequencies)
+getRef1d(booster,frequencies) = getRef1d(Pos,booster,frequencies)
 
 
 

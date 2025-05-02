@@ -54,15 +54,15 @@ end
 
 Base.copy(x::T) where T = T([getfield(x, k) for k ∈ fieldnames(T)]...)
 
-function getBoost1d(booster::Booster,freqs::Array{Float64})
-    return boost1d(pos2dist(booster.pos; thickness=booster.thickness),freqs;
-        eps=booster.epsilon,tand=booster.tand,thickness=booster.thickness)
-end
+# function getBoost1d(booster::Booster,freqs::Array{Float64})
+#     return boost1d(pos2dist(booster.pos; thickness=booster.thickness),freqs;
+#         eps=booster.epsilon,tand=booster.tand,thickness=booster.thickness)
+# end
 
-function getRef1d(booster::Booster,freqs::Array{Float64})
-    return ref1d(pos2dist(booster.pos; thickness=booster.thickness),freqs;
-        eps=booster.epsilon,tand=booster.tand,thickness=booster.thickness)
-end
+# function getRef1d(booster::Booster,freqs::Array{Float64})
+#     return ref1d(pos2dist(booster.pos; thickness=booster.thickness),freqs;
+#         eps=booster.epsilon,tand=booster.tand,thickness=booster.thickness)
+# end
 
 
 
