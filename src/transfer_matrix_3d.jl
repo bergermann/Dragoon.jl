@@ -360,17 +360,19 @@ mutable struct GrandPropagationMatrix
     M::Int
     L::Int
 
-    PS::OffsetArray{Spline{ComplexF64}, 5, Array{Spline{ComplexF64}, 5}}
+    PS::OffsetArray{Spline{ComplexF64},5,Array{Spline{ComplexF64},5}}
 
     # work matrices for transfer_matrix algorithm
     Gd::SMatrix{2,2,ComplexF64}
     Gv::SMatrix{2,2,ComplexF64}
     G0::SMatrix{2,2,ComplexF64}
-     T::MMatrix{2,2,ComplexF64}
+    #  T::MMatrix{2,2,ComplexF64}
+     T::OffsetArray{ComplexF64,4,Array{Complex64,4}}
 
      S::SMatrix{2,2,ComplexF64}
     S0::SMatrix{2,2,ComplexF64}
-     M::MMatrix{2,2,ComplexF64}
+    #  M::MMatrix{2,2,ComplexF64}
+     M::OffsetArray{ComplexF64,4,Array{Complex64,4}}
 
      W::MMatrix{2,2,ComplexF64}
 
@@ -399,11 +401,13 @@ mutable struct GrandPropagationMatrix
         Gd = SMatrix{2,2,ComplexF64}((1+nd)/2,   (1-nd)/2,   (1-nd)/2,   (1+nd)/2)
         Gv = SMatrix{2,2,ComplexF64}((nd+1)/2nd, (nd-1)/2nd, (nd-1)/2nd, (nd+1)/2nd)
         G0 = SMatrix{2,2,ComplexF64}((1+nm)/2,   (1-nm)/2,   (1-nm)/2,   (1+nm)/2)
-        T  = MMatrix{2,2,ComplexF64}(undef)
+        # T  = MMatrix{2,2,ComplexF64}(undef)
+        T = O(1,1,1,-modes.L)(Matrix{Complex64}(undef,2,2,modes.M,2*modes.L+1))
 
         S  = SMatrix{2,2,ComplexF64}( A/2, 0.0im, 0.0im,  A/2)
         S0 = SMatrix{2,2,ComplexF64}(A0/2, 0.0im, 0.0im, A0/2)
-        M  = MMatrix{2,2,ComplexF64}(undef)
+        # M  = MMatrix{2,2,ComplexF64}(undef)
+        M = O(1,1,1,-modes.L)(Matrix{Complex64}(undef,2,2,modes.M,2*modes.L+1))
 
         W  = MMatrix{2,2,ComplexF64}(undef)
 
@@ -428,7 +432,9 @@ abstract type Pos  <: Space end
 
 function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::GPM;)::Matrix{ComplexF64}
     l = length(gpm.freqs)
-    RB = O(1,1,1,-gpm.L)(Matrix{ComplexF64}(undef,l,2,gpm.M,2gpm.L+1))
+    RB = O(1,1,1,-gpm.L)(Array{ComplexF64}(undef,l,2,gpm.M,2gpm.L+1))
+
+
 
     T .= gpm.Gd
     M .= gpm.S
@@ -440,9 +446,13 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
         pd2 = cispi(+2*f*gpm.nd*gpm.thickness/c0)
 
         for m in 1:gpm.M, l in -gpm.L:gpm.L
-            
-            # iterate in reverse order to sum up M in single sweep (thx david)
-            for i in Iterators.reverse(eachindex(distances))
+            gpm.T[:,:,m,l] .= gpm.Gd
+            gpm.M[:,:,m,l] .= gpm.S
+        end
+
+        # iterate in reverse order to sum up M in single sweep (thx david)
+        for i in Iterators.reverse(eachindex(distances))
+            for m in 1:gpm.M, l in -gpm.L:gpm.L
                 T[:,1] .*= pd1
                 T[:,2] .*= pd2 # T = Gd*Pd
 
@@ -480,7 +490,39 @@ end
 
 
 
+function transformer(bdry::SetupBoundaries, coords::CoordinateSystem, modes::Modes; f=10.0e9, velocity_x=0, prop=propagator, propagation_matrices::Array{Array{Complex{T},2},1}=Array{Complex{Float64},2}[], diskR=0.15, emit=axion_induced_modes(coords,modes;B=nothing,velocity_x=velocity_x,diskR=diskR,f=f), reflect=nothing) where T<:Real
+    bdry.eps[isnan.(bdry.eps)] .= 1e30
 
+    transmissionfunction_complete = [modes.id modes.zeromatrix ; modes.zeromatrix modes.id ]
+    lambda = wavelength(f)
+
+    initial = emit
+
+    axion_beam = Array{Complex{T}}(zeros((modes.M)*(2modes.L+1)))
+
+    Nregions = length(bdry.eps)
+    idx_reg(s) = Nregions-s+1
+
+    for s in (Nregions-1):-1:1
+        axion_beam .+= axion_contrib(transmissionfunction_complete, sqrt(bdry.eps[idx_reg(s+1)]), sqrt(bdry.eps[idx_reg(s)]), initial, modes)
+
+        diffprop = (isempty(propagation_matrices) ?
+                        propagation_matrix(bdry.distance[idx_reg(s)], diskR, bdry.eps[idx_reg(s)], bdry.relative_tilt_x[idx_reg(s)], bdry.relative_tilt_y[idx_reg(s)], bdry.relative_surfaces[idx_reg(s),:,:], lambda, coords, modes; prop=prop) :
+                        propagation_matrices[idx_reg(s)])
+
+        transmissionfunction_complete *= get_boundary_matrix(sqrt(bdry.eps[idx_reg(s)]), sqrt(bdry.eps[idx_reg(s+1)]), diffprop, modes)
+    end
+
+    boost =  - (transmissionfunction_complete[index(modes,2),index(modes,2)]) \ (axion_beam)
+
+    if reflect === nothing
+        return boost
+    end
+
+    refl = - transmissionfunction_complete[index(modes,2),index(modes,2)] \
+           ((transmissionfunction_complete[index(modes,2),index(modes,1)]) * (reflect))
+    return boost, refl
+end
 
 
 
