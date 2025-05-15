@@ -22,18 +22,18 @@ ref1d(spacs::Vector{Float64},f::Vector{Float64};
     disk_system(f; spacings=[spacs;0],disk_thickness=thickness,disk_epsilon=eps,
         tand=tand,num_disk=length(spacs))[1]
 
-function findpeak(f0,n; eps=24.,tand=0.,thickness=1e-3,gran=1000,dev=0.1)
-    λ = 299792458.0/f0
-    B = zeros(gran)
-    D = range(1-dev; stop=1+dev,length=gran)*λ/2
+# function findpeak(f0,n; eps=24.,tand=0.,thickness=1e-3,gran=1000,dev=0.1)
+#     λ = 299792458.0/f0
+#     B = zeros(gran)
+#     D = range(1-dev; stop=1+dev,length=gran)*λ/2
 
-    for i in eachindex(D)
-        B[i] = boost1d(ones(n)*D[i],[f0];
-            eps=eps,tand=tand,thickness=thickness)[1]
-    end
+#     for i in eachindex(D)
+#         B[i] = boost1d(ones(n)*D[i],[f0];
+#             eps=eps,tand=tand,thickness=thickness)[1]
+#     end
 
-    return D[findmax(B)[2]]
-end
+#     return D[findmax(B)[2]]
+# end
 
 function pos2dist(pos::Array{Float64}; thickness=1e-3)
     pos = [0; pos]
