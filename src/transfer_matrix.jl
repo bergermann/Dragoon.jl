@@ -110,7 +110,6 @@ function transfer_matrix(::Type{Pos},freqs::Union{Real,AbstractVector{<:Real}},
             T[:,2] .*= pd2 # T = Gd*Pd
 
             mul!(W,T,S); M .-= W    # M = Gd*Pd*S_-1
-
             mul!(W,T,Gv); T .= W    # T *= Gd*Pd*Gv
 
             d = position[i]-(i==1 ? 0 : position[i-1]+thickness)
