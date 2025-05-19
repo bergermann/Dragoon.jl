@@ -294,31 +294,6 @@ const propMatrix = const propMat = const prop = propagationMatrix
 
 
 
-f = 20e9; ω = 2π*f; λ = c0/f
-eps = complex(1)
-k0 = 2π*f/c0*sqrt(eps)
-
-coords = Coordinates(1,λ/2; diskR=0.15);
-modes = Modes(3,0,coords);
-
-
-E0 = ones(C64,axes(coords.R));
-E0 .*= coords.diskmaskin;
-
-
-ax = axionModes(coords,modes)
-E = modes2field(ax,modes)
-
-
-coeffs = field2modes(E0,modes)
-
-
-
-freqs = collect(range(22e9,22.05e9,11))
-d = collect(range(1e-3,10e-3,10))
-@time p = propagationMatrix(d,freqs,1.0,modes,coords);
-
-
 
 # f_ = 1; m = 3; l = 0; m_ = 1; l_ = 0
 # p_ = p[f_,:,m,l,m_,l_]
@@ -360,17 +335,19 @@ mutable struct GrandPropagationMatrix
     M::Int
     L::Int
 
-    PS::OffsetArray{Spline{ComplexF64}, 5, Array{Spline{ComplexF64}, 5}}
+    PS::OffsetArray{Spline{ComplexF64},5,Array{Spline{ComplexF64},5}}
 
     # work matrices for transfer_matrix algorithm
     Gd::SMatrix{2,2,ComplexF64}
     Gv::SMatrix{2,2,ComplexF64}
     G0::SMatrix{2,2,ComplexF64}
-     T::MMatrix{2,2,ComplexF64}
+    #  T::MMatrix{2,2,ComplexF64}
+     T::OffsetArray{ComplexF64,4,Array{ComplexF64,4}}
 
      S::SMatrix{2,2,ComplexF64}
     S0::SMatrix{2,2,ComplexF64}
-     M::MMatrix{2,2,ComplexF64}
+    #  M::MMatrix{2,2,ComplexF64}
+    MM::OffsetArray{ComplexF64,4,Array{ComplexF64,4}}
 
      W::MMatrix{2,2,ComplexF64}
 
@@ -399,24 +376,22 @@ mutable struct GrandPropagationMatrix
         Gd = SMatrix{2,2,ComplexF64}((1+nd)/2,   (1-nd)/2,   (1-nd)/2,   (1+nd)/2)
         Gv = SMatrix{2,2,ComplexF64}((nd+1)/2nd, (nd-1)/2nd, (nd-1)/2nd, (nd+1)/2nd)
         G0 = SMatrix{2,2,ComplexF64}((1+nm)/2,   (1-nm)/2,   (1-nm)/2,   (1+nm)/2)
-        T  = MMatrix{2,2,ComplexF64}(undef)
+        # T  = MMatrix{2,2,ComplexF64}(undef)
+        T = O(1,1,1,-modes.L)(Array{ComplexF64}(undef,2,2,modes.M,2*modes.L+1))
 
         S  = SMatrix{2,2,ComplexF64}( A/2, 0.0im, 0.0im,  A/2)
         S0 = SMatrix{2,2,ComplexF64}(A0/2, 0.0im, 0.0im, A0/2)
-        M  = MMatrix{2,2,ComplexF64}(undef)
+        # M  = MMatrix{2,2,ComplexF64}(undef)
+        MM = O(1,1,1,-modes.L)(Array{ComplexF64}(undef,2,2,modes.M,2*modes.L+1))
 
         W  = MMatrix{2,2,ComplexF64}(undef)
 
-        new(freqs,thickness,nd,modes.M,modes.L,ps,Gd,Gv,G0,T,S,S0,M,W )
+        new(freqs,thickness,nd,modes.M,modes.L,ps,Gd,Gv,G0,T,S,S0,MM,W)
     end
 end
 
 const GPM = GrandPropagationMatrix
 
-
-
-
-gpm = GPM(freqs,d,modes,coords)
 
 
 
@@ -426,12 +401,12 @@ abstract type Space end
 abstract type Dist <: Space end
 abstract type Pos  <: Space end
 
-function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::GPM;)::Matrix{ComplexF64}
+function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::GPM;)::OffsetArray{ComplexF64,4,Array{ComplexF64,4}}
     l = length(gpm.freqs)
-    RB = O(1,1,1,-gpm.L)(Matrix{ComplexF64}(undef,l,2,gpm.M,2gpm.L+1))
+    RB = O(1,1,1,-gpm.L)(Array{ComplexF64}(undef,l,2,gpm.M,2gpm.L+1))
 
-    T .= gpm.Gd
-    M .= gpm.S
+    T_ = similar(gpm.T)
+    W = gpm.W
 
     @inbounds @views for j in eachindex(gpm.freqs)
         f = gpm.freqs[j]
@@ -440,33 +415,46 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
         pd2 = cispi(+2*f*gpm.nd*gpm.thickness/c0)
 
         for m in 1:gpm.M, l in -gpm.L:gpm.L
-            
-            # iterate in reverse order to sum up M in single sweep (thx david)
-            for i in Iterators.reverse(eachindex(distances))
-                T[:,1] .*= pd1
-                T[:,2] .*= pd2 # T = Gd*Pd
+            gpm.T[:,:,m,l]  .= gpm.Gd
+            gpm.MM[:,:,m,l] .= gpm.S
+            T_ .= 0.0im
+        end
 
-                mul!(W,T,S); M .-= W    # M = Gd*Pd*S_-1
+        # iterate in reverse order to sum up M in single sweep (thx david)
+        for i in Iterators.reverse(eachindex(distances))
+            for m in 1:gpm.M, l in -gpm.L:gpm.L
+                gpm.T[:,1,m,l] .*= pd1
+                gpm.T[:,2,m,l] .*= pd2 # T = Gd*Pd
 
-                mul!(W,T,Gv); T .= W    # T *= Gd*Pd*Gv
+                mul!(W,gpm.T[:,:,m,l],gpm.S); gpm.MM[:,:,m,l] .-= W    # M = Gd*Pd*S_-1
+                mul!(W,gpm.T[:,:,m,l],gpm.Gv); gpm.T[:,:,m,l] .= W    # T *= Gd*Pd*Gv
+            end
 
-                T[:,1] .*= cispi(-2*f*distances[i]/c0)
-                T[:,2] .*= cispi(+2*f*distances[i]/c0)   # T = Gd*Pd*Gv*Gd*S_-1
-
-                if i > 1
-                    mul!(W,T,S); M .+= W
-                    mul!(W,T,Gd); T .= W
-                else
-                    mul!(W,T,S0); M .+= W
-                    mul!(W,T,G0); T .= W
+            for m in 1:gpm.M, l in -gpm.L:gpm.L                
+                for m_ in 1:gpm.M, l_ in -gpm.L:gpm.L
+                    T_[:,1,m,l] .+= gpm.T[:,1,m,l]*spline(gpm.PS[j,m,l,m_,l_],distances[i])
+                    T_[:,2,m,l] .+= gpm.T[:,2,m,l]/spline(gpm.PS[j,m,l,m_,l_],distances[i])
                 end
             end
-            
-            RB[j] = T[1,2]/T[2,2]
-            RB[l+j] = M[1,1]+M[1,2]-(M[2,1]+M[2,2])*T[1,2]/T[2,2]
 
-            M .= S
-            T .= 1.0+0.0im; T[1,1] += nd; T[2,2] += nd; T[2,1] -= nd; T[1,2] -= nd; T .*= 0.5
+            gpm.T .= T_
+               
+            for m in 1:gpm.M, l in -gpm.L:gpm.L 
+                if i > 1
+                    mul!(W,gpm.T[:,:,m,l],gpm.S);  gpm.MM[:,:,m,l] .+= W
+                    mul!(W,gpm.T[:,:,m,l],gpm.Gd); gpm.T[:,:,m,l] .= W
+                else
+                    mul!(W,gpm.T[:,:,m,l],gpm.S0); gpm.MM[:,:,m,l] .+= W
+                    mul!(W,gpm.T[:,:,m,l],gpm.G0); gpm.T[:,:,m,l] .= W
+                end
+            
+                RB[j,1,m,l] = gpm.T[1,2,m,l]/gpm.T[2,2,m,l]
+                RB[j,2,m,l] = gpm.MM[1,1,m,l]+gpm.MM[1,2,m,l]-
+                    (gpm.MM[2,1,m,l]+gpm.MM[2,2,m,l])*gpm.T[1,2,m,l]/gpm.T[2,2,m,l]
+            end
+
+            # M .= S
+            # T .= 1.0+0.0im; T[1,1] += nd; T[2,2] += nd; T[2,1] -= nd; T[1,2] -= nd; T .*= 0.5
         end
     end
 
@@ -477,67 +465,31 @@ end
 
 
 
+f = 22.025e9; ω = 2π*f; λ = c0/f
+eps = complex(1)
+k0 = 2π*f/c0*sqrt(eps)
+
+coords = Coordinates(1,λ/2; diskR=0.15);
+modes = Modes(3,0,coords);
+
+
+E0 = ones(C64,axes(coords.R));
+E0 .*= coords.diskmaskin;
+
+
+ax = axionModes(coords,modes)
+E = modes2field(ax,modes)
+
+
+coeffs = field2modes(E0,modes)
 
 
 
+freqs = collect(range(21.5e9,22.5e9,101))
+d = collect(range(1e-3,10e-3,10))
+@time p = propagationMatrix(d,freqs,1.0,modes,coords);
 
 
-
-
-function propagation_matrix(dz, diskR, eps, tilt_x, tilt_y, surface, lambda, coords::CoordinateSystem, modes::Modes; is_air=(real(eps)==1), onlydiagonal=false, prop=propagator)
-    matching_matrix = Array{Complex{Float64}}(zeros(modes.M*(2modes.L+1),modes.M*(2modes.L+1)))
-
-
-    k0 = 2pi/lambda*sqrt(eps)
-
-    # Define the propagation function
-    propfunc = nothing # initialize
-    if is_air
-        # In air use the propagator we get
-        function propagate(x)
-            return prop(copy(x), dz, diskR, eps, tilt_x, tilt_y, surface, lambda, coords)
-        end
-        propfunc = propagate
-    else
-        # In the disk the modes are eigenmodes, so we only have to apply the
-        # inaccuracies and can apply the propagation later separately
-        propfunc(efields) = efields.*[exp(-1im*k0*tilt_x*x) * exp(-1im*k0*tilt_y*y) for x in coords.X, y in coords.Y].*exp.(-1im*k0*surface)
-        # Applying exp element-wise to the surface is very important otherwise it is e^M with M matrix
-    end
-
-    # Calculate the mixing matrix
-    for m_prime in 1:modes.M, l_prime in -modes.L:modes.L
-        # Propagated fields of mode (m_prime, l_prime)
-        for i in 1:e_field_dimensions(modes)
-            # If 3D E-field, fields propagate separately. For interaction need to implement in propagator.
-            propagated = propfunc(modes.mode_patterns[m_prime,l_prime+modes.L+1,:,:,i])
-
-            for m in (onlydiagonal ? [m_prime] : 1:modes.M), l in (onlydiagonal ? [l_prime] : -modes.L:modes.L)
-                # P_ml^m'l' = <E_ml | E^p_m'l' > = ∫ dA \bm{E}_ml^* ⋅ \bm{E}^p_m'l' = ∑_{j = x,y,z} ∫ dA ({E}_j)_ml^* ⋅ ({E}_j)^p_m'l'
-                # 6.15 in Knirck
-                matching_matrix[(m-1)*(2modes.L+1)+l+modes.L+1, (m_prime-1)*(2modes.L+1)+l_prime+modes.L+1] +=
-                        sum( conj.(modes.mode_patterns[m,l+modes.L+1,:,:,i]) .* propagated ) #*dx*dy
-
-                #v = 1-abs2.(matching_matrix[(m-1)*(2L+1)+l+L+1, (m_prime-1)*(2L+1)+l_prime+L+1])
-            end
-        end
-    end
-
-    if !is_air
-        propagation_matrix = Array{Complex{Float64}}(zeros(modes.M*(2modes.L+1),modes.M*(2modes.L+1)))
-        #The propagation within the disk is still missing
-        for m in 1:modes.M, l in -modes.L:modes.L
-            kz = sqrt(k0^2 - modes.mode_kt[m,l+modes.L+1]^2)
-            propagation_matrix[(m-1)*(2modes.L+1)+l+modes.L+1, (m-1)*(2modes.L+1)+l+modes.L+1] = exp(-1im*kz*dz)
-        end
-        # It is important to note the multiplication from the left
-        matching_matrix = propagation_matrix*matching_matrix
-    end
-
-    return matching_matrix
-
-    # TODO: This only takes surface roughness at the end of the propagation into account, not at its
-    # start. General problem in all the codes so far.
-end
+gpm = GPM(freqs,d,modes,coords)
 
 
