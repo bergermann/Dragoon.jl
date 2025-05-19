@@ -93,7 +93,7 @@ Perform forced linesearch on the booster along `p` with step length `α` for dis
 Move to best solution on finish.
 """
 function searchExtDist(p,α,booster,hist,freqs,objFunction,(d,); showtrace=false)
-    kmax = d/(α*pNorm(p))
+    kmax = d/(α*norm(p))
 
     updateHist!(booster,hist,freqs,objFunction)
     

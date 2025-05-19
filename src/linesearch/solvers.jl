@@ -145,7 +145,7 @@ function solverHybrid(booster::Booster,hist::Vector{State},freqs::Vector{Float64
         p[:] = inv(h)*g
     end
 
-    p[:] = p/pNorm(p)
+    p[:] = p/norm(p)
 
     p0 = copy(booster.pos)
     updateHist!(booster,hist,freqs,objFunction)

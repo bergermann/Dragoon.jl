@@ -35,21 +35,17 @@ ref1d(spacs::Vector{Float64},f::Vector{Float64};
 #     return D[findmax(B)[2]]
 # end
 
-function pos2dist(pos::Array{Float64}; thickness=1e-3)
-    pos = [0; pos]
-    d = (pos[2:end]-pos[1:end-1])
-    d[2:end] .-= thickness
+# function pos2dist(pos::Array{Float64}; thickness=1e-3)
+#     pos = [0; pos]
+#     d = (pos[2:end]-pos[1:end-1])
+#     d[2:end] .-= thickness
     
-    return d
-end
+#     return d
+# end
 
-function dist2pos(dist::Array{Float64}; thickness=1e-3)
-    return [sum(dist[1:i])+(i-1)*thickness for i in 1:length(dist)]
-end
-
-function pNorm(x; p=2)
-    return sum(@. abs(x)^p)^(1/p)
-end
+# function dist2pos(dist::Array{Float64}; thickness=1e-3)
+#     return [sum(dist[1:i])+(i-1)*thickness for i in 1:length(dist)]
+# end
 
 
 Base.copy(x::T) where T = T([getfield(x, k) for k ∈ fieldnames(T)]...)
