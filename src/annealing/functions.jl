@@ -51,18 +51,13 @@ function findNeighbour(booster::Booster,rmax::Float64)
     return rmax*rand()*x_
 end
 
-function findNeighbour1!(x_::Vector{Float64},rmax::Float64)
-    rand!(x_,Float64); x_ .*= 2.0; x_ .-= 1.0; x_ .*= rmax*rand()/norm(x)
-
-    return
-end
-
-function findNeighbour2!(x_::Vector{Float64},rmax::Float64)
+function findNeighbour!(x_::Vector{Float64},rmax::Float64)
     @inbounds @simd for i in eachindex(x_)
         x_[i] = 2.0*rand(Float64)-1.0
     end
 
-    x_ .*= rmax*rand()/norm(x)
+    r = rmax*rand()/norm(x_)
+    x_ .*= r
 
     return
 end
