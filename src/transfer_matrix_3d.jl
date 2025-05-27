@@ -368,7 +368,7 @@ abstract type Space end
 abstract type Dist <: Space end
 abstract type Pos  <: Space end
 
-function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::GPM;)::OffsetArray{CF64,4,Array{CF64,4}}
+function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::GPM;)::OffsetArray{C64,4,Array{C64,4}}
     l = length(gpm.freqs)
     RB = O(1,1,1,-gpm.L)(Array{ComplexF64}(undef,l,2,gpm.M,2gpm.L+1))
 
@@ -382,8 +382,8 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
         pd2 = cispi(+2*f*gpm.nd*gpm.thickness/c0)
 
         for m in 1:gpm.M, l in -gpm.L:gpm.L
-            gpm.T[:,:,m,l]  .= gpm.Gd
-            gpm.MM[:,:,m,l] .= gpm.S
+            copyto!(gpm.T[:,:,m,l],gpm.Gd)
+            copyto!(gpm.MM[:,:,m,l],gpm.S)
             T_ .= 0.0im
         end
 
@@ -393,8 +393,8 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
                 gpm.T[:,1,m,l] .*= pd1
                 gpm.T[:,2,m,l] .*= pd2 # T = Gd*Pd
 
-                mul!(W,gpm.T[:,:,m,l],gpm.S); gpm.MM[:,:,m,l] .-= W    # M = Gd*Pd*S_-1
-                mul!(W,gpm.T[:,:,m,l],gpm.Gv); gpm.T[:,:,m,l] .= W    # T *= Gd*Pd*Gv
+                mul!(W,gpm.T[:,:,m,l],gpm.S); gpm.MM[:,:,m,l] .-= W         # M = Gd*Pd*S_-1
+                mul!(W,gpm.T[:,:,m,l],gpm.Gv); copyto!(gpm.T[:,:,m,l],W)    # T *= Gd*Pd*Gv
             end
 
             for m in 1:gpm.M, l in -gpm.L:gpm.L                
@@ -404,25 +404,25 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
                 end
             end
 
-            gpm.T .= T_
+            copyto!(gpm.T,T_)
                
             for m in 1:gpm.M, l in -gpm.L:gpm.L 
                 if i > 1
                     mul!(W,gpm.T[:,:,m,l],gpm.S);  gpm.MM[:,:,m,l] .+= W
-                    mul!(W,gpm.T[:,:,m,l],gpm.Gd); gpm.T[:,:,m,l] .= W
+                    mul!(W,gpm.T[:,:,m,l],gpm.Gd); copyto!(gpm.T[:,:,m,l],W)
                 else
                     mul!(W,gpm.T[:,:,m,l],gpm.S0); gpm.MM[:,:,m,l] .+= W
-                    mul!(W,gpm.T[:,:,m,l],gpm.G0); gpm.T[:,:,m,l] .= W
+                    mul!(W,gpm.T[:,:,m,l],gpm.G0); copyto!(gpm.T[:,:,m,l],W)
                 end
             
                 RB[j,1,m,l] = gpm.T[1,2,m,l]/gpm.T[2,2,m,l]
                 RB[j,2,m,l] = gpm.MM[1,1,m,l]+gpm.MM[1,2,m,l]-
                     (gpm.MM[2,1,m,l]+gpm.MM[2,2,m,l])*gpm.T[1,2,m,l]/gpm.T[2,2,m,l]
             end
-
-            # M .= S
-            # T .= 1.0+0.0im; T[1,1] += nd; T[2,2] += nd; T[2,1] -= nd; T[1,2] -= nd; T .*= 0.5
         end
+
+        # M .= S
+        # T .= 1.0+0.0im; T[1,1] += nd; T[2,2] += nd; T[2,1] -= nd; T[1,2] -= nd; T .*= 0.5
     end
 
     return RB
@@ -457,9 +457,9 @@ d = collect(range(1e-3,10e-3,10))
 @time p = propagationMatrix(d,freqs,1.0,modes,coords);
 
 
-gpm = GPM(freqs,d,modes,coords)
+gpm = GPM(freqs,d,modes,coords; eps=1.0)
 
-dists = ones(20)*7.21e-3
+dists = ones(2)*7.21e-3
 
 RB = transfer_matrix_3d(Dist,dists,gpm;);
 
@@ -470,9 +470,9 @@ B = RB[:,2,:,:]
 gpm.PS[1,1,0,1,0]
 
 
-p = propagationMatrix(d,freqs,24,modes,coords)
+# p = propagationMatrix(d,freqs,24,modes,coords)
 
-s = cSpline(d,p[100,:,1,0,1,0])
-spline(s,1.21e-3)
+# s = cSpline(d,p[100,:,1,0,1,0])
+# spline(s,1.21e-3)
 
 
