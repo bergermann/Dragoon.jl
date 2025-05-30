@@ -46,9 +46,20 @@ end
 
 function findNeighbour(booster::Booster,rmax::Float64)
     x_ = 2*rand(Float64,booster.ndisk) .- 1
-    x_ /= pNorm(x_)
+    x_ /= norm(x_)
 
     return rmax*rand()*x_
+end
+
+function findNeighbour!(x_::Vector{Float64},rmax::Float64)
+    @inbounds @simd for i in eachindex(x_)
+        x_[i] = 2.0*rand(Float64)-1.0
+    end
+
+    r = rmax*rand()/norm(x_)
+    x_ .*= r
+
+    return
 end
 
 function thermal(objx::Float64,objy::Float64,T::Float64)
@@ -56,7 +67,7 @@ function thermal(objx::Float64,objy::Float64,T::Float64)
 end
 
 
-
+    
 """
     analyse(hist,trace::Vector{SATrace},freqsplot;
         freqs=nothing,plotting=true,div=5,ylim=[-0.05e4,3e4])

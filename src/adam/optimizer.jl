@@ -46,10 +46,10 @@ function adam(booster::Booster, hist::Vector{State}, freqs::Array{Float64},
         iter += 1
 
         showtrace && iter%showevery == 0 && println("Gradient norm: ",
-                                                round(pNorm(g), sigdigits=3))
+                                                round(norm(g), sigdigits=3))
 
         #early stopping if descend is too slow
-        pNorm(g) <= ϵgrad && ((showtrace && println("Gradient threshold reached.
+        norm(g) <= ϵgrad && ((showtrace && println("Gradient threshold reached.
                                                 Terminating.")); break)
 
         m *= β1; m += (1-β1)*g

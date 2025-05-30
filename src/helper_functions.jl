@@ -113,16 +113,17 @@ function move(booster::AnalyticalBooster,newpos::Vector{Float64};
         newpos .+= booster.pos
     end
 
-    trace = zeros(length(booster.pos),ceil(Int,maximum(abs.(booster.pos-newpos))/tracestep))
+    # trace = zeros(length(booster.pos),ceil(Int,maximum(abs.(booster.pos-newpos))/tracestep))
 
-    newpos .= modb(booster,newpos)
+    # newpos .= modb(booster,newpos)
 
     booster.summeddistance += sum(abs.(booster.pos-newpos))
     booster.timestamp += (Δt + maximum(abs.(booster.pos-newpos))/booster.vmotor) *ₜ Second
 
-    booster.pos = copy(newpos)
+    copyto!(booster.pos,newpos)
 
-    return trace
+    # return trace
+    return
 end
 
 function modb(booster::Booster,newpos::Vector{Float64})

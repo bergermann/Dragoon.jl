@@ -14,7 +14,7 @@ Normalize descend direction p to unit or maximum entry.
 function stepNorm(p,α,booster,hist,freqs,objFunction,(mode,); showtrace=false)
     #static, normalize p
     if mode == "unit"
-        p[:] = p/pNorm(p)
+        p[:] = p/norm(p)
     elseif mode == "max"
         p[:] = p/maximum(abs.(p))
     end

@@ -65,6 +65,8 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
     xsol = copy(booster.pos)
     objsol = copy(objx)
 
+    dx = Vector{Float64}(undef,length(x))
+
     iter = 1
     resetcounter = 0
     resetcounterterm = 0
@@ -76,17 +78,20 @@ function simulatedAnnealing(booster::Booster,hist::States,freqs::Array{Float64},
     while iter < maxiter
         τ = T.func(τ,T.args)
 
-        # updateHist!(booster,hist,freqs,objFunction; force=true)
-        move(booster,x+findNeighbour(booster,rmax); additive=false)
+        findNeighbour!(dx,rmax)
+
+        move(booster,x+dx; additive=false)
         obj_ = updateHist!(booster,hist,freqs,objFunction; force=true)
 
         if obj_ <= objx || rand() <= thermal(objx,obj_,τ)
-            x = copy(booster.pos)
+            # x = copy(booster.pos)
+            copyto!(x,booster.pos)
             objx = obj_
         end
 
         if obj_ <= objsol
-            xsol = copy(booster.pos)
+            # xsol = copy(booster.pos)
+            copyto!(xsol,booster.pos)
             objsol = obj_
 
             resetcounter = 0

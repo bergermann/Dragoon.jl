@@ -271,8 +271,6 @@ function disk_system(freq::AbstractArray;
 	#println("ENDING DISK_SYSTEM")
 
     return gamma, axion_out
-
-
 end
 
 

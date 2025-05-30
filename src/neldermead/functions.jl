@@ -150,7 +150,7 @@ function getSimplexSize(x::Matrix{Float64},f::Vector{Float64})
     for i in axes(x,2)
         if i == idx; continue; end
 
-        d = pNorm(x[:,i]-x[:,idx])
+        d = norm(x[:,i]-x[:,idx])
 
         if d > s
             s = d
@@ -173,7 +173,7 @@ function getSimplexInnerSize(x::Matrix{Float64})
     x_ = sum(x; dims=2)/size(x,2)
 
     for i in axes(x,2)
-        d_ = pNorm(x[:,i]-x_)
+        d_ = norm(x[:,i]-x_)
 
         if d_ < d
             d = d_

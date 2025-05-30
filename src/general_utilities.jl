@@ -289,14 +289,6 @@ end
 
 
 
-"""
-    pNorm(x,p=2)
-
-Return `(∑ x^p)^(1/p)`.
-"""
-function pNorm(x,p=2)
-    return sum(@. abs(x)^p)^(1/p)
-end
 
 
 """

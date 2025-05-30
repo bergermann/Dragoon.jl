@@ -123,7 +123,7 @@ function simplexEdgeLengths(x::Matrix{Float64})
 
     for i in axes(x,2)
         for j in i+1:size(x,2)
-            push!(E,pNorm(x[:,i]-x[:,j]))
+            push!(E,norm(x[:,i]-x[:,j]))
         end
     end
 
@@ -141,7 +141,7 @@ function simplexRadius(x::Matrix{Float64})
     R = zeros(Float64,size(x,2))
 
     for i in axes(x,2)
-        R[i] = pNorm(x0-x[:,i])
+        R[i] = norm(x0-x[:,i])
     end
 
     return R
