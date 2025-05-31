@@ -232,19 +232,19 @@ end
 
 
 
-function propMatFreeSpace(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
+function propMatFreeSpace(freqs::AbstractVector{<:Real},distances::AbstractVector{<:Real},
         eps::Number,modes::Modes,coords::Coordinates)
 
     P = O(1,1, 1,-modes.L, 1,-modes.L)(
-        zeros(C64,length(freqs),length(dz), modes.M,2modes.L+1, modes.M,2modes.L+1))
+        zeros(C64,length(freqs),length(distances), modes.M,2modes.L+1, modes.M,2modes.L+1))
 
     for i in eachindex(freqs)
         k0 = 2π*freqs[i]/c0*sqrt(eps)
 
-        for j in eachindex(dz)
+        for j in eachindex(distances)
             for m in 1:modes.M, l in -modes.L:modes.L, k in axes(modes,5)
                 mode_ = copy(raw(modes[m,l,k]))
-                propagate!(mode_,coords,dz[j],k0)
+                propagate!(mode_,coords,distances[j],k0)
                 coeffs_ = modeDecomp(mode_,modes)
                 P[i,j,m,l,:,:] .+= coeffs_
             end
@@ -254,19 +254,19 @@ function propMatFreeSpace(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Rea
     return P
 end
 
-function propMatWaveGuide(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
+function propMatWaveGuide(freqs::AbstractVector{<:Real},distances::AbstractVector{<:Real},
         eps::Number,modes::Modes,coords::Coordinates)
 
     P = O(1,1, 1,-modes.L, 1,-modes.L)(
-        zeros(C64,length(freqs),length(dz), modes.M,2modes.L+1, modes.M,2modes.L+1))
+        zeros(C64,length(freqs),length(distances), modes.M,2modes.L+1, modes.M,2modes.L+1))
 
     for i in eachindex(freqs)
         k0 = 2π*freqs[i]/c0*sqrt(eps)
 
-        for j in eachindex(dz)
+        for j in eachindex(distances)
             for m in 1:modes.M, l in -modes.L:modes.L#, k in axes(modes,5)
                 # add disk tilts and surface here
-                P[i,j,m,l,m,l] .= cis(-k0*dz[i])
+                P[i,j,m,l,m,l] .= cis(-k0*distances[i])
             end
         end
     end
@@ -275,18 +275,18 @@ function propMatWaveGuide(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Rea
 end
 
 
-function propagationMatrix(dz::AbstractVector{<:Real},freqs::AbstractVector{<:Real},
+function propagationMatrix(freqs::AbstractVector{<:Real},distances::AbstractVector{<:Real},
         eps::Number,modes::Modes,coords::Coordinates; waveguide::Bool=false)
 
-    @assert all(dz .> 0) "All propagated distances dz must be positive."
+    @assert all(distances .> 0) "All propagated distances dz must be positive."
     @assert all(freqs .> 0) "All frequencies freqs must be positive."
 
     eps = complex(eps)
 
     if waveguide
-        return propMatWaveGuide(dz,freqs,eps,modes,coords)
+        return propMatWaveGuide(freqs,distances,eps,modes,coords)
     else
-        return propMatFreeSpace(dz,freqs,eps,modes,coords)
+        return propMatFreeSpace(freqs,distances,eps,modes,coords)
     end
 end
 
@@ -321,7 +321,7 @@ mutable struct GrandPropagationMatrix
     function GrandPropagationMatrix(freqs,distances,modes,coords; 
             eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3,nm::Real=1e15)
 
-        p = propagationMatrix(distances,freqs,1.0,modes,coords);
+        p = propagationMatrix(freqs,distances,1.0,modes,coords);
 
         ps = O(1,1,-modes.L,1,-modes.L)(
         Array{Spline{C64}}(undef,length(freqs),modes.M,2modes.L+1,modes.M,2modes.L+1))
@@ -399,8 +399,10 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
 
             for m in 1:gpm.M, l in -gpm.L:gpm.L                
                 for m_ in 1:gpm.M, l_ in -gpm.L:gpm.L
-                    T_[:,1,m,l] .+= gpm.T[:,1,m,l]*spline(gpm.PS[j,m,l,m_,l_],distances[i])
-                    T_[:,2,m,l] .+= gpm.T[:,2,m,l]/spline(gpm.PS[j,m,l,m_,l_],distances[i])
+                    s = spline(gpm.PS[j,m,l,m_,l_],distances[i])
+
+                    T_[:,1,m,l] .+= gpm.T[:,1,m,l]*s
+                    T_[:,2,m,l] .+= gpm.T[:,2,m,l]*conj(s)
                 end
             end
 
@@ -429,7 +431,10 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
 end
 
 
-
+cispi(-2*f[1]*dists[1]/c0)
+cispi( 2*f[1]*dists[1]/c0)
+spline(gpm.PS[1,1,0,1,0],dists[1])
+conj(spline(gpm.PS[1,1,0,1,0],dists[1]))
 
 
 f = 22.025e9; ω = 2π*f; λ = c0/f
@@ -451,20 +456,23 @@ modes = Modes(1,0,coords);
 # coeffs = field2modes(E0,modes)
 
 
-
-freqs = collect(range(21.5e9,22.5e9,101))
+freqs = collect(range(20.5e9,23.5e9,1001))
 d = collect(range(1e-3,10e-3,10))
-@time p = propagationMatrix(d,freqs,1.0,modes,coords);
+# @time p = propagationMatrix(freqs,d,1.0,modes,coords);
+@time gpm = GPM(freqs,d,modes,coords; eps=24.0);
 
 
-gpm = GPM(freqs,d,modes,coords; eps=1.0)
 
-dists = ones(2)*7.21e-3
+dists = ones(1)*7.21e-3
 
-RB = transfer_matrix_3d(Dist,dists,gpm;);
+@time RB = transfer_matrix_3d(Dist,dists,gpm;); R = RB[:,1,:,:]; B = RB[:,2,:,:];
+display(plot(freqs/1e9,abs.(R[:]),title="Ref 3d"))
+display(plot(freqs/1e9,abs2.(B[:]),title="Boost 3d"))
 
-R = RB[:,1,:,:]
-B = RB[:,2,:,:]
+
+@time RB_ = transfer_matrix(Dist,freqs,dists;); R_ = RB_[:,1]; B_ = RB_[:,2];
+display(plot(freqs/1e9,abs.(R_),title="Ref 1d"))
+display(plot(freqs/1e9,abs2.(B_),title="Boost 1d"))
 
 
 gpm.PS[1,1,0,1,0]
