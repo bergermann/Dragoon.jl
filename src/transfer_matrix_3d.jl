@@ -369,7 +369,7 @@ const GPM = GrandPropagationMatrix
 # abstract type Dist <: Space end
 # abstract type Pos  <: Space end
 
-function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::GPM;)::OffsetArray{C64,4,Array{C64,4}}
+function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::GPM,ax;)::OffsetArray{C64,4,Array{C64,4}}
     l = length(gpm.freqs)
     RB = O(1,1,1,-gpm.L)(Array{ComplexF64}(undef,l,2,gpm.M,2gpm.L+1))
 
@@ -384,7 +384,7 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
 
         for m in 1:gpm.M, l in -gpm.L:gpm.L
             copyto!(gpm.T[:,:,m,l],gpm.Gd)
-            copyto!(gpm.MM[:,:,m,l],gpm.S)
+            copyto!(gpm.MM[:,:,m,l],gpm.S); gpm.MM .*= ax[m,l]
         end
 
         # iterate in reverse order to sum up M in single sweep (thx david)
@@ -393,7 +393,7 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
                 gpm.T[:,1,m,l] .*= pd1
                 gpm.T[:,2,m,l] .*= pd2 # T = Gd*Pd
 
-                mul!(W,gpm.T[:,:,m,l],gpm.S); gpm.MM[:,:,m,l] .-= W         # M = Gd*Pd*S_-1
+                mul!(W,gpm.T[:,:,m,l],gpm.S); W .*= ax[m,l]; gpm.MM[:,:,m,l] .-= W         # M = Gd*Pd*S_-1
                 mul!(W,gpm.T[:,:,m,l],gpm.Gv); copyto!(gpm.T[:,:,m,l],W)    # T *= Gd*Pd*Gv
             end
 
@@ -401,11 +401,7 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
             for m in 1:gpm.M, l in -gpm.L:gpm.L                
                 for m_ in 1:gpm.M, l_ in -gpm.L:gpm.L
                     s = spline(gpm.PS[j,m,l,m_,l_],distances[i])
-                    @assert abs(s) < 1.0 "|s| not smaller than 1!"
-                    # println("$i, ,$m, $m_, $l, $l_, $(abs(s))")
-
-                    # T_[:,1,m,l] .+= gpm.T[:,1,m,l]*s
-                    # T_[:,2,m,l] .+= gpm.T[:,2,m,l]*conj(s)
+                    # @assert abs(s) < 1.0 "|s| not smaller than 1!"
                     
                     T_[:,1,m,l] .+= gpm.T[:,1,m,l]*s
                     T_[:,2,m,l] .+= gpm.T[:,2,m,l]*conj(s)
@@ -416,10 +412,10 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
                
             for m in 1:gpm.M, l in -gpm.L:gpm.L 
                 if i > 1
-                    mul!(W,gpm.T[:,:,m,l],gpm.S);  gpm.MM[:,:,m,l] .+= W
+                    mul!(W,gpm.T[:,:,m,l],gpm.S); W .*= ax[m,l]; gpm.MM[:,:,m,l] .+= W
                     mul!(W,gpm.T[:,:,m,l],gpm.Gd); copyto!(gpm.T[:,:,m,l],W)
                 else
-                    mul!(W,gpm.T[:,:,m,l],gpm.S0); gpm.MM[:,:,m,l] .+= W
+                    mul!(W,gpm.T[:,:,m,l],gpm.S0); W .*= ax[m,l]; gpm.MM[:,:,m,l] .+= W
                     mul!(W,gpm.T[:,:,m,l],gpm.G0); copyto!(gpm.T[:,:,m,l],W)
                 end
             
@@ -459,25 +455,45 @@ modes = Modes(3,0,coords);
 # E = modes2field(ax,modes)
 
 
-# coeffs = field2modes(E0,modes)
+coeffs = field2modes(E0,modes)
 
 
-freqs = collect(range(21.5e9,22.5e9,101))
-d = collect(range(1e-3,10e-3,10))
-# @time p = propagationMatrix(freqs,d,1.0,modes,coords);
-@time gpm = GPM(freqs,d,modes,coords; eps=24.0);
+# freqs = collect(range(21.5e9,22.5e9,101))
+freqs = collect(range(21.98e9,22.26e9,50))
+# @time p = propagationMatrix(freqs,collect(range(1e-3,10e-3,10)),1.0,modes,coords);
+@time gpm = GPM(freqs,collect(range(1e-3,10e-3,10)),modes,coords; eps=24.0);
 
 
 
-dists = ones(20)*7.21e-3
+# dists = ones(20)*7.21e-3
+dists = [1.00334,
+        6.94754,
+        7.1766,
+        7.22788,
+        7.19717,
+        7.23776,
+        7.07746,
+        7.57173,
+        7.08019,
+        7.24657,
+        7.21708,
+        7.18317,
+        7.13025,
+        7.2198,
+        7.45585,
+        7.39873,
+        7.15403,
+        7.14252,
+        6.83105,
+        7.42282,]*1e-3
 
 m_ = 3; l_ = 0;
-@time RB = transfer_matrix_3d(Dist,dists,gpm;);
+@time RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
 @time RB_ = transfer_matrix(Dist,freqs,dists;); R_ = RB_[:,1]; B_ = RB_[:,2];
 
 R = RB[:,1,m_,l_]; B = RB[:,2,m_,l_];
-display(plot(freqs/1e9,abs2.(B_),title="Boost 1d"))
-display(plot(freqs/1e9,abs2.(B[:]),title="Boost 3d"))
+# display(plot(freqs/1e9,abs2.(B_),title="Boost 1d"))
+display(plot(freqs/1e9,abs2.(B[:]*ax[1]),title="Boost 3d, m=$m_, l=$l_"))
 
 # display(plot(freqs/1e9,abs.(R_),title="Ref 1d"))
 # display(plot(freqs/1e9,abs.(R[:]),title="Ref 3d"))
