@@ -43,17 +43,20 @@ function transfer_matrix(::Type{Dist},freqs::Union{Real,AbstractVector{<:Real}},
             T[:,1] .*= pd1
             T[:,2] .*= pd2 # T = Gd*Pd
 
-            mul!(W,T,S); M .-= W        # M = Gd*Pd*S_-1
+            # mul!(W,T,S); M .-= W        # M = Gd*Pd*S_-1
+            mul!(M,T,S,-1.,1.)
             mul!(W,T,Gv); copyto!(T,W)  # T *= Gd*Pd*Gv
 
             T[:,1] .*= cispi(-2*freqs[j]*distances[i]/c0)
             T[:,2] .*= cispi(+2*freqs[j]*distances[i]/c0)   # T = Gd*Pd*Gv*Gd*S_-1
 
             if i > 1
-                mul!(W,T,S); M .+= W
+                # mul!(W,T,S); M .+= W
+                mul!(M,T,S,1.,1.)
                 mul!(W,T,Gd); copyto!(T,W)
             else
-                mul!(W,T,S0); M .+= W
+                # mul!(W,T,S0); M .+= W
+                mul!(M,T,S0,1.,1.)
                 mul!(W,T,G0); copyto!(T,W)
             end
         end
@@ -108,7 +111,8 @@ function transfer_matrix(::Type{Pos},freqs::Union{Real,AbstractVector{<:Real}},
             T[:,1] .*= pd1
             T[:,2] .*= pd2 # T = Gd*Pd
 
-            mul!(W,T,S); M .-= W        # M = Gd*Pd*S_-1
+            # mul!(W,T,S); M .-= W        # M = Gd*Pd*S_-1
+            mul!(M,T,S,-1.,1.)
             mul!(W,T,Gv); copyto!(T,W)  # T *= Gd*Pd*Gv
 
             d = position[i]-(i==1 ? 0 : position[i-1]+thickness)
@@ -116,10 +120,12 @@ function transfer_matrix(::Type{Pos},freqs::Union{Real,AbstractVector{<:Real}},
             T[:,2] .*= cispi(+2*freqs[j]*d/c0)   # T = Gd*Pd*Gv*Gd*S_-1
 
             if i > 1
-                mul!(W,T,S); M .+= W
+                # mul!(W,T,S); M .+= W
+                mul!(M,T,S,1.,1.)
                 mul!(W,T,Gd); copyto!(T,W)
             else
-                mul!(W,T,S0); M .+= W
+                # mul!(W,T,S0); M .+= W
+                mul!(M,T,S0,1.,1.)
                 mul!(W,T,G0); copyto!(T,W)
             end
         end
@@ -187,3 +193,4 @@ transfer_matrix_2port(::Type{Pos},freqs::Union{Real,AbstractVector{<:Real}},
 transfer_matrix_2port(freqs::Union{Real,AbstractVector{<:Real}},
         distances::AbstractVector{<:Real}; eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3) =
     transfer_matrix_2port(Dist,freqs,distances; eps=eps,tand=tand,thickness=thickness)
+
