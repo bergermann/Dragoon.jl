@@ -387,6 +387,7 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
             copyto!(gpm.MM[:,:,m,l],gpm.S); gpm.MM .*= ax[m,l]
         end
 
+        # println("f: ",f)
         # iterate in reverse order to sum up M in single sweep (thx david)
         for i in Iterators.reverse(eachindex(distances))
             for m in 1:gpm.M, l in -gpm.L:gpm.L
@@ -404,6 +405,13 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
                 # T_[:,2,m,l] .+= gpm.T[:,2,m,l]*cispi(+2*freqs[j]*distances[i]/c0)        
                 for m_ in 1:gpm.M, l_ in -gpm.L:gpm.L
                     s = spline(gpm.PS[j,m,l,m_,l_],distances[i])
+
+                    if m_ == m
+                        # println(cispi(-2*f[1]*distances[i]/c0))
+                        # println(abs(cispi(-2*f[1]*distances[i]/c0)-s))
+                        # println(s)
+                        # println()
+                    end
                     
                     T_[:,1,m,l] .+= gpm.T[:,1,m,l]*s
                     T_[:,2,m,l] .+= gpm.T[:,2,m,l]*conj(s)
@@ -436,19 +444,20 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
     return RB
 end
 
-d = dists[3]
-cispi(-2*f[1]*d/c0)
-# cispi( 2*f[1]*d/c0)
-spline(gpm.PS[1,1,0,1,0],d)
-# conj(spline(gpm.PS[1,1,0,1,0],d))
+# d = dists[3]
+# cispi(-2*f[1]*d/c0)
+# # cispi( 2*f[1]*d/c0)
+# spline(gpm.PS[1,1,0,1,0],d)
+# # conj(spline(gpm.PS[1,1,0,1,0],d))
 
 f = 22.025e9; ω = 2π*f; λ = c0/f
 eps = complex(1)
 k0 = 2π*f/c0*sqrt(eps)
 
-coords = Coordinates(1,λ/2; diskR=0.15);
+# coords = Coordinates(1,λ/2; diskR=0.15);
+coords = Coordinates(1,0.02; diskR=0.15);
 
-m = 1; l = 0
+m = 3; l = 0
 modes = Modes(m,l,coords);
 
 
@@ -460,33 +469,36 @@ ax = axionModes(coords,modes)
 
 
 # freqs = collect(range(21.5e9,22.5e9,101))
-freqs = collect(range(21.98e9,22.26e9,50))
+# freqs = collect(range(21.98e9,22.26e9,100))
+# freqs = collect(range(22.0e9,22.05e9,10))
+freqs = collect(range(18.5e9,22.5e9,1000))
+
 # @time p = propagationMatrix(freqs,collect(range(1e-3,10e-3,10)),1.0,modes,coords);
 @time gpm = GPM(freqs,collect(range(1e-3,10e-3,10)),modes,coords; eps=24.0);
 
 
 
-# dists = ones(20)*7.21e-3
-dists = [1.00334,
-        6.94754,
-        7.1766,
-        7.22788,
-        7.19717,
-        7.23776,
-        7.07746,
-        7.57173,
-        7.08019,
-        7.24657,
-        7.21708,
-        7.18317,
-        7.13025,
-        7.2198,
-        7.45585,
-        7.39873,
-        7.15403,
-        7.14252,
-        6.83105,
-        7.42282,]*1e-3
+dists = ones(1)*7.21e-3
+# dists = [1.00334,
+        # 6.94754,
+        # 7.1766,
+        # 7.22788,
+        # 7.19717,
+        # 7.23776,
+        # 7.07746,
+        # 7.57173,
+        # 7.08019,
+        # 7.24657,
+        # 7.21708,
+        # 7.18317,
+        # 7.13025,
+        # 7.2198,
+        # 7.45585,
+        # 7.39873,
+        # 7.15403,
+        # 7.14252,
+        # 6.83105,
+        # 7.42282,]*1e-3
 
 
 @time RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
