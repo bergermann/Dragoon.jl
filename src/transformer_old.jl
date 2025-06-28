@@ -7,7 +7,7 @@ diskR = 0.15
 
 epsilon = 24
 # eps = Array{Complex{Float64}}([NaN, 1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1])
-eps = ComplexF64[NaN,1,epsilon,1]
+eps = ComplexF64[NaN,1,epsilon,1,epsilon,1,epsilon,1]
 # distance = [0.0, 1.00334, 1.0,
 #                         6.94754, 1.0,
 #                         7.1766, 1.0,
@@ -29,9 +29,9 @@ eps = ComplexF64[NaN,1,epsilon,1]
 #                         6.83105, 1.0,
 #                         7.42282, 1.0,
 #                         0.0]*1e-3
-distance = [0.0,7.21,1.0,0.0]*1e-3
+distance = [0.0,7.21,1.0,7.21,1.0,7.21,1.0,0.0]*1e-3
 
-sbdry = SeedSetupBoundaries(coords, diskno=1, distance=distance, epsilon=eps)
+sbdry = SeedSetupBoundaries(coords, diskno=3, distance=distance, epsilon=eps)
 
 Mmax = 3
 Lmax = 0
@@ -41,7 +41,7 @@ m_reflect = zeros(Mmax*(2*Lmax+1))
 m_reflect[Lmax+1] = 1.0
 
 # frequencies = collect(range(21.98e9,22.26e9,1000))
-frequencies = collect(range(18.5e9,22.5e9,1000))
+frequencies = collect(range(21.0e9,22.5e9,1000))
 
 B = []
 R = []
@@ -54,5 +54,5 @@ end
 b = [[abs2(B[i][j]) for i in eachindex(B)] for j in 1:3]
 r = [[R[i][j] for i in eachindex(R)] for j in 1:3]
 
-plot(frequencies/1e9,b)
+plot(frequencies/1e9,b; title="transformer")
 # display(b)
