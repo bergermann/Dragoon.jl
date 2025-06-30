@@ -47,7 +47,7 @@ B = []
 R = []
 
 @time for f in frequencies
-    boost, refl = transformer(sbdry,coords,modes; reflect=m_reflect, prop=propagator,diskR=0.15,f=f)
+    boost, refl = transformer(sbdry,coords,modes; reflect=m_reflect, prop=propagator,diskR=diskR,f=f)
     push!(B,boost); push!(R,refl)
 end
 

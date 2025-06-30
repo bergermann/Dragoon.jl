@@ -35,7 +35,7 @@ struct Coordinates
     diskmaskout::BitMatrix
 
     function Coordinates(X::AbstractVector=-0.5:0.01:0.5; diskR::Real=0.15)
-        @assert X == -reverse(X) "Coordinates must be symmetrical around 0."
+        @assert X==-reverse(X) && X[1]*X[end]<0 "Coordinates must be symmetrical around 0."
 
         kX = kSpace(X)
         R  = [sqrt(x^2+y^2) for x in X, y in X]
@@ -453,9 +453,9 @@ eps = complex(1)
 k0 = 2π*f/c0*sqrt(eps)
 
 # coords = Coordinates(1,λ/2; diskR=0.15);
-coords = Coordinates(1,0.02; diskR=0.15);
+coords = Coordinates(1,0.02; diskR=0.30);
 
-m = 1; l = 0
+m = 3; l = 0
 modes = Modes(m,l,coords);
 
 
