@@ -18,7 +18,7 @@ const C64 = ComplexF64
 function kSpace(X)
     @assert X == -reverse(X) "Coordinates need to be symmetric around 0."
 
-    k_max = π*length(X)/maximum(X)
+    k_max = π*length(X)/2maximum(X)
 
     return ifftshift(range(-k_max,k_max,length(X)))
 end
@@ -233,7 +233,7 @@ end
 
 
 
-function propMatFreeSpace(freqs::AbstractVector{<:Real},distances::AbstractVector{<:Real},
+function propMatFreeSpace(freqs::Union{Real,AbstractVector{<:Real}},distances::AbstractVector{<:Real},
         eps::Number,modes::Modes,coords::Coordinates)
 
     P = O(1,1, 1,-modes.L, 1,-modes.L)(
@@ -276,7 +276,7 @@ function propMatWaveGuide(freqs::AbstractVector{<:Real},distances::AbstractVecto
 end
 
 
-function propagationMatrix(freqs::AbstractVector{<:Real},distances::AbstractVector{<:Real},
+function propagationMatrix(freqs::Union{Real,AbstractVector{<:Real}},distances::AbstractVector{<:Real},
         eps::Number,modes::Modes,coords::Coordinates; waveguide::Bool=false)
 
     @assert all(distances .> 0) "All propagated distances dz must be positive."
@@ -296,7 +296,7 @@ const propMatrix = const propMat = const prop = propagationMatrix
 
 
 mutable struct GrandPropagationMatrix
-    freqs::Vector{Float64}
+    freqs::Union{Real,Vector{Float64}}
     thickness::Float64
     nd::ComplexF64
 
@@ -309,13 +309,12 @@ mutable struct GrandPropagationMatrix
     Gd::SMatrix{2,2,ComplexF64}
     Gv::SMatrix{2,2,ComplexF64}
     G0::SMatrix{2,2,ComplexF64}
-    #  T::MMatrix{2,2,ComplexF64}
-     T::OffsetArray{ComplexF64,4,Array{ComplexF64,4}}
-
+    
      S::SMatrix{2,2,ComplexF64}
     S0::SMatrix{2,2,ComplexF64}
-    #  M::MMatrix{2,2,ComplexF64}
-    MM::OffsetArray{ComplexF64,4,Array{ComplexF64,4}}
+    
+     T::OffsetArray{MMatrix{ComplexF64},2,Array{MMatrix{ComplexF64},2}}
+    MM::OffsetArray{MMatrix{ComplexF64},2,Array{MMatrix{ComplexF64},2}}
 
      W::MMatrix{2,2,ComplexF64}
 
@@ -344,13 +343,12 @@ mutable struct GrandPropagationMatrix
         Gd = SMatrix{2,2,ComplexF64}((1+nd)/2,   (1-nd)/2,   (1-nd)/2,   (1+nd)/2)
         Gv = SMatrix{2,2,ComplexF64}((nd+1)/2nd, (nd-1)/2nd, (nd-1)/2nd, (nd+1)/2nd)
         G0 = SMatrix{2,2,ComplexF64}((1+nm)/2,   (1-nm)/2,   (1-nm)/2,   (1+nm)/2)
-        # T  = MMatrix{2,2,ComplexF64}(undef)
-        T = O(1,1,1,-modes.L)(Array{ComplexF64}(undef,2,2,modes.M,2*modes.L+1))
-
+        
         S  = SMatrix{2,2,ComplexF64}( A/2, 0.0im, 0.0im,  A/2)
         S0 = SMatrix{2,2,ComplexF64}(A0/2, 0.0im, 0.0im, A0/2)
-        # M  = MMatrix{2,2,ComplexF64}(undef)
-        MM = O(1,1,1,-modes.L)(Array{ComplexF64}(undef,2,2,modes.M,2*modes.L+1))
+        
+        T  = O(1,-modes.L)([MMatrix{2,2,ComplexF64}(undef) for _ in 1:modes.M, _ in -modes.L:modes.L])
+        MM = O(1,-modes.L)([MMatrix{2,2,ComplexF64}(undef) for _ in 1:modes.M, _ in -modes.L:modes.L])
 
         W  = MMatrix{2,2,ComplexF64}(undef)
 
@@ -392,8 +390,8 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
         pd2 = cispi(+2*f*gpm.nd*gpm.thickness/c0)
 
         for m in 1:M, l in -L:L
-            copyto!(T[:,:,m,l],Gd)
-            copyto!(MM[:,:,m,l],S); MM .*= ax[m,l]
+            copyto!(T[m,l],Gd)
+            copyto!(MM[m,l],S); MM .*= ax[m,l]
         end
 
         # iterate in reverse order to sum up MM in single sweep (thx david)
@@ -402,17 +400,19 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
                 T[:,1,m,l] .*= pd1
                 T[:,2,m,l] .*= pd2 # T = Gd*Pd
                 
-                mul!(MM[:,:,m,l],T[:,:,m,l],S,-ax[m,l],1.)      # MM = Gd*Pd*S_-1
+                mul!(MM[:,:,m,l],T[:,:,m,l],S,-ax[m,l],1.)            # MM = Gd*Pd*S_-1
                 mul!(W,T[:,:,m,l],Gv); copyto!(T[:,:,m,l],W)    # T *= Gd*Pd*Gv
+                # @time mul!(MM[:,:,m,l],T[:,:,m,l],S,-ax[m,l],1.)            # MM = Gd*Pd*S_-1
+                # @time mul!(W,T[:,:,m,l],Gv); @time copyto!(T[:,:,m,l],W)    # T *= Gd*Pd*Gv
+
+                # println()
             end
 
             T_ .= 0.0im
-            for m in 1:gpm.M, l in -gpm.L:gpm.L        
-                # T_[:,1,m,l] .+= gpm.T[:,1,m,l]*cispi(-2*freqs[j]*distances[i]/c0)
-                # T_[:,2,m,l] .+= gpm.T[:,2,m,l]*cispi(+2*freqs[j]*distances[i]/c0)        
+            for m in 1:gpm.M, l in -gpm.L:gpm.L  
                 for m_ in 1:gpm.M, l_ in -gpm.L:gpm.L
                     s = spline(PS[j,m,l,m_,l_],distances[i])
-                    
+
                     T_[:,1,m_,l_] .+= T[:,1,m,l]*s
                     T_[:,2,m_,l_] .+= T[:,2,m,l]*conj(s)
                 end
@@ -434,89 +434,114 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
                     (MM[2,1,m,l]+MM[2,2,m,l])*T[1,2,m,l]/T[2,2,m,l]
             end
         end
-
-        # M .= S
-        # T .= 1.0+0.0im; T[1,1] += nd; T[2,2] += nd; T[2,1] -= nd; T[1,2] -= nd; T .*= 0.5
     end
 
     return RB
 end
-
-# d = dists[3]
-# cispi(-2*f[1]*d/c0)
-# # cispi( 2*f[1]*d/c0)
-# spline(gpm.PS[1,1,0,1,0],d)
-# # conj(spline(gpm.PS[1,1,0,1,0],d))
 
 f = 22.025e9; ω = 2π*f; λ = c0/f
 eps = complex(1)
 k0 = 2π*f/c0*sqrt(eps)
 
 # coords = Coordinates(1,λ/2; diskR=0.15);
-coords = Coordinates(1,0.02; diskR=0.30);
+coords = Coordinates(1,0.02; diskR=0.15);
 
-m = 3; l = 0
+m = 1; l = 0
 modes = Modes(m,l,coords);
 
 
 ax = axionModes(coords,modes)
-# E = modes2field(ax,modes)
-
-
-# coeffs = field2modes(E0,modes)
-
 
 # freqs = collect(range(21.5e9,22.5e9,101))
-# freqs = collect(range(21.98e9,22.26e9,100))
-# freqs = collect(range(21.98e9,22.12e9,101))
-# freqs = collect(range(22.0e9,22.05e9,10))
-freqs = collect(range(21.0e9,22.5e9,1000))
+freqs = 22.0e9
 
 # @time p = propagationMatrix(freqs,collect(range(1e-3,10e-3,10)),1.0,modes,coords);
 @time gpm = GPM(freqs,collect(range(1e-3,10e-3,11)),modes,coords; eps=24.0);
 
 
 
-dists = ones(3)*7.21e-3
+dists = ones(1)*7.21e-3
 # dists = [1.00334,
-#         6.94754,
-#         7.1766,
-#         7.22788,
-#         7.19717,
-#         7.23776,
-#         7.07746,
-#         7.57173,
-#         7.08019,
-#         7.24657,
-#         7.21708,
-#         7.18317,
-#         7.13025,
-#         7.2198,
-#         7.45585,
-#         7.39873,
-#         7.15403,
-#         7.14252,
-#         6.83105,
-#         7.42282,]*1e-3
+        # 6.94754,
+        # 7.1766,
+        # 7.22788,
+        # 7.19717,
+        # 7.23776,
+        # 7.07746,
+        # 7.57173,
+        # 7.08019,
+        # 7.24657,
+        # 7.21708,
+        # 7.18317,
+        # 7.13025,
+        # 7.2198,
+        # 7.45585,
+        # 7.39873,
+        # 7.15403,
+        # 7.14252,
+        # 6.83105,
+        # 7.42282,]*1e-3
 
 
-@time RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
-# @time RB_ = transfer_matrix(Dist,freqs,dists;); R_ = RB_[:,1]; B_ = RB_[:,2];
+# @time RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
+RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
+
+
+
+
+
 
 B = [abs2.(RB[:,2,i,0]) for i in 1:m]
-# display(plot(freqs/1e9,abs2.(B_),title="Boost 1d"))
 display(plot(freqs/1e9,B,title="Boost 3d, m_max = $m, l_max = $l",label=["m=1" "m=2" "m=3"]))
 
-# display(plot(freqs/1e9,abs.(R_),title="Ref 1d"))
-# display(plot(freqs/1e9,abs.(R[:]),title="Ref 3d"))
 
 
-# gpm.PS[1,1,0,1,0]
+
+function test1(gpm)
+    T = O(1,1,1,-modes.L)(Array{ComplexF64}(undef,2,2,modes.M,2*modes.L+1))
+    T = gpm.T
+    Gd = gpm.Gd
+    S  = gpm.S
+    MM = gpm.MM
+
+    @time @views @inbounds for i in 1:10
+        for m in 1:gpm.M, l in -gpm.L:gpm.L
+            # T[:,:,m,l] .= Gd
+            # MM[:,:,m,l] .= S
+            copyto!(T[:,:,m,l],Gd)
+            copyto!(MM[:,:,m,l],S)
+        end
+    end
+
+    return gpm
+end
+
+test1(gpm);
 
 
-# p = propagationMatrix(d,freqs,24,modes,coords)
 
-# s = cSpline(d,p[100,:,1,0,1,0])
-# spline(s,1.21e-3)
 
+function test2(gpm)
+    T  = [MMatrix{2,2,ComplexF64}(undef) for _ in 1:gpm.M, _ in -gpm.L:gpm.L]
+    T  = O(1,-modes.L)(T)
+    MM = [MMatrix{2,2,ComplexF64}(undef) for _ in 1:gpm.M, _ in -gpm.L:gpm.L]
+    MM = O(1,-modes.L)(MM)
+    # MM = O(1,-modes.L)(Array{MMatrix{2,2,ComplexF64}}(undef,modes.M,2*modes.L+1))
+
+    Gd = gpm.Gd
+    S  = gpm.S
+
+    @time @views @inbounds for i in 1:10
+        for m in 1:gpm.M, l in -gpm.L:gpm.L
+            # T[:,:,m,l] .= Gd
+            # MM[:,:,m,l] .= S
+            copyto!(T[m,l],Gd)
+            copyto!(MM[m,l],S)
+        end
+    end
+
+    return gpm
+end
+
+test2(gpm);
 
