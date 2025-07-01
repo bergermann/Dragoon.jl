@@ -313,10 +313,11 @@ mutable struct GrandPropagationMatrix
      S::SMatrix{2,2,ComplexF64}
     S0::SMatrix{2,2,ComplexF64}
     
-     T::OffsetArray{MMatrix{ComplexF64},2,Array{MMatrix{ComplexF64},2}}
-    MM::OffsetArray{MMatrix{ComplexF64},2,Array{MMatrix{ComplexF64},2}}
+     T::OffsetMatrix{MMatrix{2,2,ComplexF64},Matrix{MMatrix{2,2,ComplexF64}}}
+    MM::OffsetMatrix{MMatrix{2,2,ComplexF64},Matrix{MMatrix{2,2,ComplexF64}}}
 
      W::MMatrix{2,2,ComplexF64}
+    TW::OffsetMatrix{MMatrix{2,2,ComplexF64},Matrix{MMatrix{2,2,ComplexF64}}}
 
     function GrandPropagationMatrix(freqs,distances,modes,coords; 
             eps::Real=24.0,tand::Real=0.0,thickness::Real=1e-3,nm::Real=1e15)
@@ -351,8 +352,9 @@ mutable struct GrandPropagationMatrix
         MM = O(1,-modes.L)([MMatrix{2,2,ComplexF64}(undef) for _ in 1:modes.M, _ in -modes.L:modes.L])
 
         W  = MMatrix{2,2,ComplexF64}(undef)
+        TW = O(1,-modes.L)([MMatrix{2,2,ComplexF64}(undef) for _ in 1:modes.M, _ in -modes.L:modes.L])
 
-        new(freqs,thickness,nd,modes.M,modes.L,ps,Gd,Gv,G0,T,S,S0,MM,W)
+        new(freqs,thickness,nd,modes.M,modes.L,ps,Gd,Gv,G0,S,S0,T,MM,W,TW)
     end
 end
 
@@ -372,7 +374,7 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
 
     Gd = gpm.Gd; Gv = gpm.Gv; G0 = gpm.G0
 
-    T = gpm.T; T_ = similar(T)
+    T = gpm.T; TW = gpm.TW
 
     S  = gpm.S; S0 = gpm.S0
     MM  = gpm.MM
@@ -397,47 +399,45 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
         # iterate in reverse order to sum up MM in single sweep (thx david)
         for i in Iterators.reverse(eachindex(distances))
             for m in 1:M, l in -L:L
-                T[:,1,m,l] .*= pd1
-                T[:,2,m,l] .*= pd2 # T = Gd*Pd
+                T[m,l][:,1] .*= pd1
+                T[m,l][:,2] .*= pd2 # T = Gd*Pd
                 
-                mul!(MM[:,:,m,l],T[:,:,m,l],S,-ax[m,l],1.)            # MM = Gd*Pd*S_-1
-                mul!(W,T[:,:,m,l],Gv); copyto!(T[:,:,m,l],W)    # T *= Gd*Pd*Gv
-                # @time mul!(MM[:,:,m,l],T[:,:,m,l],S,-ax[m,l],1.)            # MM = Gd*Pd*S_-1
-                # @time mul!(W,T[:,:,m,l],Gv); @time copyto!(T[:,:,m,l],W)    # T *= Gd*Pd*Gv
-
-                # println()
+                mul!(MM[m,l],T[m,l],S,-ax[m,l],1.)              # MM = Gd*Pd*S_-1
+                mul!(W,T[m,l],Gv); copyto!(T[m,l],W)            # T *= Gd*Pd*Gv
             end
 
-            T_ .= 0.0im
-            for m in 1:gpm.M, l in -gpm.L:gpm.L  
+            for m in 1:gpm.M, l in -gpm.L:gpm.L; TW[m,l] .= 0.0im; end
+            for m in 1:gpm.M, l in -gpm.L:gpm.L                
                 for m_ in 1:gpm.M, l_ in -gpm.L:gpm.L
                     s = spline(PS[j,m,l,m_,l_],distances[i])
 
-                    T_[:,1,m_,l_] .+= T[:,1,m,l]*s
-                    T_[:,2,m_,l_] .+= T[:,2,m,l]*conj(s)
+                    TW[m_,l_][:,1] .+= T[m,l][:,1]*s
+                    TW[m_,l_][:,2] .+= T[m,l][:,2]*conj(s)
                 end
             end
-
-            copyto!(T,T_)
+            for m in 1:gpm.M, l in -gpm.L:gpm.L; copyto!(T[m,l],TW[m,l]); end
+            # copyto!(T,TW)
                
             for m in 1:M, l in -L:L 
                 if i > 1
-                    mul!(MM[:,:,m,l],T[:,:,m,l],S,ax[m,l],1.)
-                    mul!(W,T[:,:,m,l],Gd); copyto!(T[:,:,m,l],W)
+                    mul!(MM[m,l],T[m,l],S,ax[m,l],1.)
+                    mul!(W,T[m,l],Gd); copyto!(T[m,l],W)
                 else
-                    mul!(MM[:,:,m,l],T[:,:,m,l],S0,ax[m,l],1.)
-                    mul!(W,T[:,:,m,l],G0); copyto!(T[:,:,m,l],W)
+                    mul!(MM[m,l],T[m,l],S0,ax[m,l],1.)
+                    mul!(W,T[m,l],G0); copyto!(T[m,l],W)
                 end
             
-                RB[j,1,m,l] = T[1,2,m,l]/T[2,2,m,l]
-                RB[j,2,m,l] = MM[1,1,m,l]+MM[1,2,m,l]-
-                    (MM[2,1,m,l]+MM[2,2,m,l])*T[1,2,m,l]/T[2,2,m,l]
+                RB[j,1,m,l] = T[m,l][1,2]/T[m,l][2,2]
+                RB[j,2,m,l] = MM[m,l][1,1]+MM[m,l][1,2]-
+                    (MM[m,l][2,1]+MM[m,l][2,2])*T[m,l][1,2]/T[m,l][2,2]
             end
         end
     end
 
     return RB
 end
+
+
 
 f = 22.025e9; ω = 2π*f; λ = c0/f
 eps = complex(1)
@@ -446,45 +446,45 @@ k0 = 2π*f/c0*sqrt(eps)
 # coords = Coordinates(1,λ/2; diskR=0.15);
 coords = Coordinates(1,0.02; diskR=0.15);
 
-m = 1; l = 0
+m = 3; l = 0
 modes = Modes(m,l,coords);
 
 
 ax = axionModes(coords,modes)
 
-# freqs = collect(range(21.5e9,22.5e9,101))
-freqs = 22.0e9
+freqs = collect(range(21.98e9,22.26e9,100))
+# freqs = 22.0e9
 
 # @time p = propagationMatrix(freqs,collect(range(1e-3,10e-3,10)),1.0,modes,coords);
+# @time gpm = GPM(freqs,collect(range(1e-3,10e-3,11)),modes,coords; eps=24.0);
 @time gpm = GPM(freqs,collect(range(1e-3,10e-3,11)),modes,coords; eps=24.0);
 
 
 
-dists = ones(1)*7.21e-3
-# dists = [1.00334,
-        # 6.94754,
-        # 7.1766,
-        # 7.22788,
-        # 7.19717,
-        # 7.23776,
-        # 7.07746,
-        # 7.57173,
-        # 7.08019,
-        # 7.24657,
-        # 7.21708,
-        # 7.18317,
-        # 7.13025,
-        # 7.2198,
-        # 7.45585,
-        # 7.39873,
-        # 7.15403,
-        # 7.14252,
-        # 6.83105,
-        # 7.42282,]*1e-3
+dists = [1.00334,
+        6.94754,
+        7.1766,
+        7.22788,
+        7.19717,
+        7.23776,
+        7.07746,
+        7.57173,
+        7.08019,
+        7.24657,
+        7.21708,
+        7.18317,
+        7.13025,
+        7.2198,
+        7.45585,
+        7.39873,
+        7.15403,
+        7.14252,
+        6.83105,
+        7.42282,]*1e-3
 
 
 # @time RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
-RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
+@time RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
 
 
 

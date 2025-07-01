@@ -34,7 +34,8 @@ Literature:
 
 
 Main:
-[ ] write paper i guess
+[ ] disc tilts for new transfer matrix?
+[ ] write new transfer matrix to git
 
 New/Cross features:
 [ ] reflectivity fitting?
