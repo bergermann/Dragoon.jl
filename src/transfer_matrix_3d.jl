@@ -381,11 +381,9 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
 
     W = gpm.W
 
-    PS = gpm.PS
+    PS = gpm.PS; M = gpm.M; L = gpm.L
 
-    M = gpm.M; L = gpm.L
-
-    @inbounds @views for j in eachindex(gpm.freqs)
+    for j in eachindex(gpm.freqs)
         f = gpm.freqs[j]
 
         pd1 = cispi(-2*f*gpm.nd*gpm.thickness/c0)
@@ -432,12 +430,16 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
                     (MM[m,l][2,1]+MM[m,l][2,2])*T[m,l][1,2]/T[m,l][2,2]
             end
         end
+
+        # println()
     end
 
     return RB
 end
 
+@btime RB = transfer_matrix_3d(Dist,$dists,$gpm,$ax;);
 
+@btime s = spline($gpm.PS[1,1,0,1,0],7.21e-3;)
 
 f = 22.025e9; ω = 2π*f; λ = c0/f
 eps = complex(1)
@@ -452,7 +454,7 @@ modes = Modes(m,l,coords);
 
 ax = axionModes(coords,modes)
 
-freqs = collect(range(21.98e9,22.26e9,100))
+freqs = collect(range(21.98e9,22.26e9,10));
 # freqs = 22.0e9
 
 # @time p = propagationMatrix(freqs,collect(range(1e-3,10e-3,10)),1.0,modes,coords);
@@ -460,31 +462,31 @@ freqs = collect(range(21.98e9,22.26e9,100))
 @time gpm = GPM(freqs,collect(range(1e-3,10e-3,11)),modes,coords; eps=24.0);
 
 
-
-dists = [1.00334,
-        6.94754,
-        7.1766,
-        7.22788,
-        7.19717,
-        7.23776,
-        7.07746,
-        7.57173,
-        7.08019,
-        7.24657,
-        7.21708,
-        7.18317,
-        7.13025,
-        7.2198,
-        7.45585,
-        7.39873,
-        7.15403,
-        7.14252,
-        6.83105,
-        7.42282,]*1e-3
+dists = ones(1)*7.21e-3
+# dists = [1.00334,
+#         6.94754,
+#         7.1766,
+#         7.22788,
+#         7.19717,
+#         7.23776,
+#         7.07746,
+#         7.57173,
+#         7.08019,
+#         7.24657,
+#         7.21708,
+#         7.18317,
+#         7.13025,
+#         7.2198,
+#         7.45585,
+#         7.39873,
+#         7.15403,
+#         7.14252,
+#         6.83105,
+#         7.42282,]*1e-3
 
 
 # @time RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
-@time RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
+RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
 
 
 
@@ -494,54 +496,4 @@ dists = [1.00334,
 B = [abs2.(RB[:,2,i,0]) for i in 1:m]
 display(plot(freqs/1e9,B,title="Boost 3d, m_max = $m, l_max = $l",label=["m=1" "m=2" "m=3"]))
 
-
-
-
-function test1(gpm)
-    T = O(1,1,1,-modes.L)(Array{ComplexF64}(undef,2,2,modes.M,2*modes.L+1))
-    T = gpm.T
-    Gd = gpm.Gd
-    S  = gpm.S
-    MM = gpm.MM
-
-    @time @views @inbounds for i in 1:10
-        for m in 1:gpm.M, l in -gpm.L:gpm.L
-            # T[:,:,m,l] .= Gd
-            # MM[:,:,m,l] .= S
-            copyto!(T[:,:,m,l],Gd)
-            copyto!(MM[:,:,m,l],S)
-        end
-    end
-
-    return gpm
-end
-
-test1(gpm);
-
-
-
-
-function test2(gpm)
-    T  = [MMatrix{2,2,ComplexF64}(undef) for _ in 1:gpm.M, _ in -gpm.L:gpm.L]
-    T  = O(1,-modes.L)(T)
-    MM = [MMatrix{2,2,ComplexF64}(undef) for _ in 1:gpm.M, _ in -gpm.L:gpm.L]
-    MM = O(1,-modes.L)(MM)
-    # MM = O(1,-modes.L)(Array{MMatrix{2,2,ComplexF64}}(undef,modes.M,2*modes.L+1))
-
-    Gd = gpm.Gd
-    S  = gpm.S
-
-    @time @views @inbounds for i in 1:10
-        for m in 1:gpm.M, l in -gpm.L:gpm.L
-            # T[:,:,m,l] .= Gd
-            # MM[:,:,m,l] .= S
-            copyto!(T[m,l],Gd)
-            copyto!(MM[m,l],S)
-        end
-    end
-
-    return gpm
-end
-
-test2(gpm);
 
