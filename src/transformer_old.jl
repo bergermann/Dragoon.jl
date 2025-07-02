@@ -1,4 +1,10 @@
+
+
 using BoostFractor, Plots
+
+include("transformer_optim_utilities.jl")
+
+
 
 dx = 0.02
 coords = SeedCoordinateSystem(X = -0.5:dx:0.5, Y = -0.5:dx:0.5)
@@ -40,7 +46,7 @@ modes = SeedModes(coords, ThreeDim=true, Mmax=Mmax, Lmax=Lmax, diskR=diskR)
 m_reflect = zeros(Mmax*(2*Lmax+1))
 m_reflect[Lmax+1] = 1.0
 
-frequencies = collect(range(21.98e9,22.26e9,100))
+frequencies = collect(range(21.98e9,22.26e9,100));
 # frequencies = collect(range(21.0e9,22.5e9,100))
 
 B = []
@@ -56,3 +62,22 @@ r = [[R[i][j] for i in eachindex(R)] for j in 1:3]
 
 plot(frequencies/1e9,b; title="transformer")
 # display(b)
+
+
+
+
+
+n_region = length(distance)
+init_thickness_variation = zeros(n_region,length(coords.X),length(coords.Y));
+
+prop = propagator;
+
+
+prop_matrix_grid = calc_propagation_matrices_grid(sbdry,coords,modes,0,frequencies;prop=prop, diskR=diskR);
+prop_matrix = [prop_matrix_grid[r,f,1,1,1,:,:] for r=1:n_region, f=1:length(frequencies)]
+Eout_init = calc_boostfactor_modes(sbdry,coords,modes,frequencies, prop_matrix;prop=prop, diskR=diskR);
+
+
+@btime Eout_init = calc_boostfactor_modes($sbdry,$coords,$modes,$frequencies,$prop_matrix; prop=prop, diskR=diskR);
+
+
