@@ -101,7 +101,7 @@ function calc_boostfactor_modes(sbdry,coords,modes, frequencies, prop_matrices_s
     n_modes = size(prop_matrices_set[1,1])[1]
     EoutModes0 = Array{Complex{T},3}(undef,1,n_modes,n_freq)
     # Sweep over frequency
-    Threads.@threads for f in 1:n_freq
+    for f in 1:n_freq
         boost = transformer(sbdry,coords,modes; prop=prop,diskR=diskR,f=frequencies[f],propagation_matrices=prop_matrices_set[:,f],reflect=nothing)
         EoutModes0[1,:,f] =  boost
     end
@@ -117,7 +117,7 @@ function calc_modes(sbdry,coords,modes, frequencies, prop_matrices_set::Array{Ar
     n_modes = size(prop_matrices_set[1,1])[1]
     EoutModes0 = Array{Complex{T},3}(undef,2,n_modes,n_freq)
     # Sweep over frequency
-    Threads.@threads for f in 1:n_freq
+    for f in 1:n_freq
         boost, refl = transformer(sbdry,coords,modes; prop=prop,diskR=diskR,f=frequencies[f],propagation_matrices=prop_matrices_set[:,f],reflect=reflect)
         EoutModes0[1,:,f] =  boost
         EoutModes0[2,:,f] =  refl
