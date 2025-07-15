@@ -43,12 +43,6 @@ plot(freqs/1e9,b_sum; title="transformer",legend=false)
 
 
 
-
-
-# n_region = length(distance)
-# prop = propagator;
-
-
 # prop_matrix_grid = calc_propagation_matrices_grid(sbdry,coords,modes,0,frequencies;prop=prop, diskR=diskR);
 # prop_matrix = [prop_matrix_grid[r,f,1,1,1,:,:] for r=1:n_region, f=1:length(frequencies)]
 # Eout_init = calc_boostfactor_modes(sbdry,coords,modes,frequencies, prop_matrix;prop=prop, diskR=diskR);
