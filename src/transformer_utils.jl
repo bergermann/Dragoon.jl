@@ -20,12 +20,23 @@ function setup(distances,M,L; eps=24,Δx=1.,dx=0.02,diskR=0.15)
     return (coords=coords, sbdry=sbdry, modes=modes, m_reflect=m_reflect, disk=diskR)
 end
 
-function tilt!(sbdry,deg)
+function tilt!(sbdry::SetupBoundaries,deg::Real)
     maxtilt = deg2rad(deg)
 
     for i in 1:20
         sbdry.relative_tilt_x[2*i] = sbdry.relative_tilt_x[1+2*i] = maxtilt*(2*rand()-1)
         sbdry.relative_tilt_y[2*i] = sbdry.relative_tilt_y[1+2*i] = maxtilt*(2*rand()-1)
+    end
+
+    return
+end
+
+function tilt!(sbdry::SetupBoundaries,tiltsdeg::Vector{<:Real})
+    @assert length(tiltsdeg) == Int((length(sbdry.distance)-2)/2) "Tilt array needs entry for each disc."
+
+    for i in 1:20
+        sbdry.relative_tilt_x[2*i] = sbdry.relative_tilt_x[1+2*i] = deg2rad(tiltsdeg[i])*(2*rand()-1)
+        sbdry.relative_tilt_y[2*i] = sbdry.relative_tilt_y[1+2*i] = deg2rad(tiltsdeg[i])*(2*rand()-1)
     end
 
     return

@@ -1,13 +1,13 @@
 
 
-using BoostFractor#, Plots, BenchmarkTools
+using BoostFractor, Plots, BenchmarkTools
 
-# include("transformer_optim_utilities.jl")
+include("transformer_optim_utilities.jl")
 include("transformer_utils.jl")
 
 
 
-freqs = collect(range(21.98e9,22.26e9,10)); λ = 299792458.0/22e9
+freqs = collect(range(21.98e9,22.26e9,30)); λ = 299792458.0/22e9
 d = [
     1.00334,
     6.94754,
@@ -33,19 +33,23 @@ d = [
 
 s = setup(d,4,3; dx=0.02)
 
-tilt!(s.sbdry,0.005)
+tilt!(s.sbdry,0.001)
 
 B, R, b, b_sum, r = boost(freqs,s)
 
 
-plot(freqs/1e9,b; title="transformer",legend=false)
-plot(freqs/1e9,b_sum; title="transformer",legend=false)
+display(plot(freqs/1e9,b; title="transformer",legend=false))
+display(plot(freqs/1e9,b_sum; title="transformer",legend=false))
 
 
 
-# prop_matrix_grid = calc_propagation_matrices_grid(sbdry,coords,modes,0,frequencies;prop=prop, diskR=diskR);
-# prop_matrix = [prop_matrix_grid[r,f,1,1,1,:,:] for r=1:n_region, f=1:length(frequencies)]
-# Eout_init = calc_boostfactor_modes(sbdry,coords,modes,frequencies, prop_matrix;prop=prop, diskR=diskR);
+
+calc_propagation_matrices_grid(sbdry,coords,modes,spacing_grid,frequencies;tilt_x_grid=0,tilt_y_grid=0, prop=propagator, diskR=0.15)
+
+
+prop_matrix_grid = calc_propagation_matrices_grid(sbdry,coords,modes,0,frequencies;prop=prop, diskR=diskR);
+prop_matrix = [prop_matrix_grid[r,f,1,1,1,:,:] for r=1:n_region, f=1:length(frequencies)]
+Eout_init = calc_boostfactor_modes(sbdry,coords,modes,frequencies, prop_matrix;prop=prop, diskR=diskR);
 
 
 # @btime Eout_init = calc_boostfactor_modes($sbdry,$coords,$modes,$frequencies,$prop_matrix; prop=prop, diskR=diskR);
