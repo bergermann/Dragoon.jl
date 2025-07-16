@@ -3,84 +3,48 @@
 using BoostFractor, Plots, BenchmarkTools
 
 include("transformer_optim_utilities.jl")
+include("transformer_utils.jl")
 
 
 
-dx = 0.02
-coords = SeedCoordinateSystem(X = -0.5:dx:0.5, Y = -0.5:dx:0.5)
+freqs = collect(range(21.98e9,22.26e9,30)); λ = 299792458.0/22e9
+d = [
+    1.00334,
+    6.94754,
+    7.17660,
+    7.22788,
+    7.19717,
+    7.23776,
+    7.07746,
+    7.57173,
+    7.08019,
+    7.24657,
+    7.21708,
+    7.18317,
+    7.13025,
+    7.21980,
+    7.45585,
+    7.39873,
+    7.15403,
+    7.14252,
+    6.83105,
+    7.42282
+]*1e-3;
 
-diskR = 0.15
+s = setup(d,4,3; dx=0.02)
 
-epsilon = 24
-eps = Array{Complex{Float64}}([NaN, 1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1,epsilon,1])
-# eps = ComplexF64[NaN,1,epsilon,1]
-distance = [0.0, 1.00334, 1.0,
-                        6.94754, 1.0,
-                        7.1766, 1.0,
-                        7.22788, 1.0,
-                        7.19717, 1.0,
-                        7.23776, 1.0,
-                        7.07746, 1.0,
-                        7.57173, 1.0,
-                        7.08019, 1.0,
-                        7.24657, 1.0,
-                        7.21708, 1.0,
-                        7.18317, 1.0,
-                        7.13025, 1.0,
-                        7.2198, 1.0,
-                        7.45585, 1.0,
-                        7.39873, 1.0,
-                        7.15403, 1.0,
-                        7.14252, 1.0,
-                        6.83105, 1.0,
-                        7.42282, 1.0,
-                        0.0]*1e-3
-# distance = [0.0,7.21,1.0,0]*1e-3
+tilt!(s.sbdry,0.001)
 
-maxtilt = deg2rad(0.005)
-# tiltsx = similar(distance); tiltsy = similar(distance)
-tiltsx = zeros(Float64,length(distance)); tiltsy = zeros(Float64,length(distance))
-for i in 1:20
-    tiltsx[2*i] = tiltsx[1+2*i] = maxtilt*(2*rand()-1)
-    tiltsy[2*i] = tiltsy[1+2*i] = maxtilt*(2*rand()-1)
-end
+B, R, b, b_sum, r = boost(freqs,s)
 
-sbdry = SeedSetupBoundaries(coords, diskno=20, distance=distance, epsilon=eps,
-    relative_tilt_x=tiltsx,relative_tilt_y=tiltsy)
 
-Mmax = 4
-Lmax = 3
-modes = SeedModes(coords, ThreeDim=true, Mmax=Mmax, Lmax=Lmax, diskR=diskR)
-
-m_reflect = zeros(Mmax*(2*Lmax+1))
-m_reflect[Lmax+1] = 1.0
-
-frequencies = collect(range(21.98e9,22.26e9,100));
-# frequencies = collect(range(21.0e9,22.5e9,100))
-# frequencies = [22e9]
-
-B = []
-R = []
-
-@time for f in frequencies
-    boost, refl = transformer(sbdry,coords,modes; reflect=m_reflect, prop=propagator,diskR=diskR,f=f)
-    push!(B,boost); push!(R,refl)
-end
-
-b = [[abs2(B[i][j]) for i in eachindex(B)] for j in 1:Mmax*(2Lmax+1)]
-r = [[R[i][j] for i in eachindex(R)] for j in 1:3]
-
-# b = [sum(abs2,b) for b in B]
-
-plot(frequencies/1e9,b[1:7]; title="transformer")
-# display(b)
+display(plot(freqs/1e9,b; title="transformer",legend=false))
+display(plot(freqs/1e9,b_sum; title="transformer",legend=false))
 
 
 
 
-
-n_region = length(distance)
-prop = propagator;
+calc_propagation_matrices_grid(sbdry,coords,modes,spacing_grid,frequencies;tilt_x_grid=0,tilt_y_grid=0, prop=propagator, diskR=0.15)
 
 
 prop_matrix_grid = calc_propagation_matrices_grid(sbdry,coords,modes,0,frequencies;prop=prop, diskR=diskR);
@@ -88,7 +52,7 @@ prop_matrix = [prop_matrix_grid[r,f,1,1,1,:,:] for r=1:n_region, f=1:length(freq
 Eout_init = calc_boostfactor_modes(sbdry,coords,modes,frequencies, prop_matrix;prop=prop, diskR=diskR);
 
 
-@btime Eout_init = calc_boostfactor_modes($sbdry,$coords,$modes,$frequencies,$prop_matrix; prop=prop, diskR=diskR);
+# @btime Eout_init = calc_boostfactor_modes($sbdry,$coords,$modes,$frequencies,$prop_matrix; prop=prop, diskR=diskR);
 
 
-Eout_init
+# Eout_init
