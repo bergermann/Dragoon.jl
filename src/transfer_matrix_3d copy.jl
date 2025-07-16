@@ -461,17 +461,18 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
     return RB
 end
 
-test();
 @btime RB = transfer_matrix_3d(Dist,$dists,$gpm,$ax,$freqs;);
+
+test();
 
 function test()
     m = 1; l = 0
-
+    
     freqs = 22.0e9; dists = ones(1)*7.21e-3
     coords = Coordinates(1,0.02; diskR=0.15);
-
+    
     modes = Modes(coords,m,l); ax = axionModes(coords,modes)
-
+    
     gpm = GPM(freqs,collect(range(1e-3,10e-3,10)),modes,coords; eps=24.0)
     @btime RB = transfer_matrix_3d(Dist,$dists,$gpm,$ax,$freqs;);
     
@@ -507,7 +508,7 @@ dists = ones(1)*7.21e-3
 
 
 # @time RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
-RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
+# RB = transfer_matrix_3d(Dist,dists,gpm,ax;);
 
 
 
