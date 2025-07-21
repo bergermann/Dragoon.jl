@@ -31,28 +31,38 @@ d = [
     7.42282
 ]*1e-3;
 
-s = setup(d,4,3; dx=0.02)
+# s = setup(d,4,3; dx=0.02)
 
-tilt!(s.sbdry,0.001)
+# tilt!(s.sbdry,0.001)
 
-B, R, b, b_sum, r = boost(freqs,s)
-
-
-display(plot(freqs/1e9,b; title="transformer",legend=false))
-display(plot(freqs/1e9,b_sum; title="transformer",legend=false))
+# B, R, b, b_sum, r = boost(freqs,s)
 
 
+# display(plot(freqs/1e9,b; title="transformer",legend=false))
+# display(plot(freqs/1e9,b_sum; title="transformer",legend=false))
+
+function setup_prop(freqs,distances,tilts,(coords,sbdry,modes,m_reflect,diskR))
+    pg = calc_propagation_matrices_grid(sbdry,coords,modes,distances,freqs;
+        diskR=diskR,tilt_x_grid=deg2rad.(tilts),tilt_y_grid=deg2rad.(tilts));
+
+    return [pg[i,j,1,1,1,:,:] for i in eachindex(sbdry.distance), j in eachindex(freqs)]
+end
+
+function boost(freqs,distances,tiltsx,tiltsy,(coords,sbdry,modes,m_reflect,diskR),p)
+    tilt!(sbdry,tiltsx,tiltsy)
+    move!(sbdry,distances)
+
+    
+    prop_matrices_set_interp = interpolate_prop_matrix(itp,dist_shift);
+
+    Eout = calc_boostfactor_modes(sbdry,coords,modes,freqs,p;diskR=diskR);
+    
+    return Eout 
+end
 
 
-calc_propagation_matrices_grid(sbdry,coords,modes,spacing_grid,frequencies;tilt_x_grid=0,tilt_y_grid=0, prop=propagator, diskR=0.15)
 
+s = setup(d,2,1; dx=0.02)
+@time p = setup_prop(freqs,0,-0.005:0.001:0.005,s);
 
-prop_matrix_grid = calc_propagation_matrices_grid(sbdry,coords,modes,0,frequencies;prop=prop, diskR=diskR);
-prop_matrix = [prop_matrix_grid[r,f,1,1,1,:,:] for r=1:n_region, f=1:length(frequencies)]
-Eout_init = calc_boostfactor_modes(sbdry,coords,modes,frequencies, prop_matrix;prop=prop, diskR=diskR);
-
-
-# @btime Eout_init = calc_boostfactor_modes($sbdry,$coords,$modes,$frequencies,$prop_matrix; prop=prop, diskR=diskR);
-
-
-# Eout_init
+boost(freqs,d,zeros(20),zeros(20),s,p)

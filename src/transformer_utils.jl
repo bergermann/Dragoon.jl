@@ -31,13 +31,23 @@ function tilt!(sbdry::SetupBoundaries,deg::Real)
     return
 end
 
-function tilt!(sbdry::SetupBoundaries,tiltsdeg::Vector{<:Real})
-    @assert length(tiltsdeg) == Int((length(sbdry.distance)-2)/2) "Tilt array needs entry for each disc."
+function tilt!(sbdry::SetupBoundaries,tiltsx::Vector{<:Real},tiltsy::Vector{<:Real})
+    @assert length(tiltsx) == length(tiltsy) == Int((length(sbdry.distance)-2)/2)
+        "Tilt arrays needs entry for each disc."
 
     for i in 1:20
-        sbdry.relative_tilt_x[2*i] = sbdry.relative_tilt_x[1+2*i] = deg2rad(tiltsdeg[i])*(2*rand()-1)
-        sbdry.relative_tilt_y[2*i] = sbdry.relative_tilt_y[1+2*i] = deg2rad(tiltsdeg[i])*(2*rand()-1)
+        sbdry.relative_tilt_x[2*i] = sbdry.relative_tilt_x[1+2*i] = deg2rad(tiltsx[i])
+        sbdry.relative_tilt_y[2*i] = sbdry.relative_tilt_y[1+2*i] = deg2rad(tiltsy[i])
     end
+
+    return
+end
+
+function move!(sbdry::SetupBoundaries,distances::Vector{<:Real})
+    @assert length(distances) == Int((length(sbdry.distance)-2)/2)
+        "Distance array needs entry for each disc."
+
+    sbdry.distance[2:2:end-2] .= distances
 
     return
 end

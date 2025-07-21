@@ -497,3 +497,35 @@ B = [abs2.(RB[:,2,i,0]) for i in 1:m]
 display(plot(freqs/1e9,B,title="Boost 3d, m_max = $m, l_max = $l",label=["m=1" "m=2" "m=3"]))
 
 
+function grid(f::Function,ax::AbstractVector)
+    return f.(axisx)
+end
+
+function grid(f::Function,axx::AbstractVector,axy::AbstractVector)
+    return [f(x,y) for x in axx, y in axy]
+end
+
+function grid(f::Function,axx::AbstractVector,axy::AbstractVector,axz::AbstractVector)
+    return [f(x,y,z) for x in axx, y in axy, z in axz]
+end
+
+function grid(f::Function,ax1::AbstractVector,ax2::AbstractVector,
+                          ax3::AbstractVector,ax4::AbstractVector)
+
+    return [f(x1,x2,x3,x4) for x1 in ax1, x2 in ax2, x3 in ax3, x4 in ax4]
+end
+
+function grid(f::Function,ax1::AbstractVector,ax2::AbstractVector,
+                          ax3::AbstractVector,ax4::AbstractVector,
+                          ax5::AbstractVector)
+
+    return [f(x1,x2,x3,x4,x5) for x1 in ax1, x2 in ax2, x3 in ax3, x4 in ax4, x5 in ax5]
+end
+
+function grid(f::Function,ax1::AbstractVector,ax2::AbstractVector,
+                          ax3::AbstractVector,ax4::AbstractVector,
+                          ax5::AbstractVector,ax6::AbstractVector,)
+
+    return [f(x1,x2,x3,x4,x5,x6) for x1 in ax1, x2 in ax2, x3 in ax3, x4 in ax4,
+        x5 in ax5, x6 in ax6]
+end
