@@ -56,9 +56,9 @@ end;
 
 
 """
-Constructs the interpolation object from Interpolations without tilts
+Constructs the interpolation object from Interpolations with tilts
 """
-function construct_prop_matrix_interpolation(prop_matrix_grid::Array{Complex{Float64},7}, spacing_grid)
+function construct_prop_matrix_interpolation(prop_matrix_grid::Array{Complex{Float64},7}, spacing_grid,tilt_x_grid,tilt_y_grid)
     n_region = size(prop_matrix_grid,1)
     n_freq = size(prop_matrix_grid,2)
     n_spacing = size(prop_matrix_grid,3)
@@ -68,16 +68,16 @@ function construct_prop_matrix_interpolation(prop_matrix_grid::Array{Complex{Flo
     #Construct the interpolation object
     itp_fun = Interpolations.BSpline(Cubic(Natural(OnCell())))
     itp = Interpolations.interpolate(prop_matrix_grid, (NoInterp(),NoInterp(),
-                                        itp_fun,NoInterp(),
-                                        NoInterp(),NoInterp(),NoInterp()))
-    itp = Interpolations.scale(itp,1:n_region,1:n_freq,spacing_grid,1:n_tilt_x,1:n_tilt_y,1:n_mode,1:n_mode)  
+                                        itp_fun,itp_fun,itp_fun,
+                                        NoInterp(),NoInterp()))
+    itp = Interpolations.scale(itp,1:n_region,1:n_freq,spacing_grid,tilt_x_grid,tilt_y_grid,1:n_mode,1:n_mode)  
     return itp
 end;
 
 """
-Calculate interpolated propagation matrices set without tilts
+Calculate interpolated propagation matrices set with tilts
 """
-function interpolate_prop_matrix(itp,dist_shift::Array{T,1}) where T<:Real
+function interpolate_prop_matrix(itp,dist_shift::Array{T,1},tilts_x,tilts_y ) where T<:Real
     n_region = size(itp,1)
     n_freq = size(itp,2)
     n_mode = size(itp,6)

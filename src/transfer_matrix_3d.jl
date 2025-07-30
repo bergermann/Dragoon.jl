@@ -389,7 +389,7 @@ function transfer_matrix_3d(::Type{Dist},distances::AbstractVector{<:Real},gpm::
             copyto!(T[ml],Gd)
             copyto!(MM[ml],S); MM .*= ax[ml]
         end
-
+ 
         # iterate in reverse order to sum up MM in single sweep (thx david)
         for i in Iterators.reverse(eachindex(distances))
             for ml in eachindex(T)
