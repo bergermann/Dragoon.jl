@@ -20,24 +20,62 @@ function setup(distances,M,L; eps=24,Δx=1.,dx=0.02,diskR=0.15)
     return (coords=coords, sbdry=sbdry, modes=modes, m_reflect=m_reflect, disk=diskR)
 end
 
-function tilt!(sbdry::SetupBoundaries,deg::Real)
-    maxtilt = deg2rad(deg)
+# function tilt!(sbdry::SetupBoundaries,deg::Real)
+#     maxtilt = deg2rad(deg)
 
-    for i in 1:20
-        sbdry.relative_tilt_x[2*i] = sbdry.relative_tilt_x[1+2*i] = maxtilt*(2*rand()-1)
-        sbdry.relative_tilt_y[2*i] = sbdry.relative_tilt_y[1+2*i] = maxtilt*(2*rand()-1)
+#     for i in 1:
+#         sbdry.relative_tilt_x[2*i] = sbdry.relative_tilt_x[1+2*i] = maxtilt*(2*rand()-1)
+#         sbdry.relative_tilt_y[2*i] = sbdry.relative_tilt_y[1+2*i] = maxtilt*(2*rand()-1)
+#     end
+
+#     return
+# end
+
+# function tilt!(sbdry::SetupBoundaries,tiltsx::Vector{<:Real},tiltsy::Vector{<:Real})
+#     @assert length(tiltsx) == length(tiltsy) == Int((length(sbdry.distance)-2)/2)
+#         "Tilt arrays needs entry for each disc."
+
+#     for i in 1:20
+#         sbdry.relative_tilt_x[2*i] = sbdry.relative_tilt_x[1+2*i] = deg2rad(tiltsx[i])
+#         sbdry.relative_tilt_y[2*i] = sbdry.relative_tilt_y[1+2*i] = deg2rad(tiltsy[i])
+#     end
+
+#     return
+# end
+
+function tilt!(sbdry::SetupBoundaries,deg::Real)
+    ndisk = Int((length(sbdry.distance)-2)/2)
+
+    tilts = deg2rad(deg)*(2*rand(2,ndisk).-1)
+    fill!(sbdry.relative_tilt_x,0.); fill!(sbdry.relative_tilt_y,0.)
+
+    sbdry.relative_tilt_x[2] = tilts[1,1]
+    sbdry.relative_tilt_y[2] = tilts[2,1]
+    sbdry.relative_tilt_x[end] = -tilts[1,end]
+    sbdry.relative_tilt_y[end] = -tilts[2,end]
+
+    for i in 2:ndisk
+        sbdry.relative_tilt_x[2i] = tilts[1,i]-tilts[1,i-1]
+        sbdry.relative_tilt_y[2i] = tilts[2,i]-tilts[2,i-1]
     end
 
     return
 end
 
 function tilt!(sbdry::SetupBoundaries,tiltsx::Vector{<:Real},tiltsy::Vector{<:Real})
-    @assert length(tiltsx) == length(tiltsy) == Int((length(sbdry.distance)-2)/2)
-        "Tilt arrays needs entry for each disc."
+    ndisk = Int((length(sbdry.distance)-2)/2)
+    @assert length(tiltsx) == length(tiltsy) == ndisk "Tilt arrays needs entry for each disc."
 
-    for i in 1:20
-        sbdry.relative_tilt_x[2*i] = sbdry.relative_tilt_x[1+2*i] = deg2rad(tiltsx[i])
-        sbdry.relative_tilt_y[2*i] = sbdry.relative_tilt_y[1+2*i] = deg2rad(tiltsy[i])
+    fill!(sbdry.relative_tilt_x,0.); fill!(sbdry.relative_tilt_y,0.)
+
+    sbdry.relative_tilt_x[2] = tiltsx[1]
+    sbdry.relative_tilt_y[2] = tiltsy[1]
+    sbdry.relative_tilt_x[end] = -tiltsx[end]
+    sbdry.relative_tilt_y[end] = -tiltsy[end]
+
+    for i in 2:ndisk
+        sbdry.relative_tilt_x[2i] = tilts[1,i]-tilts[1,i-1]
+        sbdry.relative_tilt_y[2i] = tilts[2,i]-tilts[2,i-1]
     end
 
     return
@@ -71,37 +109,40 @@ end
 
 
 
-# freqs = collect(range(21.98e9,22.26e9,10)); λ = 299792458.0/22e9
-# d = [
-#     1.00334,
-#     6.94754,
-#     7.17660,
-#     7.22788,
-#     7.19717,
-#     7.23776,
-#     7.07746,
-#     7.57173,
-#     7.08019,
-#     7.24657,
-#     7.21708,
-#     7.18317,
-#     7.13025,
-#     7.21980,
-#     7.45585,
-#     7.39873,
-#     7.15403,
-#     7.14252,
-#     6.83105,
-#     7.42282
-# ]*1e-3;
+freqs = collect(range(21.98e9,22.26e9,100)); λ = 299792458.0/22e9
+d = [
+    1.00334,
+    6.94754,
+    7.17660,
+    7.22788,
+    7.19717,
+    7.23776,
+    7.07746,
+    7.57173,
+    7.08019,
+    7.24657,
+    7.21708,
+    7.18317,
+    7.13025,
+    7.21980,
+    7.45585,
+    7.39873,
+    7.15403,
+    7.14252,
+    6.83105,
+    7.42282
+]*1e-3;
 
-# s = setup(d,4,3; dx=0.02)
+s = setup(d,4,3; dx=0.02)
 
-# tilt!(s.sbdry,0.005)
+tilt!(s.sbdry,0.005)
 
-# B, R, b, b_sum, r = boost(freqs,s)
+B, R, b, b_sum, r = boost(freqs,s);
 
 
 # plot(freqs/1e9,b; title="transformer",legend=false)
 # plot(freqs/1e9,b_sum; title="transformer",legend=false)
 
+plot(freqs/1e9,[abs.(r_) for r_ in r[1:7]]; legend=false)
+plot(freqs/1e9,[real.(r_) for r_ in r[1:7]]; legend=false)
+plot(freqs/1e9,[imag.(r_) for r_ in r[1:7]]; legend=false)
