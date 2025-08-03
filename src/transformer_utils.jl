@@ -74,8 +74,8 @@ function tilt!(sbdry::SetupBoundaries,tiltsx::Vector{<:Real},tiltsy::Vector{<:Re
     sbdry.relative_tilt_y[end] = -tiltsy[end]
 
     for i in 2:ndisk
-        sbdry.relative_tilt_x[2i] = tilts[1,i]-tilts[1,i-1]
-        sbdry.relative_tilt_y[2i] = tilts[2,i]-tilts[2,i-1]
+        sbdry.relative_tilt_x[2i] = tiltsx[i]-tiltsx[i-1]
+        sbdry.relative_tilt_y[2i] = tiltsy[i]-tiltsy[i-1]
     end
 
     return
@@ -95,7 +95,7 @@ function boost(freqs,(coords,sbdry,modes,m_reflect,diskR))
     B = Vector{Vector{ComplexF64}}(undef,length(freqs))
     R = Vector{Vector{ComplexF64}}(undef,length(freqs))
 
-    @time for i in eachindex(freqs)
+    for i in eachindex(freqs)
         B[i], R[i] = transformer(sbdry,coords,modes; reflect=m_reflect,diskR=diskR,f=freqs[i])
     end
 
@@ -107,42 +107,52 @@ function boost(freqs,(coords,sbdry,modes,m_reflect,diskR))
     return B, R, b, b_sum, r
 end
 
+function ref(freqs,(coords,sbdry,modes,m_reflect,diskR))
+    ML = modes.M*(2modes.L+1)
+    R = Vector{Vector{ComplexF64}}(undef,length(freqs))
+
+    for i in eachindex(freqs)
+        _, R[i] = transformer(sbdry,coords,modes; reflect=m_reflect,diskR=diskR,f=freqs[i])
+    end
+
+    return [[R[i][j] for i in eachindex(R)] for j in 1:ML]   
+end
 
 
-freqs = collect(range(21.98e9,22.26e9,100)); λ = 299792458.0/22e9
-d = [
-    1.00334,
-    6.94754,
-    7.17660,
-    7.22788,
-    7.19717,
-    7.23776,
-    7.07746,
-    7.57173,
-    7.08019,
-    7.24657,
-    7.21708,
-    7.18317,
-    7.13025,
-    7.21980,
-    7.45585,
-    7.39873,
-    7.15403,
-    7.14252,
-    6.83105,
-    7.42282
-]*1e-3;
+# freqs = collect(range(21.98e9,22.26e9,100)); λ = 299792458.0/22e9
+# d = [
+#     1.00334,
+#     6.94754,
+#     7.17660,
+#     7.22788,
+#     7.19717,
+#     7.23776,
+#     7.07746,
+#     7.57173,
+#     7.08019,
+#     7.24657,
+#     7.21708,
+#     7.18317,
+#     7.13025,
+#     7.21980,
+#     7.45585,
+#     7.39873,
+#     7.15403,
+#     7.14252,
+#     6.83105,
+#     7.42282
+# ]*1e-3;
 
-s = setup(d,4,3; dx=0.02)
+# s = setup(d,4,3; dx=0.02)
 
-tilt!(s.sbdry,0.005)
+# tilt!(s.sbdry,0.005)
 
-B, R, b, b_sum, r = boost(freqs,s);
+# B, R, b, b_sum, r = boost(freqs,s);
 
 
-# plot(freqs/1e9,b; title="transformer",legend=false)
-# plot(freqs/1e9,b_sum; title="transformer",legend=false)
+# # plot(freqs/1e9,b; title="transformer",legend=false)
+# # plot(freqs/1e9,b_sum; title="transformer",legend=false)
 
-plot(freqs/1e9,[abs.(r_) for r_ in r[1:7]]; legend=false)
-plot(freqs/1e9,[real.(r_) for r_ in r[1:7]]; legend=false)
-plot(freqs/1e9,[imag.(r_) for r_ in r[1:7]]; legend=false)
+# plot(freqs/1e9,[abs.(r_) for r_ in r[1:7]]; legend=false)
+# plot(freqs/1e9,[real.(r_) for r_ in r[1:7]]; legend=false)
+# plot(freqs/1e9,[imag.(r_) for r_ in r[1:7]]; legend=false)
