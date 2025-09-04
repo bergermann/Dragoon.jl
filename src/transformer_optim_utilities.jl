@@ -8,7 +8,9 @@ using DSP
 Calculates propagation matrices for all regions and frequencies at given relative spacings (optionally relative tilts aswell)
 The returned matrix is (n_regions x n_freq x n_spacing x n_tilt_x x n_tilt_y x n_mode x n_mode)      
 """
-function calc_propagation_matrices_grid(sbdry::SetupBoundaries,coords::CoordinateSystem, modes::Modes,spacing_grid,frequencies;tilt_x_grid=0,tilt_y_grid=0, prop=propagator, diskR=0.15)
+function calc_propagation_matrices_grid(sbdry::SetupBoundaries,coords::CoordinateSystem, modes::Modes,
+        spacing_grid,frequencies;tilt_x_grid=0,tilt_y_grid=0, prop=propagator, diskR=0.15)
+
     n_region = length(sbdry.distance)
     n_disk = (n_region-2)÷2
     n_freq = length(frequencies)
@@ -58,7 +60,9 @@ end;
 """
 Constructs the interpolation object from Interpolations with tilts
 """
-function construct_prop_matrix_interpolation(prop_matrix_grid::Array{Complex{Float64},7}, spacing_grid,tilt_x_grid,tilt_y_grid)
+function construct_prop_matrix_interpolation(prop_matrix_grid::Array{Complex{Float64},7},
+        spacing_grid,tilt_x_grid,tilt_y_grid)
+    
     n_region = size(prop_matrix_grid,1)
     n_freq = size(prop_matrix_grid,2)
     n_spacing = size(prop_matrix_grid,3)
