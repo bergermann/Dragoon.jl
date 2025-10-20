@@ -1,12 +1,8 @@
 
 
+function movinator(old::Vector{<:Real},new::Vector{<:Real};
+        thickness::Real=0.1,lbl::Real=-Inf64,ubr::Real=Inf64)
 
-a = rand(10)
-b = rand(10)*0.5 .+ 0.5
-
-sort!(a); sort!(b)
-
-function movinator(old::Vector{<:Real},new::Vector{<:Real})
     l = length(old)
 
     @assert l == length(new) "Old and new positions need same lengths."
@@ -19,8 +15,8 @@ function movinator(old::Vector{<:Real},new::Vector{<:Real})
         for i in eachindex(idx)
             if idx[i] != 0; continue; end
 
-            lb = i == 1 ? -Inf64 : old_[i-1]
-            ub = i == l ?  Inf64 : old_[i+1]
+            lb = i == 1 ? lbl : old_[i-1]+thickness
+            ub = i == l ? ubr : old_[i+1]
 
             if lb < new[i] < ub
                 old_[i] = new[i]
@@ -37,12 +33,30 @@ function movinator(old::Vector{<:Real},new::Vector{<:Real})
     return idx
 end
 
-for i in 1:100_000
-    a = rand(10)
-    x = rand()
-    b = rand(10)*x .+ (1-x)
+function genpos(n::Int,dmax::Real=0.1; thickness::Real=0.1)
+    @assert n > 0 "Disc number needs to be positive integer."
+    @assert dmax > 0 "dmax needs to be positive."
+    @assert thickness > 0 "thickness needs to be positive."
 
-    sort!(a); sort!(b)
+    p = zeros(Float64,n)
+
+    p[1] = rand()*dmax
+
+    for i in 2:n
+        p[i] = p[i-1]+thickness+rand()*dmax
+    end
+
+    return p
+end
+
+a = genpos(10)
+b = genpos(10,0.2)
+
+movinator(a,b)
+
+for i in 1:100_000
+    a = genpos(100)
+    b = genpos(100,0.2)
     
     movinator(a,b)
 end
