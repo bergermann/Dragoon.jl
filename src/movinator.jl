@@ -49,14 +49,15 @@ function genpos(n::Int,dmax::Real=0.1; thickness::Real=0.1)
     return p
 end
 
-a = genpos(10)
-b = genpos(10,0.2)
+a = genpos(100,0.1)
+b = genpos(100,0.1)
 
-movinator(a,b)
+idx = movinator(a,b)
+issorted(idx)
 
 for i in 1:100_000
-    a = genpos(100)
-    b = genpos(100,0.2)
+    a = genpos(100,0.2)
+    b = genpos(100,0.1)
     
     movinator(a,b)
 end
