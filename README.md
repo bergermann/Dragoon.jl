@@ -15,7 +15,7 @@ julia> Pkg.add(url="https://github.com/mppmu/BoostFractor.jl.git")
 
 Then install the main package:
 ```julia
-julia> Pkg.add("https://github.com/bergermann/Dragoon.jl.git")
+julia> Pkg.add(url="https://github.com/bergermann/Dragoon.jl.git")
 ```
 
 ## Usage
