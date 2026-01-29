@@ -9,13 +9,13 @@ booster setup.
 As it is not part of the official Julia package registry, first manually install the
 [BoostFractor](https://github.com/mppmu/BoostFractor.jl) package:
 ```julia
-julia> using Pkg
-julia> Pkg.add(url="https://github.com/mppmu/BoostFractor.jl.git")
+using Pkg
+Pkg.add(url="https://github.com/mppmu/BoostFractor.jl.git")
 ```
 
 Then install the main package:
 ```julia
-julia> Pkg.add(url="https://github.com/bergermann/Dragoon.jl.git")
+Pkg.add(url="https://github.com/bergermann/Dragoon.jl.git")
 ```
 
 ## Usage
