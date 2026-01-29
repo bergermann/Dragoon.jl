@@ -37,9 +37,6 @@ function boost1d(space::Type{<:Space},config::AbstractVector{<:Real},
         frequencies::Union{Real,AbstractVector{<:Real}};
         eps::Real=24.,tand::Real=0.,thickness::Real=1e-3)
     
-    # return abs2.(disk_system(frequencies;
-    #     tand=tand,spacings=[spacings;0],disk_thickness=thickness,
-    #     disk_epsilon=eps,num_disk=length(spacings))[2])
     return abs2.(transfer_matrix(space,frequencies,config;
         eps=eps,tand=tand,thickness=thickness)[:,2])
 end
@@ -201,15 +198,20 @@ function findpeak1d(frequency::Real,ndisk::Int;
         granularity::Int=1000,deviation::Real=0.1,scale::Real=1.)
 
     λ = 299792458.0/frequency
-    B = zeros(granularity)
-    D = range(1-deviation; stop=1+deviation,length=granularity)*scale*λ/2
+    B = 0
+    D = (1-deviation)*scale*λ/2
 
-    for i in eachindex(D)
-        B[i] = boost1d(Dist,ones(ndisk)*D[i],[frequency];
-            eps=eps,tand=tand,thickness=thickness)[1]
+    dists = ones(ndisk)
+
+    for i in 0:granularity
+        d = scale*λ/2*(1+deviation*(-1+2*i/granularity)); dists .= d
+
+        b = boost1d(Dist,dists,[frequency]; eps=eps,tand=tand,thickness=thickness)[1]
+
+        if b > B; D = d; B = b; end
     end
 
-    return D[argmax(B)]
+    return D
 end
 
 """
@@ -228,16 +230,22 @@ function findpeak3d(frequency::Real,n::Int,
         granularity::Int=1000,deviation::Real=0.1)
 
     λ = 299792458.0/frequency
-    B = zeros(granularity)
-    D = range(1-deviation; stop=1+deviation,length=granularity)*λ/2
+    B = 0
+    D = (1-deviation)*scale*λ/2
 
-    for i in eachindex(D)
-        B[i] = boost3d(ones(n)*D[i],[frequency];
+    dists = ones(ndisk)
+
+    for i in 0:granularity
+        d = scale*λ/2*(1+deviation*(-1+2*i/granularity)); dists .= d
+
+        b = boost3d(dists,[frequency];
             eps=eps,tand=tand,thickness=thickness,R=R,
             M=M,L=L,gridwidth=gridwidth,dx=dx)[1]
+
+        if b > B; D = d; B = b; end
     end
 
-    return D[argmax(B)]
+    return D
 end
 
 
