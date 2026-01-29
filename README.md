@@ -10,12 +10,12 @@ As it is not part of the official Julia package registry, first manually install
 [BoostFractor](https://github.com/mppmu/BoostFractor.jl) package:
 ```julia
 julia> using Pkg
-julia> pkg"add https://github.com/mppmu/BoostFractor.jl.git"
+julia> Pkg.add(url="https://github.com/mppmu/BoostFractor.jl.git")
 ```
 
 Then install the main package:
 ```julia
-julia> pkg"add https://github.com/bergermann/Dragoon.jl.git"
+julia> Pkg.add("https://github.com/bergermann/Dragoon.jl.git")
 ```
 
 ## Usage
