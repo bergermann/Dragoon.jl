@@ -1,7 +1,7 @@
 name = "Dragoon"
 uuid = "2528b1d8-4502-48e3-b632-a5c1e1215533"
-authors = ["voidarchon <dominik.bergermann@rwth-aachen.de> and contributors"]
 version = "0.5.0"
+authors = ["voidarchon <dominik.bergermann@rwth-aachen.de> and contributors"]
 
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
@@ -30,6 +30,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
+FFTW = "1"
 Plots = "1"
 
 [extras]
